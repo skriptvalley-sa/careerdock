@@ -32,9 +32,10 @@ CareerDock is a monolithic application with async worker processing, deployed on
 ## 2. System Architecture Diagram
 
 ```
-                    ┌─────────────────────────┐
-                    │       DNS (Route 53)     │
-                    └────┬───────────────┬─────┘
+                    ┌──────────────────────────────┐
+                    │  DNS (Hostinger — skript-    │
+                    │  valley.com)                 │
+                    └────┬───────────────┬─────────┘
                          │               │
                     ┌────▼────┐    ┌─────▼──────┐
                     │ Vercel  │    │ CloudFront  │
@@ -418,17 +419,35 @@ Frontend                         Backend
 
 ## 4. Infrastructure
 
-### 4.1 AWS Architecture
+### 4.1 Domain & DNS
+
+**Domain:** `skriptvalley.com` (owned via Hostinger)
+**Registrar/DNS:** Hostinger (manages all DNS records)
+
+| Subdomain | Record Type | Points To | Purpose |
+|-----------|------------|-----------|---------|
+| `careerdock.skriptvalley.com` | CNAME | `cname.vercel-dns.com` | Next.js frontend (Vercel) |
+| `api.careerdock.skriptvalley.com` | A | EC2 Elastic IP | Go API backend |
+| `assets.careerdock.skriptvalley.com` | CNAME | CloudFront distribution | Company logos, static assets |
+
+**SSL:**
+- Frontend: Auto-managed by Vercel (free).
+- API: Let's Encrypt via certbot on EC2 (free, auto-renew via cron).
+- No Route 53 or ACM needed — saves ~₹50/month.
+
+**Future:** If CareerDock warrants its own domain (e.g., `careerdock.in`), DNS can be migrated without architecture changes.
+
+### 4.2 AWS Architecture
 
 ```
 ┌──────────────────────────────────────────────────────┐
 │                     AWS Account                       │
 │                                                       │
-│  ┌─────────────┐     ┌────────────────────────────┐  │
-│  │  Route 53   │     │       CloudFront            │  │
-│  │  DNS        │────►│  - api.careerdock.in        │  │
-│  │             │     │  - assets.careerdock.in     │  │
-│  └─────────────┘     └─────────────┬──────────────┘  │
+│  ┌──────────────────┐  ┌────────────────────────────────────┐  │
+│  │ Hostinger DNS    │  │            CloudFront               │  │
+│  │ skriptvalley.com │─►│  - assets.careerdock.skriptvalley   │  │
+│  │ (CNAME records)  │  │    .com (S3 logos origin)           │  │
+│  └──────────────────┘  └──────────────┬──────────────────────┘  │
 │                                    │                  │
 │                         ┌──────────▼──────────┐      │
 │                         │  EC2 (t3.medium)    │      │
@@ -447,19 +466,22 @@ Frontend                         Backend
 │  │  - logos         │   │  20GB gp3          │      │
 │  └──────────────────┘   └────────────────────┘      │
 │                                                       │
-│  ┌──────────────────┐                                │
-│  │  ACM (SSL)       │  Certs for careerdock.in      │
-│  └──────────────────┘                                │
+│  ┌──────────────────────────────────────┐             │
+│  │  Let's Encrypt (SSL via certbot)    │             │
+│  │  Cert for api.careerdock             │             │
+│  │  .skriptvalley.com                   │             │
+│  └──────────────────────────────────────┘             │
 └──────────────────────────────────────────────────────┘
 
-┌──────────────────┐
-│  Vercel          │
-│  Next.js frontend│
-│  careerdock.in   │
-└──────────────────┘
+┌───────────────────────────────────┐
+│  Vercel                           │
+│  Next.js frontend                 │
+│  careerdock.skriptvalley.com      │
+│  (SSL auto-managed by Vercel)     │
+└───────────────────────────────────┘
 ```
 
-### 4.2 Cost Estimate (MVP)
+### 4.3 Cost Estimate (MVP)
 
 | Service | Spec | Monthly Cost (₹) |
 |---------|------|------------------:|
@@ -467,17 +489,18 @@ Frontend                         Backend
 | RDS | db.t3.micro (free tier year 1) | ₹0 (then ~₹1,200) |
 | S3 | <1GB storage + minimal requests | ~₹10 |
 | CloudFront | Free tier (1TB/month) | ₹0 |
-| Route 53 | 1 hosted zone + queries | ~₹50 |
-| ACM | Free | ₹0 |
+| DNS | Hostinger (included with domain) | ₹0 |
+| SSL (API) | Let's Encrypt via certbot | ₹0 |
+| SSL (Frontend) | Vercel auto-managed | ₹0 |
 | Vercel | Free tier | ₹0 |
 | Resend | Free tier (3K emails) | ₹0 |
 | Sentry | Free tier (5K events) | ₹0 |
-| **Total (Year 1)** | | **~₹2,600/month** |
-| **Total (After free tier)** | | **~₹3,800/month** |
+| **Total (Year 1)** | | **~₹2,510/month** |
+| **Total (After free tier)** | | **~₹3,710/month** |
 
 **Note:** EC2 cost can be reduced to ~₹1,500/month with a 1-year Reserved Instance or ~₹800/month with a 3-year RI. Spot instances are not recommended for a web server.
 
-### 4.3 Docker Compose (Production on EC2)
+### 4.4 Docker Compose (Production on EC2)
 
 ```yaml
 # Simplified production docker-compose
@@ -520,7 +543,7 @@ services:
       - api
 ```
 
-### 4.4 Local Development Docker Compose
+### 4.5 Local Development Docker Compose
 
 ```yaml
 # Local dev — includes all dependencies
@@ -578,7 +601,7 @@ Detailed security design is in Phase 5. Key architectural decisions:
 | Resume access | Private S3 bucket, signed URLs (15-min), user-scoped access checks |
 | Payment security | Razorpay webhook signature verification, idempotent processing |
 | Secrets | AWS Secrets Manager (production), `.env` file (local dev) |
-| HTTPS | ACM certificate + CloudFront (API), Vercel auto-SSL (frontend) |
+| HTTPS | Let's Encrypt + certbot (API on EC2), Vercel auto-SSL (frontend) |
 
 ---
 
@@ -644,7 +667,7 @@ Single EC2 instance handles all backend traffic. Bottlenecks at this scale:
 | **Database** | PostgreSQL | 16 |
 | **Cache** | Redis | 7.x |
 | **Search** | PostgreSQL FTS | (built-in) |
-| **Infrastructure** | AWS (EC2, RDS, S3, CloudFront, Route 53, ACM) | — |
+| **Infrastructure** | AWS (EC2, RDS, S3, CloudFront) + Hostinger DNS + Let's Encrypt | — |
 | Frontend hosting | Vercel | — |
 | **AI (primary)** | Claude API (Sonnet) | Latest |
 | **AI (fallback)** | OpenAI (GPT-4o-mini) | Latest |
