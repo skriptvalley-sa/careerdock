@@ -1,0 +1,45 @@
+repos:
+  - repo: local
+    hooks:
+      # Go: format
+      - id: gofmt
+        name: gofmt
+        entry: gofmt -w
+        language: system
+        types: [go]
+
+      # Go: vet
+      - id: govet
+        name: go vet
+        entry: bash -c 'cd backend && go vet ./...'
+        language: system
+        pass_filenames: false
+        files: '\.go$'
+
+      # Go: lint (fast — only changed files)
+      - id: golangci-lint
+        name: golangci-lint
+        entry: bash -c 'cd backend && golangci-lint run --new-from-rev=HEAD~1 ./...'
+        language: system
+        pass_filenames: false
+        files: '\.go$'
+
+      # Frontend: lint
+      - id: eslint
+        name: eslint
+        entry: bash -c 'cd frontend && npx eslint --fix'
+        language: system
+        types: [ts, tsx]
+
+      # Frontend: format
+      - id: prettier
+        name: prettier
+        entry: bash -c 'cd frontend && npx prettier --write'
+        language: system
+        types_or: [ts, tsx, css, json]
+
+      # Secrets: detect accidentally committed secrets
+      - id: detect-secrets
+        name: detect-secrets
+        entry: detect-secrets-hook --baseline .secrets.baseline
+        language: system

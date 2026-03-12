@@ -1,7 +1,5 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
-# Binaries for programs and plugins
+# ─── Go ──────────────────────────────────────────────────
+# Binaries
 *.exe
 *.exe~
 *.dll
@@ -11,23 +9,53 @@
 # Test binary, built with `go test -c`
 *.test
 
-# Code coverage profiles and other test artifacts
+# Code coverage profiles and test artifacts
 *.out
 coverage.*
 *.coverprofile
 profile.cov
 
-# Dependency directories (remove the comment below to include it)
+# Dependency directories
 vendor/
 
-# Go workspace file
+# Go workspace files
 go.work
 go.work.sum
-.DS_Store 
 
-# env file
+# Backend build output
+backend/bin/
+backend/tmp/
+
+# ─── Node / Next.js ─────────────────────────────────────
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# ─── Environment ─────────────────────────────────────────
 .env
+.env.local
+.env.*.local
 
-# Editor/IDE
+# ─── OS ──────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Editor/IDE ──────────────────────────────────────────
 .idea/
 .vscode/
+*.swp
+*.swo
+*~
+
+# ─── Docker ──────────────────────────────────────────────
+# Don't ignore docker-compose.yml or Dockerfiles
+
+# ─── Secrets baseline ───────────────────────────────────
+.secrets.baseline
+
+# ─── Misc ────────────────────────────────────────────────
+*.log

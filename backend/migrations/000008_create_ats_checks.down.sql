@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS ats_checks CASCADE;
