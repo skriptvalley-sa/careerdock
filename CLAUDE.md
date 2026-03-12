@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **CareerDock** is a SaaS career intelligence platform for tech job seekers in India. It's a solo founder project being built design-first, then implemented incrementally.
 
-**Current state:** Pre-implementation. All design/architecture decisions live in `docs/`. No backend or frontend code exists yet.
+**Current state:** All 9 design phases complete. Implementation begins with Sprint 0. See `docs/ai/SESSION-GUIDE.md` for session and branch management.
 
 ## Working Agreements
 
@@ -138,4 +138,5 @@ cd backend && go test -run TestFunctionName ./...  # Single test
 
 - `docs/CLAUDE-PROMPT.md` — Full master prompt with all requirements, open questions, and constraints
 - `docs/USAGE-GUIDE.md` — How to structure Claude Code sessions for this project
-- `docs/STATUS.md` — Track which phases are complete
+- `ai/SESSION-GUIDE.md` — Session, branch, and PR workflow for the build phase
+- `docs/STATUS.md` — Track which phases and sprints are complete
