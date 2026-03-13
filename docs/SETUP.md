@@ -48,13 +48,15 @@ cd frontend && npm install
 ## 2. Environment Setup
 
 ```bash
-# Copy the example env file
+# Copy the example env file (must be at the project root)
 cp .env.example .env
 
 # The defaults work out of the box for local development.
 # Only change values if you need custom ports or want to enable
 # AI/payment integrations (Claude API key, Razorpay, etc.)
 ```
+
+> **Note:** The `.env` file lives at the project root, not inside `backend/` or `frontend/`. The backend config automatically searches both the current directory and the parent directory.
 
 ## 3. Start Infrastructure
 

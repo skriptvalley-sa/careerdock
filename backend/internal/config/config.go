@@ -62,7 +62,10 @@ type S3Config struct {
 // MustLoad loads configuration and panics on failure.
 // This is called once at startup — a missing required value is fatal.
 func MustLoad() *Config {
-	viper.SetConfigFile(".env")
+	viper.SetConfigType("env")
+	viper.SetConfigName(".env")
+	viper.AddConfigPath(".")  // current dir (for running from backend/)
+	viper.AddConfigPath("..") // parent dir (project root — used by Makefile)
 	viper.AutomaticEnv()
 
 	// Defaults

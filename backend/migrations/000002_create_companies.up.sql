@@ -29,19 +29,33 @@ CREATE TABLE companies (
     compensation_bands  JSONB,
     last_verified_at    TIMESTAMPTZ,
 
-    -- Full-text search vector (auto-maintained)
-    search_vector TSVECTOR GENERATED ALWAYS AS (
-        setweight(to_tsvector('english', coalesce(name, '')), 'A') ||
-        setweight(to_tsvector('english', coalesce(description, '')), 'B') ||
-        setweight(to_tsvector('english', coalesce(array_to_string(tech_stack, ' '), '')), 'B') ||
-        setweight(to_tsvector('english', coalesce(array_to_string(domains, ' '), '')), 'C')
-    ) STORED,
+    -- Full-text search vector (maintained by trigger below)
+    search_vector       TSVECTOR,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT uq_companies_slug UNIQUE (slug)
 );
+
+-- Trigger function to maintain search_vector on INSERT/UPDATE.
+-- to_tsvector is STABLE (not IMMUTABLE) so it cannot be used in a
+-- GENERATED ALWAYS AS column; a trigger is the standard alternative.
+CREATE OR REPLACE FUNCTION companies_search_vector_update() RETURNS trigger AS $$
+BEGIN
+    NEW.search_vector :=
+        setweight(to_tsvector('english', coalesce(NEW.name, '')), 'A') ||
+        setweight(to_tsvector('english', coalesce(NEW.description, '')), 'B') ||
+        setweight(to_tsvector('english', coalesce(array_to_string(NEW.tech_stack, ' '), '')), 'B') ||
+        setweight(to_tsvector('english', coalesce(array_to_string(NEW.domains, ' '), '')), 'C');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_companies_search_vector
+    BEFORE INSERT OR UPDATE ON companies
+    FOR EACH ROW
+    EXECUTE FUNCTION companies_search_vector_update();
 
 -- Full-text search
 CREATE INDEX idx_companies_search ON companies USING GIN (search_vector);
