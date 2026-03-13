@@ -30,3 +30,55 @@ export interface ErrorBody {
 export interface ErrorResponse {
   error: ErrorBody;
 }
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    next_cursor: string;
+    has_more: boolean;
+  };
+}
+
+export interface CompanyListItem {
+  id: string;
+  slug: string;
+  name: string;
+  logo_url: string | null;
+  description: string | null;
+  size: string | null;
+  headquarters: string | null;
+  tech_stack: string[];
+  domains: string[];
+  hiring_status: string;
+  compensation_tier: string | null;
+  has_rsu: boolean;
+  has_rsu_refresher: boolean;
+  updated_at: string;
+}
+
+export interface CompanyDetail extends CompanyListItem {
+  founded_year: number | null;
+  careers_page_url: string | null;
+  glassdoor_url: string | null;
+  ambitionbox_url: string | null;
+  linkedin_url: string | null;
+  interview_patterns: unknown;
+  compensation_bands: unknown;
+  last_verified_at: string | null;
+  created_at: string;
+}
+
+export interface CompanyFilterParams {
+  q?: string;
+  size?: string;
+  hiring_status?: string;
+  tech_stack?: string;
+  domains?: string;
+  compensation_tier?: string;
+  has_rsu?: string;
+  headquarters?: string;
+  sort?: string;
+  order?: string;
+  cursor?: string;
+  limit?: string;
+}

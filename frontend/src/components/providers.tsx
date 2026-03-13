@@ -14,6 +14,17 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** Register the service worker for offline company directory support. */
+function useServiceWorker() {
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // SW registration failed — offline caching unavailable, non-critical
+      });
+    }
+  }, []);
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -26,6 +37,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       }),
   );
+
+  useServiceWorker();
 
   return (
     <QueryClientProvider client={queryClient}>

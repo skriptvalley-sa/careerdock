@@ -74,10 +74,12 @@ func main() {
 	txr := repository.NewTransactor(db)
 	userRepo := repository.NewUserRepo(db)
 	tokenRepo := repository.NewTokenRepo(db)
+	companyRepo := repository.NewCompanyRepo(db)
 
 	// 5. Build service layer
 	authSvc := service.NewAuthService(userRepo, tokenRepo, txr, redisClient, cfg.JWTSecret)
-	svc := service.NewServices(authSvc, db, redisClient, version, cfg.IsProduction())
+	companySvc := service.NewCompanyService(companyRepo)
+	svc := service.NewServices(authSvc, companySvc, db, redisClient, version, cfg.IsProduction())
 
 	// 6. Build handler layer + mount routes
 	r := chi.NewRouter()

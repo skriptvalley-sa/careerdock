@@ -15,9 +15,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/skriptvalley/careerdock/internal/config"
+	"github.com/skriptvalley/careerdock/internal/domain"
+	"github.com/skriptvalley/careerdock/internal/repository"
 )
 
 func main() {
@@ -51,15 +54,17 @@ func run() error {
 		target = os.Args[1]
 	}
 
+	companyRepo := repository.NewCompanyRepo(db)
+
 	switch target {
 	case "all":
-		if err := seedCompanies(ctx, db); err != nil {
+		if err := seedCompanies(ctx, companyRepo); err != nil {
 			return fmt.Errorf("seed companies: %w", err)
 		}
 		slog.Info("all seeds applied successfully")
 
 	case "companies":
-		if err := seedCompanies(ctx, db); err != nil {
+		if err := seedCompanies(ctx, companyRepo); err != nil {
 			return fmt.Errorf("seed companies: %w", err)
 		}
 
@@ -73,8 +78,66 @@ func run() error {
 	return nil
 }
 
-// seedCompanies reads seeds/companies.json and inserts companies.
-func seedCompanies(ctx context.Context, db *pgxpool.Pool) error {
+// seedCompany is the typed JSON representation in seeds/companies.json.
+type seedCompany struct {
+	Slug              string          `json:"slug"`
+	Name              string          `json:"name"`
+	LogoURL           *string         `json:"logo_url,omitempty"`
+	Description       *string         `json:"description,omitempty"`
+	Size              *string         `json:"size,omitempty"`
+	Headquarters      *string         `json:"headquarters,omitempty"`
+	FoundedYear       *int            `json:"founded_year,omitempty"`
+	CareersPageURL    *string         `json:"careers_page_url,omitempty"`
+	GlassdoorURL      *string         `json:"glassdoor_url,omitempty"`
+	AmbitionboxURL    *string         `json:"ambitionbox_url,omitempty"`
+	LinkedinURL       *string         `json:"linkedin_url,omitempty"`
+	TechStack         []string        `json:"tech_stack"`
+	Domains           []string        `json:"domains"`
+	HiringStatus      string          `json:"hiring_status"`
+	InterviewPatterns json.RawMessage `json:"interview_patterns,omitempty"`
+	CompensationTier  *string         `json:"compensation_tier,omitempty"`
+	HasRSU            bool            `json:"has_rsu"`
+	HasRSURefresher   bool            `json:"has_rsu_refresher"`
+	CompensationBands json.RawMessage `json:"compensation_bands,omitempty"`
+}
+
+func (s seedCompany) toDomain() domain.Company {
+	c := domain.Company{
+		ID:                uuid.Must(uuid.NewV7()),
+		Slug:              s.Slug,
+		Name:              s.Name,
+		LogoURL:           s.LogoURL,
+		Description:       s.Description,
+		Headquarters:      s.Headquarters,
+		FoundedYear:       s.FoundedYear,
+		CareersPageURL:    s.CareersPageURL,
+		GlassdoorURL:      s.GlassdoorURL,
+		AmbitionboxURL:    s.AmbitionboxURL,
+		LinkedinURL:       s.LinkedinURL,
+		TechStack:         s.TechStack,
+		Domains:           s.Domains,
+		HiringStatus:      domain.HiringStatus(s.HiringStatus),
+		InterviewPatterns: s.InterviewPatterns,
+		CompensationTier:  s.CompensationTier,
+		HasRSU:            s.HasRSU,
+		HasRSURefresher:   s.HasRSURefresher,
+		CompensationBands: s.CompensationBands,
+	}
+	if s.Size != nil {
+		sz := domain.CompanySize(*s.Size)
+		c.Size = &sz
+	}
+	if c.TechStack == nil {
+		c.TechStack = []string{}
+	}
+	if c.Domains == nil {
+		c.Domains = []string{}
+	}
+	return c
+}
+
+// seedCompanies reads seeds/companies.json and upserts companies via the repository.
+func seedCompanies(ctx context.Context, repo *repository.CompanyRepo) error {
 	seedFile := findSeedFile("companies.json")
 	if seedFile == "" {
 		slog.Warn("seeds/companies.json not found — skipping company seed")
@@ -86,18 +149,35 @@ func seedCompanies(ctx context.Context, db *pgxpool.Pool) error {
 		return fmt.Errorf("read seed file: %w", err)
 	}
 
-	// Parse as generic JSON array for now — will be typed in Sprint 1
-	var companies []map[string]any
-	if err := json.Unmarshal(data, &companies); err != nil {
+	var seeds []seedCompany
+	if err := json.Unmarshal(data, &seeds); err != nil {
 		return fmt.Errorf("parse seed file: %w", err)
 	}
 
-	slog.Info("seeding companies", "count", len(companies))
+	slog.Info("seeding companies", "count", len(seeds))
 
-	// TODO (Sprint 1): Use CompanyRepository.Create for proper upsert
-	_ = ctx
-	_ = db
-	slog.Warn("company seed insert not yet implemented — seed file parsed successfully")
+	var upserted, errCount int
+	for _, s := range seeds {
+		if s.Slug == "" || s.Name == "" {
+			slog.Warn("skipping company with missing slug or name", "slug", s.Slug, "name", s.Name)
+			errCount++
+			continue
+		}
+
+		company := s.toDomain()
+		if err := repo.Upsert(ctx, &company); err != nil {
+			slog.Error("failed to upsert company", "slug", s.Slug, "error", err)
+			errCount++
+			continue
+		}
+		upserted++
+	}
+
+	slog.Info("company seed complete",
+		"total", len(seeds),
+		"upserted", upserted,
+		"errors", errCount,
+	)
 
 	return nil
 }

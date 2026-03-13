@@ -54,7 +54,11 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 		})
 
 		// --- Public routes (no auth) ---
-		// TODO (Sprint 1): Company directory (public read)
+		r.Route("/companies", func(r chi.Router) {
+			companyH := NewCompanyHandler(svc.Company)
+			r.Get("/", companyH.ListCompanies)
+			r.Get("/{slug}", companyH.GetCompany)
+		})
 
 		// --- Webhooks ---
 		// TODO (Sprint 3): Razorpay webhook

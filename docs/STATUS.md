@@ -16,7 +16,7 @@
 ## Implementation Sprints
 
 - Sprint 0 (Foundation): ✅ Complete — PR #13 (merged)
-- Sprint 1 (Company Directory): 🔄 Up next
+- Sprint 1 (Company Directory): 🔄 In progress
 - Sprint 2 (Lists & Tracking): ⬜ Not started
 - Sprint 3 (Payments & Resume): ⬜ Not started
 - Sprint 4 (AI Features): ⬜ Not started
@@ -93,31 +93,71 @@
 
 | # | Task | Status |
 |:-:|------|:------:|
-| 1.1 | Company repository (`repository/company_repo.go` — CRUD, FTS, cursor pagination) | ⬜ |
-| 1.2 | Company service (`service/company_service.go` — list, search, getBySlug, filter) | ⬜ |
-| 1.3 | Company handlers (`handler/company.go` — public endpoints) | ⬜ |
-| 1.4 | Company routes (mount in `routes.go`) | ⬜ |
-| 1.5 | Seed data file (`seeds/companies.json` — 50-100 Indian tech companies) | ⬜ |
-| 1.6 | Seed runner (upgrade `cmd/seed/main.go` — typed parsing, upsert via repo) | ⬜ |
-| 1.7 | Frontend: Company list page (`app/(public)/companies/page.tsx` — grid/list, search, filters, infinite scroll) | ⬜ |
-| 1.8 | Frontend: Company profile page (`app/(public)/companies/[slug]/page.tsx` — SSR, SEO meta) | ⬜ |
-| 1.9 | Frontend: Company components (`CompanyCard`, `CompanyFilters`, `CompanySearchBar`, `TechStackTags`) | ⬜ |
-| 1.10 | Frontend: Service Worker + IndexedDB (offline caching for company directory) | ⬜ |
-| 1.11 | S3/MinIO integration (`internal/storage/` — upload, download, signed URL, delete) | ⬜ |
-| 1.12 | Company logo upload (admin — logo stored in S3 logos bucket) | ⬜ |
-| 1.13 | Landing page (`app/page.tsx` — hero, features, CTA) | ⬜ |
-| 1.14 | Pricing page (`app/(public)/pricing/page.tsx` — Starter Pack, à la carte) | ⬜ |
-| 1.15 | Frontend: Header + Footer (`components/layout/Header.tsx`, `Footer.tsx`) | ⬜ |
-| 1.16 | ETags / cache headers (company list + profile for CDN) | ⬜ |
+| 1.1 | Company repository (`repository/company_repo.go` — CRUD, FTS, cursor pagination) | ✅ |
+| 1.2 | Company service (`service/company_service.go` — list, search, getBySlug, filter) | ✅ |
+| 1.3 | Company handlers (`handler/company.go` — public endpoints) | ✅ |
+| 1.4 | Company routes (mount in `routes.go`) | ✅ |
+| 1.5 | Seed data file (`seeds/companies.json` — 50-100 Indian tech companies) | ✅ |
+| 1.6 | Seed runner (upgrade `cmd/seed/main.go` — typed parsing, upsert via repo) | ✅ |
+| 1.7 | Frontend: Company list page (`app/(public)/companies/page.tsx` — grid/list, search, filters, infinite scroll) | ✅ |
+| 1.8 | Frontend: Company profile page (`app/(public)/companies/[slug]/page.tsx` — SSR, SEO meta) | ✅ |
+| 1.9 | Frontend: Company components (`CompanyCard`, `CompanyFilters`, `CompanySearchBar`, `TechStackTags`) | ✅ |
+| 1.10 | Frontend: Service Worker + IndexedDB (offline caching for company directory) | ✅ |
+| 1.11 | S3/MinIO integration (`internal/storage/` — upload, download, signed URL, delete) | ✅ |
+| 1.12 | Company logo upload (admin — logo stored in S3 logos bucket) | 🔄 |
+| 1.13 | Landing page (`app/page.tsx` — hero, features, CTA) | ✅ |
+| 1.14 | Pricing page (`app/(public)/pricing/page.tsx` — Starter Pack, à la carte) | ✅ |
+| 1.15 | Frontend: Header + Footer (`components/layout/Header.tsx`, `Footer.tsx`) | ✅ |
+| 1.16 | ETags / cache headers (company list + profile for CDN) | ✅ |
 
 ### Definition of Done
 
 | Criterion | Status |
 |-----------|:------:|
-| `GET /api/companies` returns paginated company list | ⬜ |
-| `GET /api/companies/search?q=tata` returns FTS results | ⬜ |
-| `GET /api/companies/{slug}` returns company profile | ⬜ |
-| `make seed` populates 50+ companies | ⬜ |
-| Company list page renders with search, filter, pagination | ⬜ |
-| Company profile page is SSR with correct meta tags (OG, Twitter) | ⬜ |
-| Offline: previously viewed companies available without network | ⬜ |
+| `GET /api/companies` returns paginated company list | ✅ |
+| `GET /api/companies/search?q=tata` returns FTS results | ✅ |
+| `GET /api/companies/{slug}` returns company profile | ✅ |
+| `make seed` populates 50+ companies | ✅ |
+| Company list page renders with search, filter, pagination | ✅ |
+| Company profile page is SSR with correct meta tags (OG, Twitter) | 🔄 |
+| Offline: previously viewed companies available without network | ✅ |
+
+---
+
+## Sprint 2 — User Lists & Tracking (Tasks 2.1–2.15)
+
+**Branch:** TBD
+**PR:** TBD
+**CI:** ⬜ Not started
+**Est. hours:** ~63
+
+### Task Checklist
+
+| # | Task | Status |
+|:-:|------|:------:|
+| 2.1 | List repository (`repository/list_repo.go` — CRUD, entries, cursor pagination) | ⬜ |
+| 2.2 | List entry repository (CRUD for entries with application status, notes, dates) | ⬜ |
+| 2.3 | List service (`service/list_service.go` — enforce 3-list free / 5-list premium limit) | ⬜ |
+| 2.4 | List handlers (`handler/list.go` — all list + entry endpoints) | ⬜ |
+| 2.5 | List routes (mount authenticated routes) | ⬜ |
+| 2.6 | Frontend: Lists page (`app/(dashboard)/lists/page.tsx` — list cards, create modal) | ⬜ |
+| 2.7 | Frontend: List detail page (`app/(dashboard)/lists/[id]/page.tsx` — entry table, add company, status tracking) | ⬜ |
+| 2.8 | Frontend: Application tracker (status pipeline — wishlist → applied → screening → interviewing → offer) | ⬜ |
+| 2.9 | Frontend: Dashboard (free) (`app/(dashboard)/dashboard/page.tsx` — funnel view, recent activity, quick add) | ⬜ |
+| 2.10 | Frontend: Dashboard layout (`app/(dashboard)/layout.tsx` — sidebar nav, top bar) | ⬜ |
+| 2.11 | Frontend: Settings page (`app/(dashboard)/settings/page.tsx` — profile edit, password change, account deletion) | ⬜ |
+| 2.12 | User service (`service/user_service.go` — profile update, password change, soft delete) | ⬜ |
+| 2.13 | User handlers (`handler/user.go` — settings endpoints) | ⬜ |
+| 2.14 | Notification model skeleton (`repository/notification_repo.go` — create, list, mark read) | ⬜ |
+| 2.15 | SSE endpoint skeleton (`GET /api/events` — authenticated, sends job completion events) | ⬜ |
+
+### Definition of Done
+
+| Criterion | Status |
+|-----------|:------:|
+| User can create up to 3 lists (free tier) | ⬜ |
+| User can add companies to lists with application status | ⬜ |
+| Status transitions work (wishlist → applied → ... → accepted/rejected) | ⬜ |
+| Dashboard shows funnel view with correct counts | ⬜ |
+| Settings: profile edit, password change, account deletion work | ⬜ |
+| SSE: endpoint accepts connections (no events emitted yet) | ⬜ |

@@ -147,13 +147,17 @@ type FileStore interface {
 
 // CompanyFilter defines filtering options for company listing.
 type CompanyFilter struct {
-	Cursor           string
-	Limit            int
-	Size             *CompanySize
-	HiringStatus     *HiringStatus
-	TechStack        []string // any match
-	Domains          []string // any match
-	CompensationTier *string
+	Cursor            string
+	Limit             int
+	Sizes             []CompanySize // filter by one or more sizes
+	HiringStatus      *HiringStatus // single hiring status filter
+	TechStack         []string      // must have ALL (AND / @> operator)
+	Domains           []string      // any match (OR / && operator)
+	CompensationTiers []string      // filter by one or more tiers
+	HasRSU            *bool         // filter by RSU availability
+	Headquarters      string        // partial match (ILIKE)
+	Sort              string        // name, size, compensation_tier, updated_at
+	Order             string        // asc (default), desc
 }
 
 // AuditLogFilter defines filtering options for admin audit log.
