@@ -138,8 +138,10 @@ careerdock/
 │       └── .gitkeep
 │
 ├── scripts/                     # Developer scripts
-│   ├── setup.sh                 # One-time local setup
-│   └── gen-migration.sh         # Create new migration file pair
+│   ├── dev.sh                   # Local environment manager
+│   ├── setup.sh                 # Compatibility wrapper for dev.sh setup
+│   ├── gen-migration.sh         # Create next sequential migration file pair
+│   └── GUIDE.md                 # Manual for script usage
 │
 ├── .github/
 │   ├── workflows/
@@ -1974,7 +1976,7 @@ make migrate-new NAME=add_interview_rounds_table
 #   backend/migrations/000017_add_interview_rounds_table.down.sql
 ```
 
-The `gen-migration.sh` script auto-detects the next sequence number.
+The `gen-migration.sh` script scans existing migrations and creates the next sequential number.
 
 ### 9.3 Migration Rules
 

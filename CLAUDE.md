@@ -118,6 +118,19 @@ careerdock/
 
 ## Commands
 
+### Dev Environment Manager (recommended)
+
+```bash
+./scripts/dev.sh setup      # First-time: check prereqs, install tools, create .env
+./scripts/dev.sh start      # Start everything (Docker + API + worker + frontend + watchdog)
+./scripts/dev.sh stop       # Gracefully stop all services
+./scripts/dev.sh restart    # Restart everything (or: restart api|worker|frontend)
+./scripts/dev.sh status     # Show health of all components
+./scripts/dev.sh logs api   # Tail logs (api|worker|frontend|watchdog|all)
+```
+
+### Makefile targets
+
 ```bash
 make dev        # Start local dev environment (Docker Compose)
 make test       # Run all tests
