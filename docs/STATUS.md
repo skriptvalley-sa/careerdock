@@ -17,7 +17,7 @@
 
 - Sprint 0 (Foundation): ✅ Complete — PR #13 (merged)
 - Sprint 1 (Company Directory): ✅ Complete — PR #15 (merged), CI ✅
-- Sprint 2 (Lists & Tracking): ✅ Complete — PR pending
+- Sprint 2 (Lists & Tracking): ✅ Complete — PR #17 (merged), PR #18 (merged)
 - Sprint 3 (Payments & Resume): ⬜ Not started
 - Sprint 4 (AI Features): ⬜ Not started
 - Sprint 5 (Admin & Polish): ⬜ Not started
@@ -127,8 +127,8 @@
 ## Sprint 2 — User Lists & Tracking (Tasks 2.1–2.15)
 
 **Branch:** `feature/sprint-2-lists-tracking`
-**PR:** Pending — ready for PR creation
-**CI:** ✅ Backend builds, frontend builds (local verified)
+**PR:** #17 (merged 2026-03-14), #18 (merged 2026-03-14)
+**CI:** ✅ All jobs passing
 **Est. hours:** ~63
 
 ### Task Checklist
