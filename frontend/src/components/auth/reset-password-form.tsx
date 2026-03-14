@@ -41,14 +41,14 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
   if (success) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Password reset</h1>
-        <p className="mt-2 text-sm text-gray-500">
+      <div className="rounded-lg border border-edge bg-card p-8 shadow-sm text-center">
+        <h1 className="text-2xl font-bold text-slate-100">Password reset</h1>
+        <p className="mt-2 text-sm text-slate-500">
           Your password has been reset successfully.
         </p>
         <Link
           href="/login"
-          className="mt-4 inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="btn-neon mt-4 inline-block rounded-md px-4 py-2 text-sm font-medium"
         >
           Sign in
         </Link>
@@ -57,18 +57,18 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+    <div className="rounded-lg border border-edge bg-card p-8 shadow-sm">
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-gray-900">Set a new password</h1>
+        <h1 className="text-2xl font-bold text-slate-100">Set a new password</h1>
       </div>
 
       {error && (
-        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>
+        <div className="mb-4 rounded-md bg-red-900/30 p-3 text-sm text-red-400">{error}</div>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="password" className="block text-sm font-medium text-slate-300">
             New password
           </label>
           <input
@@ -76,7 +76,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             type="password"
             autoComplete="new-password"
             {...register('password')}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 shadow-sm focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
           />
           {errors.password && (
             <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
@@ -84,7 +84,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-300">
             Confirm password
           </label>
           <input
@@ -92,7 +92,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             type="password"
             autoComplete="new-password"
             {...register('confirmPassword')}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 shadow-sm focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
           />
           {errors.confirmPassword && (
             <p className="mt-1 text-xs text-red-600">{errors.confirmPassword.message}</p>
@@ -102,7 +102,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+          className="btn-neon w-full rounded-md px-4 py-2 text-sm font-medium shadow-sm disabled:opacity-50"
         >
           {isSubmitting ? 'Resetting...' : 'Reset password'}
         </button>

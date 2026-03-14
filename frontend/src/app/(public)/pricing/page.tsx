@@ -49,25 +49,25 @@ function PricingCard({
     <div
       className={`flex flex-col rounded-xl border p-8 ${
         plan.highlight
-          ? 'border-blue-600 shadow-lg ring-1 ring-blue-600'
-          : 'border-gray-200'
+          ? 'border-[#00f0ff]/40 shadow-lg shadow-[#00f0ff]/5 ring-1 ring-[#00f0ff]/30 glow-cyan'
+          : 'border-edge card-neon-hover'
       }`}
     >
       {plan.highlight && (
-        <span className="-mt-12 mb-4 self-start rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">
+        <span className="-mt-12 mb-4 self-start rounded-full bg-[#00f0ff]/15 border border-[#00f0ff]/30 px-3 py-1 text-xs font-semibold text-[#00f0ff]">
           Most Popular
         </span>
       )}
-      <h3 className="text-lg font-semibold text-gray-900">{plan.name}</h3>
-      <p className="mt-1 text-sm text-gray-500">{plan.description}</p>
+      <h3 className="text-lg font-semibold text-slate-100">{plan.name}</h3>
+      <p className="mt-1 text-sm text-slate-500">{plan.description}</p>
       <div className="mt-6">
-        <span className="text-4xl font-bold text-gray-900">{plan.price === '0' ? 'Free' : `₹${plan.price}`}</span>
-        {plan.price !== '0' && <span className="text-sm text-gray-500"> one-time</span>}
+        <span className="text-4xl font-bold text-slate-100">{plan.price === '0' ? 'Free' : `₹${plan.price}`}</span>
+        {plan.price !== '0' && <span className="text-sm text-slate-500"> one-time</span>}
       </div>
       <ul className="mt-8 flex-1 space-y-3">
         {plan.features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm text-gray-700">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+          <li key={f} className="flex items-start gap-2 text-sm text-slate-300">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#00f0ff]" />
             {f}
           </li>
         ))}
@@ -76,8 +76,8 @@ function PricingCard({
         href={plan.href}
         className={`mt-8 block rounded-lg px-4 py-2.5 text-center text-sm font-semibold ${
           plan.highlight
-            ? 'bg-blue-600 text-white hover:bg-blue-700'
-            : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+            ? 'btn-neon'
+            : 'border border-[#00f0ff]/20 text-[#00f0ff] hover:bg-[#00f0ff]/5 hover:border-[#00f0ff]/40 transition-all'
         }`}
       >
         {plan.cta}
@@ -90,8 +90,8 @@ export default function PricingPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Simple, transparent pricing</h1>
-        <p className="mt-4 text-lg text-gray-600">
+        <h1 className="text-3xl font-bold text-slate-100">Simple, transparent pricing</h1>
+        <p className="mt-4 text-lg text-slate-400">
           Start free. Pay once for AI features. No subscriptions.
         </p>
       </div>
@@ -104,19 +104,19 @@ export default function PricingPage() {
 
       {/* Credit Packs */}
       <section className="mt-16">
-        <h2 className="text-center text-xl font-bold text-gray-900">Need more credits?</h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <h2 className="text-center text-xl font-bold text-slate-100">Need more credits?</h2>
+        <p className="mt-2 text-center text-sm text-slate-400">
           Buy additional AI credits a la carte after your Starter Pack.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {creditPacks.map((pack) => (
             <div
               key={pack.credits}
-              className="rounded-lg border border-gray-200 p-6 text-center"
+              className="card-neon-hover rounded-lg border border-edge p-6 text-center"
             >
-              <div className="text-2xl font-bold text-gray-900">{pack.credits} credits</div>
-              <div className="mt-1 text-lg font-semibold text-blue-600">₹{pack.price}</div>
-              <div className="mt-1 text-xs text-gray-500">
+              <div className="text-2xl font-bold text-slate-100">{pack.credits} credits</div>
+              <div className="mt-1 text-lg font-semibold text-[#00f0ff]">₹{pack.price}</div>
+              <div className="mt-1 text-xs text-slate-500">
                 ₹{Math.round(Number(pack.price) / pack.credits)}/credit
               </div>
             </div>
@@ -126,10 +126,10 @@ export default function PricingPage() {
 
       {/* FAQ hint */}
       <section className="mt-16 text-center">
-        <h2 className="text-xl font-bold text-gray-900">Questions?</h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <h2 className="text-xl font-bold text-slate-100">Questions?</h2>
+        <p className="mt-2 text-sm text-slate-400">
           Reach out at{' '}
-          <span className="font-medium text-gray-900">support@careerdock.in</span> and
+          <span className="font-medium text-slate-100">support@careerdock.in</span> and
           we&apos;ll get back to you within 24 hours.
         </p>
       </section>

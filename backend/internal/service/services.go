@@ -11,8 +11,11 @@ import (
 // instances. It is constructed once in cmd/api/main.go and passed to the
 // handler layer via MountRoutes.
 type Services struct {
-	Auth    *AuthService
-	Company *CompanyService
+	Auth        *AuthService
+	Company     *CompanyService
+	List        *ListService
+	User        *UserService
+	FeatureFlag *FeatureFlagService
 
 	// Infrastructure references for health checks
 	db    *pgxpool.Pool
@@ -27,6 +30,9 @@ type Services struct {
 func NewServices(
 	auth *AuthService,
 	company *CompanyService,
+	list *ListService,
+	user *UserService,
+	featureFlag *FeatureFlagService,
 	db *pgxpool.Pool,
 	redisClient *redis.Client,
 	version string,
@@ -35,6 +41,9 @@ func NewServices(
 	return &Services{
 		Auth:         auth,
 		Company:      company,
+		List:         list,
+		User:         user,
+		FeatureFlag:  featureFlag,
 		db:           db,
 		redis:        redisClient,
 		Version:      version,

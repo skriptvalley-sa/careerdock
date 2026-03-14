@@ -8,12 +8,30 @@
     "founded_year": 1998,
     "careers_page_url": "https://careers.google.com",
     "linkedin_url": "https://linkedin.com/company/google",
-    "tech_stack": ["Go", "Python", "Java", "C++", "Kubernetes", "TensorFlow", "Angular"],
-    "domains": ["Cloud", "AI/ML", "Search", "Advertising", "Mobile"],
+    "tech_stack": [
+      "Go",
+      "Python",
+      "Java",
+      "C++",
+      "Kubernetes",
+      "TensorFlow",
+      "Angular"
+    ],
+    "domains": [
+      "Cloud",
+      "AI/ML",
+      "Search",
+      "Advertising",
+      "Mobile"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "microsoft",
@@ -24,12 +42,30 @@
     "founded_year": 1975,
     "careers_page_url": "https://careers.microsoft.com",
     "linkedin_url": "https://linkedin.com/company/microsoft",
-    "tech_stack": ["C#", ".NET", "TypeScript", "React", "Azure", "Python", "Java"],
-    "domains": ["Cloud", "AI/ML", "Enterprise Software", "Developer Tools", "Gaming"],
+    "tech_stack": [
+      "C#",
+      ".NET",
+      "TypeScript",
+      "React",
+      "Azure",
+      "Python",
+      "Java"
+    ],
+    "domains": [
+      "Cloud",
+      "AI/ML",
+      "Enterprise Software",
+      "Developer Tools",
+      "Gaming"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
   },
   {
     "slug": "amazon",
@@ -40,12 +76,30 @@
     "founded_year": 1994,
     "careers_page_url": "https://www.amazon.jobs",
     "linkedin_url": "https://linkedin.com/company/amazon",
-    "tech_stack": ["Java", "Python", "TypeScript", "React", "AWS", "DynamoDB", "Kotlin"],
-    "domains": ["Cloud", "E-commerce", "AI/ML", "Logistics", "Voice Assistants"],
+    "tech_stack": [
+      "Java",
+      "Python",
+      "TypeScript",
+      "React",
+      "AWS",
+      "DynamoDB",
+      "Kotlin"
+    ],
+    "domains": [
+      "Cloud",
+      "E-commerce",
+      "AI/ML",
+      "Logistics",
+      "Voice Assistants"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "meta",
@@ -56,12 +110,29 @@
     "founded_year": 2004,
     "careers_page_url": "https://www.metacareers.com",
     "linkedin_url": "https://linkedin.com/company/meta",
-    "tech_stack": ["Python", "Hack", "React", "React Native", "C++", "PyTorch", "GraphQL"],
-    "domains": ["Social Media", "AI/ML", "VR/AR", "Messaging"],
+    "tech_stack": [
+      "Python",
+      "Hack",
+      "React",
+      "React Native",
+      "C++",
+      "PyTorch",
+      "GraphQL"
+    ],
+    "domains": [
+      "Social Media",
+      "AI/ML",
+      "VR/AR",
+      "Messaging"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
   },
   {
     "slug": "apple",
@@ -72,12 +143,29 @@
     "founded_year": 1976,
     "careers_page_url": "https://jobs.apple.com",
     "linkedin_url": "https://linkedin.com/company/apple",
-    "tech_stack": ["Swift", "Objective-C", "Python", "Java", "C++", "Kubernetes"],
-    "domains": ["Consumer Electronics", "Mobile", "AI/ML", "Maps", "Cloud"],
+    "tech_stack": [
+      "Swift",
+      "Objective-C",
+      "Python",
+      "Java",
+      "C++",
+      "Kubernetes"
+    ],
+    "domains": [
+      "Consumer Electronics",
+      "Mobile",
+      "AI/ML",
+      "Maps",
+      "Cloud"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "netflix",
@@ -88,12 +176,29 @@
     "founded_year": 1997,
     "careers_page_url": "https://jobs.netflix.com",
     "linkedin_url": "https://linkedin.com/company/netflix",
-    "tech_stack": ["Java", "Python", "Node.js", "React", "Spring Boot", "Cassandra", "Kafka"],
-    "domains": ["Streaming", "Entertainment", "AI/ML", "Content Delivery"],
+    "tech_stack": [
+      "Java",
+      "Python",
+      "Node.js",
+      "React",
+      "Spring Boot",
+      "Cassandra",
+      "Kafka"
+    ],
+    "domains": [
+      "Streaming",
+      "Entertainment",
+      "AI/ML",
+      "Content Delivery"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
   },
   {
     "slug": "uber",
@@ -104,12 +209,29 @@
     "founded_year": 2009,
     "careers_page_url": "https://www.uber.com/careers",
     "linkedin_url": "https://linkedin.com/company/uber-com",
-    "tech_stack": ["Go", "Java", "Python", "React", "Node.js", "Apache Flink", "Kafka"],
-    "domains": ["Mobility", "Delivery", "Marketplace", "Maps", "Payments"],
+    "tech_stack": [
+      "Go",
+      "Java",
+      "Python",
+      "React",
+      "Node.js",
+      "Apache Flink",
+      "Kafka"
+    ],
+    "domains": [
+      "Mobility",
+      "Delivery",
+      "Marketplace",
+      "Maps",
+      "Payments"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "atlassian",
@@ -120,12 +242,29 @@
     "founded_year": 2002,
     "careers_page_url": "https://www.atlassian.com/company/careers",
     "linkedin_url": "https://linkedin.com/company/atlassian",
-    "tech_stack": ["Java", "TypeScript", "React", "Python", "Kotlin", "AWS", "GraphQL"],
-    "domains": ["Developer Tools", "Collaboration", "SaaS", "Project Management"],
+    "tech_stack": [
+      "Java",
+      "TypeScript",
+      "React",
+      "Python",
+      "Kotlin",
+      "AWS",
+      "GraphQL"
+    ],
+    "domains": [
+      "Developer Tools",
+      "Collaboration",
+      "SaaS",
+      "Project Management"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "remote",
+      "hybrid"
+    ]
   },
   {
     "slug": "adobe",
@@ -136,12 +275,28 @@
     "founded_year": 1982,
     "careers_page_url": "https://www.adobe.com/careers.html",
     "linkedin_url": "https://linkedin.com/company/adobe",
-    "tech_stack": ["Java", "C++", "JavaScript", "React", "Python", "Node.js", "Kubernetes"],
-    "domains": ["Creative Software", "Digital Marketing", "Document Management", "AI/ML"],
+    "tech_stack": [
+      "Java",
+      "C++",
+      "JavaScript",
+      "React",
+      "Python",
+      "Node.js",
+      "Kubernetes"
+    ],
+    "domains": [
+      "Creative Software",
+      "Digital Marketing",
+      "Document Management",
+      "AI/ML"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "salesforce",
@@ -152,12 +307,30 @@
     "founded_year": 1999,
     "careers_page_url": "https://www.salesforce.com/company/careers",
     "linkedin_url": "https://linkedin.com/company/salesforce",
-    "tech_stack": ["Java", "Python", "JavaScript", "React", "Apex", "Lightning", "Kubernetes"],
-    "domains": ["CRM", "Enterprise Software", "Cloud", "AI/ML", "SaaS"],
+    "tech_stack": [
+      "Java",
+      "Python",
+      "JavaScript",
+      "React",
+      "Apex",
+      "Lightning",
+      "Kubernetes"
+    ],
+    "domains": [
+      "CRM",
+      "Enterprise Software",
+      "Cloud",
+      "AI/ML",
+      "SaaS"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
   },
   {
     "slug": "oracle",
@@ -168,12 +341,29 @@
     "founded_year": 1977,
     "careers_page_url": "https://www.oracle.com/careers",
     "linkedin_url": "https://linkedin.com/company/oracle",
-    "tech_stack": ["Java", "C++", "Python", "JavaScript", "OCI", "MySQL", "Kubernetes"],
-    "domains": ["Cloud Infrastructure", "Enterprise Software", "Database", "ERP"],
+    "tech_stack": [
+      "Java",
+      "C++",
+      "Python",
+      "JavaScript",
+      "OCI",
+      "MySQL",
+      "Kubernetes"
+    ],
+    "domains": [
+      "Cloud Infrastructure",
+      "Enterprise Software",
+      "Database",
+      "ERP"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "sap",
@@ -184,12 +374,29 @@
     "founded_year": 1972,
     "careers_page_url": "https://www.sap.com/about/careers.html",
     "linkedin_url": "https://linkedin.com/company/sap",
-    "tech_stack": ["Java", "ABAP", "JavaScript", "React", "Python", "HANA", "Node.js"],
-    "domains": ["Enterprise Software", "ERP", "Cloud", "Analytics", "Supply Chain"],
+    "tech_stack": [
+      "Java",
+      "ABAP",
+      "JavaScript",
+      "React",
+      "Python",
+      "HANA",
+      "Node.js"
+    ],
+    "domains": [
+      "Enterprise Software",
+      "ERP",
+      "Cloud",
+      "Analytics",
+      "Supply Chain"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "ibm",
@@ -200,12 +407,30 @@
     "founded_year": 1911,
     "careers_page_url": "https://www.ibm.com/careers",
     "linkedin_url": "https://linkedin.com/company/ibm",
-    "tech_stack": ["Java", "Python", "Go", "Node.js", "React", "Kubernetes", "OpenShift"],
-    "domains": ["Cloud", "AI/ML", "Enterprise Software", "Consulting", "Quantum Computing"],
+    "tech_stack": [
+      "Java",
+      "Python",
+      "Go",
+      "Node.js",
+      "React",
+      "Kubernetes",
+      "OpenShift"
+    ],
+    "domains": [
+      "Cloud",
+      "AI/ML",
+      "Enterprise Software",
+      "Consulting",
+      "Quantum Computing"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
   },
   {
     "slug": "vmware",
@@ -216,12 +441,30 @@
     "founded_year": 1998,
     "careers_page_url": "https://careers.vmware.com",
     "linkedin_url": "https://linkedin.com/company/vmware",
-    "tech_stack": ["Java", "Go", "Python", "C++", "React", "Kubernetes", "Spring Boot"],
-    "domains": ["Cloud", "Virtualization", "Networking", "Security", "Kubernetes"],
+    "tech_stack": [
+      "Java",
+      "Go",
+      "Python",
+      "C++",
+      "React",
+      "Kubernetes",
+      "Spring Boot"
+    ],
+    "domains": [
+      "Cloud",
+      "Virtualization",
+      "Networking",
+      "Security",
+      "Kubernetes"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
   },
   {
     "slug": "cisco",
@@ -232,12 +475,29 @@
     "founded_year": 1984,
     "careers_page_url": "https://jobs.cisco.com",
     "linkedin_url": "https://linkedin.com/company/cisco",
-    "tech_stack": ["C++", "Python", "Java", "Go", "React", "Angular", "Kubernetes"],
-    "domains": ["Networking", "Cybersecurity", "Collaboration", "IoT", "Cloud"],
+    "tech_stack": [
+      "C++",
+      "Python",
+      "Java",
+      "Go",
+      "React",
+      "Angular",
+      "Kubernetes"
+    ],
+    "domains": [
+      "Networking",
+      "Cybersecurity",
+      "Collaboration",
+      "IoT",
+      "Cloud"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_1",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "flipkart",
@@ -248,12 +508,30 @@
     "founded_year": 2007,
     "careers_page_url": "https://www.flipkartcareers.com",
     "linkedin_url": "https://linkedin.com/company/flipkart",
-    "tech_stack": ["Java", "Go", "React", "Node.js", "Python", "Kafka", "Elasticsearch"],
-    "domains": ["E-commerce", "Fintech", "Logistics", "Supply Chain", "AI/ML"],
+    "tech_stack": [
+      "Java",
+      "Go",
+      "React",
+      "Node.js",
+      "Python",
+      "Kafka",
+      "Elasticsearch"
+    ],
+    "domains": [
+      "E-commerce",
+      "Fintech",
+      "Logistics",
+      "Supply Chain",
+      "AI/ML"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "razorpay",
@@ -264,12 +542,28 @@
     "founded_year": 2014,
     "careers_page_url": "https://razorpay.com/careers",
     "linkedin_url": "https://linkedin.com/company/razorpay",
-    "tech_stack": ["Go", "Ruby", "React", "Kotlin", "Python", "Kafka", "MySQL"],
-    "domains": ["Fintech", "Payments", "Banking", "SaaS"],
+    "tech_stack": [
+      "Go",
+      "Ruby",
+      "React",
+      "Kotlin",
+      "Python",
+      "Kafka",
+      "MySQL"
+    ],
+    "domains": [
+      "Fintech",
+      "Payments",
+      "Banking",
+      "SaaS"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "swiggy",
@@ -280,12 +574,29 @@
     "founded_year": 2014,
     "careers_page_url": "https://careers.swiggy.com",
     "linkedin_url": "https://linkedin.com/company/swiggy",
-    "tech_stack": ["Java", "Kotlin", "Go", "React", "Python", "Kafka", "Elasticsearch"],
-    "domains": ["Food Delivery", "Quick Commerce", "Logistics", "Hyperlocal"],
+    "tech_stack": [
+      "Java",
+      "Kotlin",
+      "Go",
+      "React",
+      "Python",
+      "Kafka",
+      "Elasticsearch"
+    ],
+    "domains": [
+      "Food Delivery",
+      "Quick Commerce",
+      "Logistics",
+      "Hyperlocal"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "zomato",
@@ -296,12 +607,29 @@
     "founded_year": 2008,
     "careers_page_url": "https://www.zomato.com/careers",
     "linkedin_url": "https://linkedin.com/company/zomato",
-    "tech_stack": ["Python", "Go", "React", "Java", "Redis", "Kafka", "PostgreSQL"],
-    "domains": ["Food Delivery", "Quick Commerce", "Restaurant Tech", "Logistics"],
+    "tech_stack": [
+      "Python",
+      "Go",
+      "React",
+      "Java",
+      "Redis",
+      "Kafka",
+      "PostgreSQL"
+    ],
+    "domains": [
+      "Food Delivery",
+      "Quick Commerce",
+      "Restaurant Tech",
+      "Logistics"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "cred",
@@ -312,12 +640,28 @@
     "founded_year": 2018,
     "careers_page_url": "https://careers.cred.club",
     "linkedin_url": "https://linkedin.com/company/cred-club",
-    "tech_stack": ["Kotlin", "Swift", "Go", "React", "Node.js", "PostgreSQL", "Kafka"],
-    "domains": ["Fintech", "Payments", "Rewards", "Credit"],
+    "tech_stack": [
+      "Kotlin",
+      "Swift",
+      "Go",
+      "React",
+      "Node.js",
+      "PostgreSQL",
+      "Kafka"
+    ],
+    "domains": [
+      "Fintech",
+      "Payments",
+      "Rewards",
+      "Credit"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "zerodha",
@@ -328,12 +672,29 @@
     "founded_year": 2010,
     "careers_page_url": "https://zerodha.com/careers",
     "linkedin_url": "https://linkedin.com/company/zerodha",
-    "tech_stack": ["Go", "Python", "Vue.js", "PostgreSQL", "Redis", "Elixir", "Flutter"],
-    "domains": ["Fintech", "Trading", "Wealth Management", "Capital Markets"],
+    "tech_stack": [
+      "Go",
+      "Python",
+      "Vue.js",
+      "PostgreSQL",
+      "Redis",
+      "Elixir",
+      "Flutter"
+    ],
+    "domains": [
+      "Fintech",
+      "Trading",
+      "Wealth Management",
+      "Capital Markets"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": false,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "remote",
+      "hybrid"
+    ]
   },
   {
     "slug": "phonepe",
@@ -344,12 +705,30 @@
     "founded_year": 2015,
     "careers_page_url": "https://www.phonepe.com/careers",
     "linkedin_url": "https://linkedin.com/company/phonepe",
-    "tech_stack": ["Java", "Kotlin", "React", "Go", "Python", "Kafka", "Cassandra"],
-    "domains": ["Fintech", "Payments", "Insurance", "Mutual Funds", "UPI"],
+    "tech_stack": [
+      "Java",
+      "Kotlin",
+      "React",
+      "Go",
+      "Python",
+      "Kafka",
+      "Cassandra"
+    ],
+    "domains": [
+      "Fintech",
+      "Payments",
+      "Insurance",
+      "Mutual Funds",
+      "UPI"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "meesho",
@@ -360,12 +739,28 @@
     "founded_year": 2015,
     "careers_page_url": "https://meesho.io/careers",
     "linkedin_url": "https://linkedin.com/company/meesho",
-    "tech_stack": ["Java", "Go", "React", "Python", "Kotlin", "Kafka", "Redis"],
-    "domains": ["E-commerce", "Social Commerce", "Logistics", "Marketplace"],
+    "tech_stack": [
+      "Java",
+      "Go",
+      "React",
+      "Python",
+      "Kotlin",
+      "Kafka",
+      "Redis"
+    ],
+    "domains": [
+      "E-commerce",
+      "Social Commerce",
+      "Logistics",
+      "Marketplace"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "groww",
@@ -376,12 +771,28 @@
     "founded_year": 2016,
     "careers_page_url": "https://groww.in/careers",
     "linkedin_url": "https://linkedin.com/company/groww",
-    "tech_stack": ["Java", "Go", "React", "Kotlin", "Python", "MongoDB", "Kafka"],
-    "domains": ["Fintech", "Trading", "Mutual Funds", "Wealth Management"],
+    "tech_stack": [
+      "Java",
+      "Go",
+      "React",
+      "Kotlin",
+      "Python",
+      "MongoDB",
+      "Kafka"
+    ],
+    "domains": [
+      "Fintech",
+      "Trading",
+      "Mutual Funds",
+      "Wealth Management"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "dream11",
@@ -392,12 +803,28 @@
     "founded_year": 2008,
     "careers_page_url": "https://www.dreamsports.group/careers",
     "linkedin_url": "https://linkedin.com/company/dream11",
-    "tech_stack": ["Go", "Java", "React", "Python", "Redis", "Kafka", "Kubernetes"],
-    "domains": ["Fantasy Sports", "Gaming", "Entertainment", "AdTech"],
+    "tech_stack": [
+      "Go",
+      "Java",
+      "React",
+      "Python",
+      "Redis",
+      "Kafka",
+      "Kubernetes"
+    ],
+    "domains": [
+      "Fantasy Sports",
+      "Gaming",
+      "Entertainment",
+      "AdTech"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "ola",
@@ -408,12 +835,30 @@
     "founded_year": 2010,
     "careers_page_url": "https://www.olacabs.com/careers",
     "linkedin_url": "https://linkedin.com/company/olacabs",
-    "tech_stack": ["Java", "Go", "Python", "React", "Kotlin", "Kafka", "Elasticsearch"],
-    "domains": ["Mobility", "EV", "Maps", "Fintech", "Logistics"],
+    "tech_stack": [
+      "Java",
+      "Go",
+      "Python",
+      "React",
+      "Kotlin",
+      "Kafka",
+      "Elasticsearch"
+    ],
+    "domains": [
+      "Mobility",
+      "EV",
+      "Maps",
+      "Fintech",
+      "Logistics"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "sharechat",
@@ -424,12 +869,28 @@
     "founded_year": 2015,
     "careers_page_url": "https://sharechat.com/careers",
     "linkedin_url": "https://linkedin.com/company/sharechatapp",
-    "tech_stack": ["Go", "Python", "React", "Kotlin", "Swift", "TensorFlow", "Kafka"],
-    "domains": ["Social Media", "Short Video", "AI/ML", "Regional Content"],
+    "tech_stack": [
+      "Go",
+      "Python",
+      "React",
+      "Kotlin",
+      "Swift",
+      "TensorFlow",
+      "Kafka"
+    ],
+    "domains": [
+      "Social Media",
+      "Short Video",
+      "AI/ML",
+      "Regional Content"
+    ],
     "hiring_status": "unknown",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "browserstack",
@@ -440,12 +901,29 @@
     "founded_year": 2011,
     "careers_page_url": "https://www.browserstack.com/careers",
     "linkedin_url": "https://linkedin.com/company/browserstack",
-    "tech_stack": ["Ruby", "Java", "Node.js", "React", "Python", "Selenium", "Docker"],
-    "domains": ["Developer Tools", "Testing", "Cloud", "SaaS"],
+    "tech_stack": [
+      "Ruby",
+      "Java",
+      "Node.js",
+      "React",
+      "Python",
+      "Selenium",
+      "Docker"
+    ],
+    "domains": [
+      "Developer Tools",
+      "Testing",
+      "Cloud",
+      "SaaS"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
   },
   {
     "slug": "postman",
@@ -456,12 +934,29 @@
     "founded_year": 2014,
     "careers_page_url": "https://www.postman.com/company/careers",
     "linkedin_url": "https://linkedin.com/company/postman-platform",
-    "tech_stack": ["Node.js", "React", "Electron", "Go", "Java", "MongoDB", "AWS"],
-    "domains": ["Developer Tools", "API", "SaaS", "Collaboration"],
+    "tech_stack": [
+      "Node.js",
+      "React",
+      "Electron",
+      "Go",
+      "Java",
+      "MongoDB",
+      "AWS"
+    ],
+    "domains": [
+      "Developer Tools",
+      "API",
+      "SaaS",
+      "Collaboration"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "remote",
+      "hybrid"
+    ]
   },
   {
     "slug": "chargebee",
@@ -472,12 +967,29 @@
     "founded_year": 2011,
     "careers_page_url": "https://www.chargebee.com/careers",
     "linkedin_url": "https://linkedin.com/company/chargebee",
-    "tech_stack": ["Java", "Ruby", "React", "Python", "PostgreSQL", "Redis", "AWS"],
-    "domains": ["SaaS", "Billing", "Fintech", "Subscription Management"],
+    "tech_stack": [
+      "Java",
+      "Ruby",
+      "React",
+      "Python",
+      "PostgreSQL",
+      "Redis",
+      "AWS"
+    ],
+    "domains": [
+      "SaaS",
+      "Billing",
+      "Fintech",
+      "Subscription Management"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
   },
   {
     "slug": "freshworks",
@@ -488,12 +1000,28 @@
     "founded_year": 2010,
     "careers_page_url": "https://www.freshworks.com/careers",
     "linkedin_url": "https://linkedin.com/company/freshworks",
-    "tech_stack": ["Ruby", "Go", "React", "Java", "Python", "Ember.js", "AWS"],
-    "domains": ["SaaS", "CRM", "IT Service Management", "Customer Support"],
+    "tech_stack": [
+      "Ruby",
+      "Go",
+      "React",
+      "Java",
+      "Python",
+      "Ember.js",
+      "AWS"
+    ],
+    "domains": [
+      "SaaS",
+      "CRM",
+      "IT Service Management",
+      "Customer Support"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "zoho",
@@ -504,12 +1032,29 @@
     "founded_year": 1996,
     "careers_page_url": "https://www.zoho.com/careers.html",
     "linkedin_url": "https://linkedin.com/company/zoho",
-    "tech_stack": ["Java", "JavaScript", "Python", "Go", "React", "MySQL", "Elasticsearch"],
-    "domains": ["SaaS", "CRM", "Enterprise Software", "Email", "Collaboration"],
+    "tech_stack": [
+      "Java",
+      "JavaScript",
+      "Python",
+      "Go",
+      "React",
+      "MySQL",
+      "Elasticsearch"
+    ],
+    "domains": [
+      "SaaS",
+      "CRM",
+      "Enterprise Software",
+      "Email",
+      "Collaboration"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_3",
     "has_rsu": false,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "onsite"
+    ]
   },
   {
     "slug": "hasura",
@@ -520,12 +1065,29 @@
     "founded_year": 2017,
     "careers_page_url": "https://hasura.io/careers",
     "linkedin_url": "https://linkedin.com/company/hasura",
-    "tech_stack": ["Haskell", "Go", "TypeScript", "React", "PostgreSQL", "GraphQL", "Kubernetes"],
-    "domains": ["Developer Tools", "Open Source", "GraphQL", "Database", "API"],
+    "tech_stack": [
+      "Haskell",
+      "Go",
+      "TypeScript",
+      "React",
+      "PostgreSQL",
+      "GraphQL",
+      "Kubernetes"
+    ],
+    "domains": [
+      "Developer Tools",
+      "Open Source",
+      "GraphQL",
+      "Database",
+      "API"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "remote"
+    ]
   },
   {
     "slug": "dgraph",
@@ -536,12 +1098,27 @@
     "founded_year": 2016,
     "careers_page_url": "https://dgraph.io/careers",
     "linkedin_url": "https://linkedin.com/company/dgraph",
-    "tech_stack": ["Go", "React", "GraphQL", "Badger", "Kubernetes", "gRPC"],
-    "domains": ["Database", "Open Source", "Graph Database", "Developer Tools"],
+    "tech_stack": [
+      "Go",
+      "React",
+      "GraphQL",
+      "Badger",
+      "Kubernetes",
+      "gRPC"
+    ],
+    "domains": [
+      "Database",
+      "Open Source",
+      "Graph Database",
+      "Developer Tools"
+    ],
     "hiring_status": "unknown",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "remote"
+    ]
   },
   {
     "slug": "thoughtspot",
@@ -552,12 +1129,29 @@
     "founded_year": 2012,
     "careers_page_url": "https://www.thoughtspot.com/careers",
     "linkedin_url": "https://linkedin.com/company/thoughtspot",
-    "tech_stack": ["C++", "Java", "Python", "React", "TypeScript", "PostgreSQL", "Kubernetes"],
-    "domains": ["Analytics", "AI/ML", "Business Intelligence", "SaaS"],
+    "tech_stack": [
+      "C++",
+      "Java",
+      "Python",
+      "React",
+      "TypeScript",
+      "PostgreSQL",
+      "Kubernetes"
+    ],
+    "domains": [
+      "Analytics",
+      "AI/ML",
+      "Business Intelligence",
+      "SaaS"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": true
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
   },
   {
     "slug": "infosys",
@@ -568,12 +1162,30 @@
     "founded_year": 1981,
     "careers_page_url": "https://www.infosys.com/careers",
     "linkedin_url": "https://linkedin.com/company/infosys",
-    "tech_stack": ["Java", ".NET", "Python", "SAP", "Angular", "AWS", "Azure"],
-    "domains": ["IT Services", "Consulting", "Digital Transformation", "Cloud", "AI/ML"],
+    "tech_stack": [
+      "Java",
+      ".NET",
+      "Python",
+      "SAP",
+      "Angular",
+      "AWS",
+      "Azure"
+    ],
+    "domains": [
+      "IT Services",
+      "Consulting",
+      "Digital Transformation",
+      "Cloud",
+      "AI/ML"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_4",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "tcs",
@@ -584,12 +1196,30 @@
     "founded_year": 1968,
     "careers_page_url": "https://www.tcs.com/careers",
     "linkedin_url": "https://linkedin.com/company/tata-consultancy-services",
-    "tech_stack": ["Java", ".NET", "Python", "SAP", "React", "AWS", "Azure"],
-    "domains": ["IT Services", "Consulting", "Digital Transformation", "Cloud", "Enterprise Solutions"],
+    "tech_stack": [
+      "Java",
+      ".NET",
+      "Python",
+      "SAP",
+      "React",
+      "AWS",
+      "Azure"
+    ],
+    "domains": [
+      "IT Services",
+      "Consulting",
+      "Digital Transformation",
+      "Cloud",
+      "Enterprise Solutions"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_4",
     "has_rsu": false,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "wipro",
@@ -600,12 +1230,30 @@
     "founded_year": 1945,
     "careers_page_url": "https://careers.wipro.com",
     "linkedin_url": "https://linkedin.com/company/wipro",
-    "tech_stack": ["Java", ".NET", "Python", "SAP", "Angular", "AWS", "Azure"],
-    "domains": ["IT Services", "Consulting", "Cloud", "Cybersecurity", "Digital Transformation"],
+    "tech_stack": [
+      "Java",
+      ".NET",
+      "Python",
+      "SAP",
+      "Angular",
+      "AWS",
+      "Azure"
+    ],
+    "domains": [
+      "IT Services",
+      "Consulting",
+      "Cloud",
+      "Cybersecurity",
+      "Digital Transformation"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_4",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "hcl-technologies",
@@ -616,12 +1264,30 @@
     "founded_year": 1991,
     "careers_page_url": "https://www.hcltech.com/careers",
     "linkedin_url": "https://linkedin.com/company/hcl-technologies",
-    "tech_stack": ["Java", ".NET", "Python", "SAP", "React", "Azure", "AWS"],
-    "domains": ["IT Services", "Engineering R&D", "Cloud", "Digital Transformation", "IoT"],
+    "tech_stack": [
+      "Java",
+      ".NET",
+      "Python",
+      "SAP",
+      "React",
+      "Azure",
+      "AWS"
+    ],
+    "domains": [
+      "IT Services",
+      "Engineering R&D",
+      "Cloud",
+      "Digital Transformation",
+      "IoT"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_4",
     "has_rsu": false,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "tech-mahindra",
@@ -632,12 +1298,30 @@
     "founded_year": 1986,
     "careers_page_url": "https://careers.techmahindra.com",
     "linkedin_url": "https://linkedin.com/company/tech-mahindra",
-    "tech_stack": ["Java", ".NET", "Python", "Angular", "SAP", "AWS", "Azure"],
-    "domains": ["IT Services", "Telecom", "Consulting", "Digital Transformation", "5G"],
+    "tech_stack": [
+      "Java",
+      ".NET",
+      "Python",
+      "Angular",
+      "SAP",
+      "AWS",
+      "Azure"
+    ],
+    "domains": [
+      "IT Services",
+      "Telecom",
+      "Consulting",
+      "Digital Transformation",
+      "5G"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_4",
     "has_rsu": false,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "mindtree",
@@ -648,12 +1332,29 @@
     "founded_year": 1999,
     "careers_page_url": "https://www.mindtree.com/careers",
     "linkedin_url": "https://linkedin.com/company/mindtree",
-    "tech_stack": ["Java", "Python", ".NET", "React", "Angular", "AWS", "Azure"],
-    "domains": ["IT Services", "Cloud", "Digital Transformation", "Data Analytics"],
+    "tech_stack": [
+      "Java",
+      "Python",
+      ".NET",
+      "React",
+      "Angular",
+      "AWS",
+      "Azure"
+    ],
+    "domains": [
+      "IT Services",
+      "Cloud",
+      "Digital Transformation",
+      "Data Analytics"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_4",
     "has_rsu": false,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "mphasis",
@@ -664,12 +1365,29 @@
     "founded_year": 2000,
     "careers_page_url": "https://www.mphasis.com/careers.html",
     "linkedin_url": "https://linkedin.com/company/mphasis",
-    "tech_stack": ["Java", "Python", ".NET", "React", "AWS", "Azure", "Kubernetes"],
-    "domains": ["IT Services", "Cloud", "AI/ML", "Banking Technology", "Insurance"],
+    "tech_stack": [
+      "Java",
+      "Python",
+      ".NET",
+      "React",
+      "AWS",
+      "Azure",
+      "Kubernetes"
+    ],
+    "domains": [
+      "IT Services",
+      "Cloud",
+      "AI/ML",
+      "Banking Technology",
+      "Insurance"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_4",
     "has_rsu": false,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "ltimindtree",
@@ -680,12 +1398,30 @@
     "founded_year": 2022,
     "careers_page_url": "https://www.ltimindtree.com/careers",
     "linkedin_url": "https://linkedin.com/company/ltimindtree",
-    "tech_stack": ["Java", "Python", ".NET", "React", "Angular", "AWS", "Azure"],
-    "domains": ["IT Services", "Consulting", "Cloud", "Data Analytics", "Digital Transformation"],
+    "tech_stack": [
+      "Java",
+      "Python",
+      ".NET",
+      "React",
+      "Angular",
+      "AWS",
+      "Azure"
+    ],
+    "domains": [
+      "IT Services",
+      "Consulting",
+      "Cloud",
+      "Data Analytics",
+      "Digital Transformation"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_4",
     "has_rsu": false,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "persistent-systems",
@@ -696,12 +1432,29 @@
     "founded_year": 1990,
     "careers_page_url": "https://www.persistent.com/careers",
     "linkedin_url": "https://linkedin.com/company/persistent-systems",
-    "tech_stack": ["Java", "Python", ".NET", "React", "Salesforce", "AWS", "Azure"],
-    "domains": ["IT Services", "Product Engineering", "Healthcare IT", "Banking", "SaaS"],
+    "tech_stack": [
+      "Java",
+      "Python",
+      ".NET",
+      "React",
+      "Salesforce",
+      "AWS",
+      "Azure"
+    ],
+    "domains": [
+      "IT Services",
+      "Product Engineering",
+      "Healthcare IT",
+      "Banking",
+      "SaaS"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "coforge",
@@ -712,12 +1465,30 @@
     "founded_year": 1992,
     "careers_page_url": "https://www.coforge.com/careers",
     "linkedin_url": "https://linkedin.com/company/coforge",
-    "tech_stack": ["Java", ".NET", "Python", "Angular", "React", "AWS", "Azure"],
-    "domains": ["IT Services", "Insurance", "Travel Tech", "Banking", "Digital Transformation"],
+    "tech_stack": [
+      "Java",
+      ".NET",
+      "Python",
+      "Angular",
+      "React",
+      "AWS",
+      "Azure"
+    ],
+    "domains": [
+      "IT Services",
+      "Insurance",
+      "Travel Tech",
+      "Banking",
+      "Digital Transformation"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_3",
     "has_rsu": false,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "rupeek",
@@ -728,12 +1499,27 @@
     "founded_year": 2015,
     "careers_page_url": "https://www.rupeek.com/careers",
     "linkedin_url": "https://linkedin.com/company/rupeek",
-    "tech_stack": ["Node.js", "React", "Python", "Go", "MongoDB", "Redis", "AWS"],
-    "domains": ["Fintech", "Lending", "Gold Loans"],
+    "tech_stack": [
+      "Node.js",
+      "React",
+      "Python",
+      "Go",
+      "MongoDB",
+      "Redis",
+      "AWS"
+    ],
+    "domains": [
+      "Fintech",
+      "Lending",
+      "Gold Loans"
+    ],
     "hiring_status": "unknown",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "jupiter",
@@ -744,12 +1530,28 @@
     "founded_year": 2019,
     "careers_page_url": "https://jupiter.money/careers",
     "linkedin_url": "https://linkedin.com/company/jupiter-money",
-    "tech_stack": ["Kotlin", "Swift", "Go", "React", "Python", "PostgreSQL", "AWS"],
-    "domains": ["Fintech", "Neo-banking", "Payments", "Mutual Funds"],
+    "tech_stack": [
+      "Kotlin",
+      "Swift",
+      "Go",
+      "React",
+      "Python",
+      "PostgreSQL",
+      "AWS"
+    ],
+    "domains": [
+      "Fintech",
+      "Neo-banking",
+      "Payments",
+      "Mutual Funds"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "slice",
@@ -760,12 +1562,28 @@
     "founded_year": 2016,
     "careers_page_url": "https://www.sliceit.com/careers",
     "linkedin_url": "https://linkedin.com/company/slicepay",
-    "tech_stack": ["Java", "Kotlin", "React", "Node.js", "Python", "PostgreSQL", "AWS"],
-    "domains": ["Fintech", "Credit", "Payments", "Banking"],
+    "tech_stack": [
+      "Java",
+      "Kotlin",
+      "React",
+      "Node.js",
+      "Python",
+      "PostgreSQL",
+      "AWS"
+    ],
+    "domains": [
+      "Fintech",
+      "Credit",
+      "Payments",
+      "Banking"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "navi",
@@ -776,12 +1594,28 @@
     "founded_year": 2018,
     "careers_page_url": "https://navi.com/careers",
     "linkedin_url": "https://linkedin.com/company/navi-technologies",
-    "tech_stack": ["Java", "Kotlin", "React", "Python", "Go", "PostgreSQL", "AWS"],
-    "domains": ["Fintech", "Insurance", "Lending", "Mutual Funds"],
+    "tech_stack": [
+      "Java",
+      "Kotlin",
+      "React",
+      "Python",
+      "Go",
+      "PostgreSQL",
+      "AWS"
+    ],
+    "domains": [
+      "Fintech",
+      "Insurance",
+      "Lending",
+      "Mutual Funds"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "licious",
@@ -792,12 +1626,29 @@
     "founded_year": 2015,
     "careers_page_url": "https://www.licious.in/careers",
     "linkedin_url": "https://linkedin.com/company/licious",
-    "tech_stack": ["Java", "React", "Node.js", "Python", "MongoDB", "Redis", "AWS"],
-    "domains": ["D2C", "Food Tech", "E-commerce", "Supply Chain"],
+    "tech_stack": [
+      "Java",
+      "React",
+      "Node.js",
+      "Python",
+      "MongoDB",
+      "Redis",
+      "AWS"
+    ],
+    "domains": [
+      "D2C",
+      "Food Tech",
+      "E-commerce",
+      "Supply Chain"
+    ],
     "hiring_status": "unknown",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "upgrad",
@@ -808,12 +1659,27 @@
     "founded_year": 2015,
     "careers_page_url": "https://www.upgrad.com/careers",
     "linkedin_url": "https://linkedin.com/company/upgrad",
-    "tech_stack": ["Java", "React", "Node.js", "Python", "MongoDB", "Redis", "AWS"],
-    "domains": ["EdTech", "Online Education", "SaaS"],
+    "tech_stack": [
+      "Java",
+      "React",
+      "Node.js",
+      "Python",
+      "MongoDB",
+      "Redis",
+      "AWS"
+    ],
+    "domains": [
+      "EdTech",
+      "Online Education",
+      "SaaS"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "scaler",
@@ -824,12 +1690,28 @@
     "founded_year": 2019,
     "careers_page_url": "https://www.scaler.com/careers",
     "linkedin_url": "https://linkedin.com/company/scaborad",
-    "tech_stack": ["Java", "React", "Node.js", "Python", "Django", "PostgreSQL", "AWS"],
-    "domains": ["EdTech", "Online Education", "SaaS"],
+    "tech_stack": [
+      "Java",
+      "React",
+      "Node.js",
+      "Python",
+      "Django",
+      "PostgreSQL",
+      "AWS"
+    ],
+    "domains": [
+      "EdTech",
+      "Online Education",
+      "SaaS"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
   },
   {
     "slug": "nobroker",
@@ -840,12 +1722,28 @@
     "founded_year": 2014,
     "careers_page_url": "https://www.nobroker.in/careers",
     "linkedin_url": "https://linkedin.com/company/nobroker-technologies",
-    "tech_stack": ["Java", "React", "Node.js", "Python", "MongoDB", "Elasticsearch", "AWS"],
-    "domains": ["PropTech", "Real Estate", "Marketplace", "SaaS"],
+    "tech_stack": [
+      "Java",
+      "React",
+      "Node.js",
+      "Python",
+      "MongoDB",
+      "Elasticsearch",
+      "AWS"
+    ],
+    "domains": [
+      "PropTech",
+      "Real Estate",
+      "Marketplace",
+      "SaaS"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "delhivery",
@@ -856,12 +1754,29 @@
     "founded_year": 2011,
     "careers_page_url": "https://www.delhivery.com/careers",
     "linkedin_url": "https://linkedin.com/company/delhivery",
-    "tech_stack": ["Python", "Go", "React", "Java", "PostgreSQL", "Redis", "AWS"],
-    "domains": ["Logistics", "Supply Chain", "E-commerce", "Fulfillment"],
+    "tech_stack": [
+      "Python",
+      "Go",
+      "React",
+      "Java",
+      "PostgreSQL",
+      "Redis",
+      "AWS"
+    ],
+    "domains": [
+      "Logistics",
+      "Supply Chain",
+      "E-commerce",
+      "Fulfillment"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "paytm",
@@ -872,12 +1787,30 @@
     "founded_year": 2010,
     "careers_page_url": "https://paytm.com/careers",
     "linkedin_url": "https://linkedin.com/company/paytm",
-    "tech_stack": ["Java", "Python", "React", "Go", "Node.js", "Kafka", "PostgreSQL"],
-    "domains": ["Fintech", "Payments", "Banking", "Insurance", "E-commerce"],
+    "tech_stack": [
+      "Java",
+      "Python",
+      "React",
+      "Go",
+      "Node.js",
+      "Kafka",
+      "PostgreSQL"
+    ],
+    "domains": [
+      "Fintech",
+      "Payments",
+      "Banking",
+      "Insurance",
+      "E-commerce"
+    ],
     "hiring_status": "paused",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "bigbasket",
@@ -888,12 +1821,29 @@
     "founded_year": 2011,
     "careers_page_url": "https://www.bigbasket.com/careers",
     "linkedin_url": "https://linkedin.com/company/bigbasket",
-    "tech_stack": ["Python", "Java", "React", "Node.js", "PostgreSQL", "Redis", "AWS"],
-    "domains": ["E-commerce", "Grocery", "Logistics", "Supply Chain"],
+    "tech_stack": [
+      "Python",
+      "Java",
+      "React",
+      "Node.js",
+      "PostgreSQL",
+      "Redis",
+      "AWS"
+    ],
+    "domains": [
+      "E-commerce",
+      "Grocery",
+      "Logistics",
+      "Supply Chain"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_3",
     "has_rsu": false,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "dunzo",
@@ -904,12 +1854,28 @@
     "founded_year": 2014,
     "careers_page_url": "https://www.dunzo.com/careers",
     "linkedin_url": "https://linkedin.com/company/dunzo",
-    "tech_stack": ["Kotlin", "Go", "React", "Python", "PostgreSQL", "Redis", "GCP"],
-    "domains": ["Quick Commerce", "Hyperlocal", "Logistics", "Delivery"],
+    "tech_stack": [
+      "Kotlin",
+      "Go",
+      "React",
+      "Python",
+      "PostgreSQL",
+      "Redis",
+      "GCP"
+    ],
+    "domains": [
+      "Quick Commerce",
+      "Hyperlocal",
+      "Logistics",
+      "Delivery"
+    ],
     "hiring_status": "paused",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "byjus",
@@ -920,12 +1886,29 @@
     "founded_year": 2011,
     "careers_page_url": "https://byjus.com/careers",
     "linkedin_url": "https://linkedin.com/company/byjus",
-    "tech_stack": ["Java", "React", "Node.js", "Python", "MongoDB", "Redis", "AWS"],
-    "domains": ["EdTech", "Online Education", "K-12", "Test Prep"],
+    "tech_stack": [
+      "Java",
+      "React",
+      "Node.js",
+      "Python",
+      "MongoDB",
+      "Redis",
+      "AWS"
+    ],
+    "domains": [
+      "EdTech",
+      "Online Education",
+      "K-12",
+      "Test Prep"
+    ],
     "hiring_status": "paused",
     "compensation_tier": "tier_3",
     "has_rsu": false,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
   },
   {
     "slug": "unacademy",
@@ -936,12 +1919,28 @@
     "founded_year": 2015,
     "careers_page_url": "https://unacademy.com/careers",
     "linkedin_url": "https://linkedin.com/company/unacademy",
-    "tech_stack": ["Python", "React", "Node.js", "Go", "MongoDB", "Redis", "AWS"],
-    "domains": ["EdTech", "Online Education", "Test Prep", "Live Classes"],
+    "tech_stack": [
+      "Python",
+      "React",
+      "Node.js",
+      "Go",
+      "MongoDB",
+      "Redis",
+      "AWS"
+    ],
+    "domains": [
+      "EdTech",
+      "Online Education",
+      "Test Prep",
+      "Live Classes"
+    ],
     "hiring_status": "unknown",
     "compensation_tier": "tier_3",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   },
   {
     "slug": "inmobi",
@@ -952,11 +1951,27 @@
     "founded_year": 2007,
     "careers_page_url": "https://www.inmobi.com/careers",
     "linkedin_url": "https://linkedin.com/company/inmobi",
-    "tech_stack": ["Java", "Scala", "Python", "React", "Kafka", "Spark", "AWS"],
-    "domains": ["AdTech", "Mobile Advertising", "Data Analytics", "AI/ML"],
+    "tech_stack": [
+      "Java",
+      "Scala",
+      "Python",
+      "React",
+      "Kafka",
+      "Spark",
+      "AWS"
+    ],
+    "domains": [
+      "AdTech",
+      "Mobile Advertising",
+      "Data Analytics",
+      "AI/ML"
+    ],
     "hiring_status": "active",
     "compensation_tier": "tier_2",
     "has_rsu": true,
-    "has_rsu_refresher": false
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   }
 ]

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Providers } from '@/components/providers';
 import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
+import { AppShell } from '@/components/layout/app-shell';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -13,11 +13,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-white text-gray-900 antialiased">
+      <body className="min-h-screen overscroll-none bg-surface text-slate-200 antialiased">
         <Providers>
           <Header />
-          <main className="min-h-[calc(100vh-4rem)]">{children}</main>
-          <Footer />
+          {/* pt-14 compensates for the fixed header (h-14 = 56px) */}
+          <div className="pt-14">
+            <AppShell>{children}</AppShell>
+          </div>
         </Providers>
       </body>
     </html>

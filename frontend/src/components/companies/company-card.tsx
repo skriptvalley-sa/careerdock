@@ -1,6 +1,12 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
+import { Plus } from 'lucide-react';
+import { useAuthStore } from '@/store/auth-store';
 import type { CompanyListItem } from '@/types/api';
 import { TechStackTags } from './tech-stack-tags';
+import { QuickAddToListModal } from './quick-add-to-list-modal';
 
 const sizeLabels: Record<string, string> = {
   startup: 'Startup',
@@ -18,76 +24,148 @@ const tierLabels: Record<string, string> = {
 };
 
 const hiringColors: Record<string, string> = {
-  active: 'bg-green-50 text-green-700',
-  paused: 'bg-yellow-50 text-yellow-700',
-  unknown: 'bg-gray-100 text-gray-600',
+  active: 'bg-green-900/30 text-green-400',
+  paused: 'bg-yellow-900/30 text-yellow-400',
+  unknown: 'bg-slate-800 text-slate-500',
+};
+
+const officeModeLabels: Record<string, string> = {
+  remote: 'Remote',
+  hybrid: 'Hybrid',
+  onsite: 'On-site',
 };
 
 interface CompanyCardProps {
   company: CompanyListItem;
+  /** Number of lists this company belongs to (0 = show +, >0 = show count) */
+  listCount?: number;
 }
 
-export function CompanyCard({ company }: CompanyCardProps) {
+export function CompanyCard({ company, listCount }: CompanyCardProps) {
+  const { isAuthenticated } = useAuthStore();
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  const handleListClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowAddModal(true);
+  };
+
   return (
-    <Link
-      href={`/companies/${company.slug}`}
-      className="block rounded-lg border border-gray-200 bg-white p-5 transition-shadow hover:shadow-md"
-    >
-      <div className="flex items-start justify-between">
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate text-lg font-semibold text-gray-900">{company.name}</h3>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-            {company.headquarters && <span>{company.headquarters}</span>}
-            {company.size && (
-              <>
-                <span className="text-gray-300">|</span>
-                <span>{sizeLabels[company.size] || company.size}</span>
-              </>
+    <>
+      <Link
+        href={`/companies/${company.slug}`}
+        className="card-neon-hover group relative flex flex-col rounded-lg border border-edge bg-card p-5 transition-all"
+      >
+        {/* Header row: name + hiring badge */}
+        <div className="flex items-start justify-between">
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-lg font-semibold text-slate-100">{company.name}</h3>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+              {company.headquarters && <span>{company.headquarters}</span>}
+              {company.size && (
+                <>
+                  <span className="text-slate-700">|</span>
+                  <span>{sizeLabels[company.size] || company.size}</span>
+                </>
+              )}
+              {company.compensation_tier && (
+                <>
+                  <span className="text-slate-700">|</span>
+                  <span>{tierLabels[company.compensation_tier] || company.compensation_tier}</span>
+                </>
+              )}
+            </div>
+          </div>
+          <span
+            className={`ml-3 shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${hiringColors[company.hiring_status] || hiringColors.unknown}`}
+          >
+            {company.hiring_status === 'active'
+              ? 'Hiring'
+              : company.hiring_status === 'paused'
+                ? 'Paused'
+                : 'Unknown'}
+          </span>
+        </div>
+
+        {/* Domains */}
+        {company.domains.length > 0 && (
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            {company.domains.slice(0, 4).map((d) => (
+              <span
+                key={d}
+                className="inline-flex items-center rounded-full bg-[#ff00e5]/10 px-2.5 py-0.5 text-xs font-medium text-[#ff00e5]/80"
+              >
+                {d}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Tech stack */}
+        <div className="mt-2.5">
+          <TechStackTags tags={company.tech_stack} limit={5} />
+        </div>
+
+        {/* Spacer to push bottom section down */}
+        <div className="flex-1" />
+
+        {/* Bottom row: RSU chips + office mode + list indicator */}
+        <div className="mt-3 flex items-center justify-between">
+          {/* Left: RSU + Refresher chips */}
+          <div className="flex items-center gap-2">
+            {company.has_rsu && (
+              <span className="inline-flex items-center rounded-full bg-[#39ff14]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#39ff14]">
+                RSU
+              </span>
             )}
-            {company.compensation_tier && (
-              <>
-                <span className="text-gray-300">|</span>
-                <span>{tierLabels[company.compensation_tier] || company.compensation_tier}</span>
-              </>
+            {company.has_rsu_refresher && (
+              <span className="inline-flex items-center rounded-full bg-[#ffb800]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#ffb800]">
+                Refresher
+              </span>
+            )}
+          </div>
+
+          {/* Right: office mode + list indicator */}
+          <div className="flex items-center gap-2">
+            {/* Office mode chip */}
+            {company.office_modes.length > 0 && (
+              <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-400">
+                {company.office_modes.map((m) => officeModeLabels[m] || m).join(' / ')}
+              </span>
+            )}
+
+            {/* List indicator (auth-only) */}
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={handleListClick}
+                className={`flex h-7 min-w-[28px] items-center justify-center rounded-md border text-xs font-medium transition-all ${
+                  listCount && listCount > 0
+                    ? 'border-[#00f0ff]/30 bg-[#00f0ff]/10 text-[#00f0ff] hover:bg-[#00f0ff]/20'
+                    : 'border-edge bg-overlay text-slate-500 hover:border-[#00f0ff]/50 hover:text-[#00f0ff]'
+                }`}
+                title={listCount && listCount > 0 ? `In ${listCount} list(s)` : 'Add to list'}
+              >
+                {listCount && listCount > 0 ? (
+                  <span className="px-1">{listCount}</span>
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+              </button>
             )}
           </div>
         </div>
-        <span
-          className={`ml-3 shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${hiringColors[company.hiring_status] || hiringColors.unknown}`}
-        >
-          {company.hiring_status === 'active'
-            ? 'Hiring'
-            : company.hiring_status === 'paused'
-              ? 'Paused'
-              : 'Unknown'}
-        </span>
-      </div>
+      </Link>
 
-      {company.description && (
-        <p className="mt-2 line-clamp-2 text-sm text-gray-600">{company.description}</p>
+      {/* Quick-add modal */}
+      {showAddModal && (
+        <QuickAddToListModal
+          companyId={company.id}
+          companyName={company.name}
+          onClose={() => setShowAddModal(false)}
+        />
       )}
-
-      <div className="mt-3">
-        <TechStackTags tags={company.tech_stack} limit={5} />
-      </div>
-
-      {company.domains.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {company.domains.slice(0, 3).map((d) => (
-            <span
-              key={d}
-              className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600"
-            >
-              {d}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className="mt-3 flex items-center gap-3 text-xs text-gray-400">
-        {company.has_rsu && <span>RSU</span>}
-        {company.has_rsu_refresher && <span>Refresher</span>}
-      </div>
-    </Link>
+    </>
   );
 }

@@ -28,6 +28,20 @@ const (
 	StatusWithdrawn   ApplicationStatus = "withdrawn"
 )
 
+// CompanyTrackingStatus represents a company's overall progress in a list.
+type CompanyTrackingStatus string
+
+// CompanyTrackingStatus constants.
+const (
+	CompanyStatusMarked       CompanyTrackingStatus = "marked"
+	CompanyStatusResearching  CompanyTrackingStatus = "researching"
+	CompanyStatusApplied      CompanyTrackingStatus = "applied"
+	CompanyStatusInterviewing CompanyTrackingStatus = "interviewing"
+	CompanyStatusOffered      CompanyTrackingStatus = "offered"
+	CompanyStatusAccepted     CompanyTrackingStatus = "accepted"
+	CompanyStatusRejected     CompanyTrackingStatus = "rejected"
+)
+
 // CreditType represents a category of purchasable credit.
 type CreditType string
 

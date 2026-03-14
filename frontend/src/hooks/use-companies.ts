@@ -44,3 +44,22 @@ export function useCompanyDetail(slug: string) {
     enabled: !!slug,
   });
 }
+
+/**
+ * Lightweight company search for combobox/typeahead.
+ * Debounced on the caller side — only fires when query changes.
+ */
+export function useCompanySearch(query: string) {
+  return useQuery({
+    queryKey: ['companies', 'search', query] as const,
+    queryFn: async () => {
+      const resp = await apiClient.getPaginated<CompanyListItem>(
+        '/api/companies',
+        { q: query, limit: '8' },
+      );
+      return resp.data;
+    },
+    staleTime: staleTimes.companyList,
+    enabled: query.length >= 2,
+  });
+}

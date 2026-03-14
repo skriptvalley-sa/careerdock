@@ -116,23 +116,46 @@ careerdock/
    - ATS scoring: General score, company-specific score, job-specific score
    - Additional credits purchasable à la carte
 
-## Commands (Once Implemented)
+## Commands
 
 ```bash
 make dev        # Start local dev environment (Docker Compose)
 make test       # Run all tests
-make lint       # Run linters
+make lint       # Run all linters (backend + frontend)
+make lint-backend   # Run Go linter only (golangci-lint v2)
+make lint-frontend  # Run frontend linter only (ESLint)
 make migrate    # Run database migrations
 make seed       # Seed company data
 make build      # Build backend + frontend
 ```
 
-For Go tests, once the backend exists:
+For Go tests:
 ```bash
 cd backend && go test ./...                      # All tests
 cd backend && go test ./internal/service/...     # Specific package
 cd backend && go test -run TestFunctionName ./...  # Single test
 ```
+
+## Pre-Commit Checks
+
+**IMPORTANT:** Always run `make lint` locally before committing Go or frontend changes. This catches gofmt, revive, errcheck, and ESLint issues before they hit CI.
+
+```bash
+# Run before every commit that touches backend or frontend code:
+make lint
+
+# If only backend changed:
+make lint-backend
+
+# If only frontend changed:
+make lint-frontend
+```
+
+The CI pipeline runs 5 checks: backend-lint, backend-test, backend-build, frontend-lint, frontend-build. Running `make lint` locally mirrors the lint checks. Running `make build` mirrors the build checks.
+
+**Requirements:**
+- `golangci-lint` v2 (installed via Homebrew: `brew install golangci-lint`)
+- Node.js + npm (for frontend ESLint)
 
 ## Reference Documents
 

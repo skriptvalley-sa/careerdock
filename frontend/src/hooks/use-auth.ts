@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiClient, ApiError } from '@/lib/api';
+import { apiClient } from '@/lib/api';
 import { useAuthStore } from '@/store/auth-store';
 import type { User } from '@/types/api';
 
@@ -20,6 +20,10 @@ interface LoginInput {
 /**
  * useAuth provides authentication actions that call the backend API
  * and update the Zustand auth store.
+ *
+ * Note: 401 → refresh → retry is handled transparently by the API client
+ * (see lib/api.ts). Hooks here only need to call the API; if the access
+ * token is expired the client will silently refresh and retry.
  */
 export function useAuth() {
   const { setUser, logout: storeLogout } = useAuthStore();
@@ -53,18 +57,6 @@ export function useAuth() {
     router.push('/login');
   }, [storeLogout, router]);
 
-  const refreshSession = useCallback(async () => {
-    try {
-      await apiClient.post('/api/auth/refresh');
-      const user = await apiClient.get<User>('/api/auth/me');
-      setUser(user);
-      return true;
-    } catch {
-      storeLogout();
-      return false;
-    }
-  }, [setUser, storeLogout]);
-
   const forgotPassword = useCallback(async (email: string) => {
     await apiClient.post('/api/auth/forgot-password', { email });
   }, []);
@@ -85,24 +77,18 @@ export function useAuth() {
 
   /**
    * Check current session by calling GET /api/auth/me.
-   * Called once on app mount via AuthProvider.
+   * The API client handles 401 → refresh → retry automatically,
+   * so this just needs to fetch and update the store.
+   * Called on app mount and on window focus via AuthProvider.
    */
   const checkSession = useCallback(async () => {
     try {
       const user = await apiClient.get<User>('/api/auth/me');
       setUser(user);
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 401) {
-        // Try refresh once
-        try {
-          await apiClient.post('/api/auth/refresh');
-          const user = await apiClient.get<User>('/api/auth/me');
-          setUser(user);
-          return;
-        } catch {
-          // Refresh also failed — not authenticated
-        }
-      }
+    } catch {
+      // Any failure (including post-refresh 401) means not authenticated.
+      // The API client's onAuthFailure handler also clears state,
+      // but we set null here too for the initial mount case.
       setUser(null);
     }
   }, [setUser]);
@@ -111,7 +97,6 @@ export function useAuth() {
     register,
     login,
     logout,
-    refreshSession,
     forgotPassword,
     resetPassword,
     verifyEmail,

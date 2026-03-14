@@ -19,13 +19,13 @@ import (
 // listColumns are the columns returned in list queries (summary — no detail fields).
 const listColumns = `id, slug, name, logo_url, description, size, headquarters,
 	tech_stack, domains, hiring_status, compensation_tier,
-	has_rsu, has_rsu_refresher, updated_at`
+	has_rsu, has_rsu_refresher, office_modes, updated_at`
 
 // detailColumns are the columns returned in detail queries (full company profile).
 const detailColumns = `id, slug, name, logo_url, description, size, headquarters,
 	founded_year, careers_page_url, glassdoor_url, ambitionbox_url, linkedin_url,
 	tech_stack, domains, hiring_status, interview_patterns, compensation_tier,
-	has_rsu, has_rsu_refresher, compensation_bands,
+	has_rsu, has_rsu_refresher, office_modes, compensation_bands,
 	last_verified_at, created_at, updated_at`
 
 // CompanyRepo implements domain.CompanyRepository using pgx.
@@ -93,7 +93,10 @@ func (r *CompanyRepo) List(ctx context.Context, filter domain.CompanyFilter) ([]
 	return companies, nextCursor, nil
 }
 
-// Search returns companies matching a full-text search query plus filters.
+// Search returns companies matching a search query plus filters.
+// It uses prefix-enabled full-text search (word:*) so partial words like
+// "goog" match "Google". For very short queries (single token < 3 chars)
+// it falls back to ILIKE on the name column.
 func (r *CompanyRepo) Search(ctx context.Context, query string, filter domain.CompanyFilter) ([]domain.Company, string, error) {
 	q := getDBTX(ctx, r.pool)
 
@@ -104,11 +107,22 @@ func (r *CompanyRepo) Search(ctx context.Context, query string, filter domain.Co
 	clauses := []string{}
 	argIdx := 1
 
-	// Full-text search condition
-	args = append(args, query)
-	clauses = append(clauses, fmt.Sprintf("search_vector @@ plainto_tsquery('english', $%d)", argIdx))
-	ftsArgIdx := argIdx
-	argIdx++
+	// Determine search strategy: prefix tsquery or ILIKE fallback.
+	ftsArgIdx := 0 // 0 = not using FTS ranking
+	prefixTsquery := buildPrefixTsquery(query)
+
+	if prefixTsquery != "" {
+		// Prefix full-text search:  "goog" → to_tsquery('english','goog:*')
+		args = append(args, prefixTsquery)
+		clauses = append(clauses, fmt.Sprintf("search_vector @@ to_tsquery('english', $%d)", argIdx))
+		ftsArgIdx = argIdx
+		argIdx++
+	} else {
+		// Very short / unparseable query → ILIKE fallback on name
+		args = append(args, "%"+query+"%")
+		clauses = append(clauses, fmt.Sprintf("name ILIKE $%d", argIdx))
+		argIdx++
+	}
 
 	argIdx = appendFilterClauses(&clauses, &args, argIdx, filter)
 
@@ -123,10 +137,10 @@ func (r *CompanyRepo) Search(ctx context.Context, query string, filter domain.Co
 
 	where := "WHERE " + strings.Join(clauses, " AND ")
 
-	// Default sort for search is relevance
+	// Default sort for search is relevance (only available with FTS)
 	var orderClause string
-	if sort == "" || sort == "relevance" {
-		orderClause = fmt.Sprintf("ORDER BY ts_rank(search_vector, plainto_tsquery('english', $%d)) DESC, id ASC", ftsArgIdx)
+	if ftsArgIdx > 0 && (sort == "" || sort == "relevance") {
+		orderClause = fmt.Sprintf("ORDER BY ts_rank(search_vector, to_tsquery('english', $%d)) DESC, id ASC", ftsArgIdx)
 	} else {
 		orderClause = buildOrderClause(sort, order)
 	}
@@ -153,6 +167,46 @@ func (r *CompanyRepo) Search(ctx context.Context, query string, filter domain.Co
 	}
 
 	return companies, nextCursor, nil
+}
+
+// buildPrefixTsquery converts a user search string into a prefix tsquery.
+// "goog"        → "goog:*"
+// "amazon web"  → "amazon:* & web:*"
+// Returns "" if no valid tokens can be built (caller should use ILIKE).
+func buildPrefixTsquery(query string) string {
+	words := strings.Fields(query)
+	if len(words) == 0 {
+		return ""
+	}
+
+	tokens := make([]string, 0, len(words))
+	for _, w := range words {
+		// Strip characters that are special in tsquery syntax
+		cleaned := sanitiseTsqueryToken(w)
+		if cleaned == "" {
+			continue
+		}
+		tokens = append(tokens, cleaned+":*")
+	}
+
+	if len(tokens) == 0 {
+		return ""
+	}
+
+	return strings.Join(tokens, " & ")
+}
+
+// sanitiseTsqueryToken removes characters that are special in PostgreSQL
+// tsquery syntax so the token can be safely interpolated.
+func sanitiseTsqueryToken(s string) string {
+	var b strings.Builder
+	for _, r := range s {
+		// Allow only alphanumeric, underscore, hyphen
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '_' || r == '-' {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
 }
 
 // GetByID retrieves a company by UUID with full detail.
@@ -270,14 +324,14 @@ func (r *CompanyRepo) Upsert(ctx context.Context, company *domain.Company) error
 			id, slug, name, logo_url, description, size, headquarters,
 			founded_year, careers_page_url, glassdoor_url, ambitionbox_url, linkedin_url,
 			tech_stack, domains, hiring_status, interview_patterns, compensation_tier,
-			has_rsu, has_rsu_refresher, compensation_bands,
+			has_rsu, has_rsu_refresher, office_modes, compensation_bands,
 			last_verified_at, created_at, updated_at
 		) VALUES (
 			$1, $2, $3, $4, $5, $6, $7,
 			$8, $9, $10, $11, $12,
 			$13, $14, $15, $16, $17,
-			$18, $19, $20,
-			$21, $22, $23
+			$18, $19, $20, $21,
+			$22, $23, $24
 		)
 		ON CONFLICT (slug) DO UPDATE SET
 			name = EXCLUDED.name,
@@ -297,6 +351,7 @@ func (r *CompanyRepo) Upsert(ctx context.Context, company *domain.Company) error
 			compensation_tier = EXCLUDED.compensation_tier,
 			has_rsu = EXCLUDED.has_rsu,
 			has_rsu_refresher = EXCLUDED.has_rsu_refresher,
+			office_modes = EXCLUDED.office_modes,
 			compensation_bands = EXCLUDED.compensation_bands,
 			last_verified_at = EXCLUDED.last_verified_at,
 			updated_at = EXCLUDED.updated_at
@@ -307,7 +362,7 @@ func (r *CompanyRepo) Upsert(ctx context.Context, company *domain.Company) error
 		company.AmbitionboxURL, company.LinkedinURL,
 		company.TechStack, company.Domains, string(company.HiringStatus),
 		company.InterviewPatterns, company.CompensationTier,
-		company.HasRSU, company.HasRSURefresher, company.CompensationBands,
+		company.HasRSU, company.HasRSURefresher, company.OfficeModes, company.CompensationBands,
 		company.LastVerifiedAt, company.CreatedAt, company.UpdatedAt,
 	).Scan(&company.ID)
 
@@ -524,7 +579,7 @@ func scanCompanyListRow(row pgx.Row) (*domain.Company, error) {
 		&c.ID, &c.Slug, &c.Name, &c.LogoURL, &c.Description,
 		&size, &c.Headquarters,
 		&c.TechStack, &c.Domains, &c.HiringStatus, &compTier,
-		&c.HasRSU, &c.HasRSURefresher, &c.UpdatedAt,
+		&c.HasRSU, &c.HasRSURefresher, &c.OfficeModes, &c.UpdatedAt,
 	)
 	if err != nil {
 		return nil, domain.InternalError(err)
@@ -541,6 +596,9 @@ func scanCompanyListRow(row pgx.Row) (*domain.Company, error) {
 	}
 	if c.Domains == nil {
 		c.Domains = []string{}
+	}
+	if c.OfficeModes == nil {
+		c.OfficeModes = []string{}
 	}
 
 	return c, nil
@@ -559,7 +617,7 @@ func scanCompanyDetail(row pgx.Row) (*domain.Company, error) {
 		&c.AmbitionboxURL, &c.LinkedinURL,
 		&c.TechStack, &c.Domains, &c.HiringStatus,
 		&c.InterviewPatterns, &compTier,
-		&c.HasRSU, &c.HasRSURefresher, &c.CompensationBands,
+		&c.HasRSU, &c.HasRSURefresher, &c.OfficeModes, &c.CompensationBands,
 		&c.LastVerifiedAt, &c.CreatedAt, &c.UpdatedAt,
 	)
 	if err != nil {
@@ -581,8 +639,68 @@ func scanCompanyDetail(row pgx.Row) (*domain.Company, error) {
 	if c.Domains == nil {
 		c.Domains = []string{}
 	}
+	if c.OfficeModes == nil {
+		c.OfficeModes = []string{}
+	}
 
 	return c, nil
+}
+
+// GetNamesByIDs returns a map of company ID → name for the given IDs.
+// This is a lightweight batch lookup used to enrich list entries with company names.
+func (r *CompanyRepo) GetNamesByIDs(ctx context.Context, ids []uuid.UUID) (map[uuid.UUID]string, error) {
+	if len(ids) == 0 {
+		return map[uuid.UUID]string{}, nil
+	}
+
+	q := getDBTX(ctx, r.pool)
+	rows, err := q.Query(ctx, `SELECT id, name FROM companies WHERE id = ANY($1)`, ids)
+	if err != nil {
+		return nil, domain.InternalError(err)
+	}
+	defer rows.Close()
+
+	result := make(map[uuid.UUID]string, len(ids))
+	for rows.Next() {
+		var id uuid.UUID
+		var name string
+		if err := rows.Scan(&id, &name); err != nil {
+			return nil, domain.InternalError(err)
+		}
+		result[id] = name
+	}
+	if err := rows.Err(); err != nil {
+		return nil, domain.InternalError(err)
+	}
+	return result, nil
+}
+
+// GetNameAndSlugsByIDs returns a map of company ID → {name, slug} for the given IDs.
+func (r *CompanyRepo) GetNameAndSlugsByIDs(ctx context.Context, ids []uuid.UUID) (map[uuid.UUID]domain.CompanyNameSlug, error) {
+	if len(ids) == 0 {
+		return map[uuid.UUID]domain.CompanyNameSlug{}, nil
+	}
+
+	q := getDBTX(ctx, r.pool)
+	rows, err := q.Query(ctx, `SELECT id, name, slug FROM companies WHERE id = ANY($1)`, ids)
+	if err != nil {
+		return nil, domain.InternalError(err)
+	}
+	defer rows.Close()
+
+	result := make(map[uuid.UUID]domain.CompanyNameSlug, len(ids))
+	for rows.Next() {
+		var id uuid.UUID
+		var ns domain.CompanyNameSlug
+		if err := rows.Scan(&id, &ns.Name, &ns.Slug); err != nil {
+			return nil, domain.InternalError(err)
+		}
+		result[id] = ns
+	}
+	if err := rows.Err(); err != nil {
+		return nil, domain.InternalError(err)
+	}
+	return result, nil
 }
 
 // companySizeToString converts *CompanySize to *string for DB.

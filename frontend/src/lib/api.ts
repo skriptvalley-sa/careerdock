@@ -1,5 +1,6 @@
 // Centralised API client for the CareerDock backend.
 // All requests use credentials: 'include' for httpOnly cookie auth.
+// Includes automatic 401 → refresh → retry logic.
 
 import type { DataResponse, ErrorBody, PaginatedResponse } from '@/types/api';
 
@@ -22,9 +23,83 @@ export class ApiError extends Error {
   }
 }
 
+// --- Token refresh lock ---
+// Prevents concurrent refresh requests when multiple 401s arrive simultaneously.
+let refreshPromise: Promise<boolean> | null = null;
+
+/**
+ * Attempt to refresh the access token. Returns true if successful.
+ * Serialises concurrent calls so only one refresh request is in-flight at a time.
+ */
+async function refreshAccessToken(): Promise<boolean> {
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const resp = await fetch(`${API_BASE}/api/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      return resp.ok;
+    } catch {
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+// Paths that should never trigger auto-refresh (to avoid infinite loops).
+const NO_REFRESH_PATHS = ['/api/auth/refresh', '/api/auth/login', '/api/auth/register'];
+
+/**
+ * Core fetch wrapper with 401 auto-refresh. On a 401 response, it attempts
+ * one token refresh and retries the original request. If refresh fails, it
+ * clears auth state via the onAuthFailure callback and throws the original error.
+ */
+async function fetchWithAuth(
+  url: string,
+  init: RequestInit,
+  path: string,
+): Promise<Response> {
+  const resp = await fetch(url, { ...init, credentials: 'include' });
+
+  // If not a 401, or if this is an auth endpoint, return as-is
+  if (resp.status !== 401 || NO_REFRESH_PATHS.some((p) => path.startsWith(p))) {
+    return resp;
+  }
+
+  // Attempt refresh
+  const refreshed = await refreshAccessToken();
+  if (!refreshed) {
+    // Refresh failed — notify auth store to clear state
+    if (onAuthFailure) onAuthFailure();
+    return resp;
+  }
+
+  // Retry original request with fresh token
+  return fetch(url, { ...init, credentials: 'include' });
+}
+
+// --- Auth failure callback ---
+// Set by the AuthProvider to clear Zustand state when refresh fails.
+let onAuthFailure: (() => void) | null = null;
+
+/**
+ * Register a callback invoked when token refresh fails (session expired).
+ * Called from AuthProvider to wire up Zustand store clearing.
+ */
+export function setAuthFailureHandler(handler: () => void) {
+  onAuthFailure = handler;
+}
+
 /**
  * Core fetch wrapper. Handles JSON encoding/decoding, error mapping,
- * and httpOnly cookie credentials.
+ * and httpOnly cookie credentials with automatic 401 refresh/retry.
  */
 async function api<T>(
   path: string,
@@ -47,11 +122,7 @@ async function api<T>(
     headers['Content-Type'] = 'application/json';
   }
 
-  const resp = await fetch(url, {
-    ...init,
-    headers,
-    credentials: 'include',
-  });
+  const resp = await fetchWithAuth(url, { ...init, headers }, path);
 
   // 204 No Content
   if (resp.status === 204) {
@@ -93,11 +164,7 @@ async function apiRaw<T>(
     headers['Content-Type'] = 'application/json';
   }
 
-  const resp = await fetch(url, {
-    ...init,
-    headers,
-    credentials: 'include',
-  });
+  const resp = await fetchWithAuth(url, { ...init, headers }, path);
 
   const json = await resp.json();
 
@@ -131,8 +198,11 @@ export const apiClient = {
     });
   },
 
-  delete<T>(path: string): Promise<T> {
-    return api<T>(path, { method: 'DELETE' });
+  delete<T>(path: string, body?: unknown): Promise<T> {
+    return api<T>(path, {
+      method: 'DELETE',
+      body: body ? JSON.stringify(body) : undefined,
+    });
   },
 
   /** Fetch paginated response without unwrapping the data envelope. */

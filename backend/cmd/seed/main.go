@@ -98,6 +98,7 @@ type seedCompany struct {
 	CompensationTier  *string         `json:"compensation_tier,omitempty"`
 	HasRSU            bool            `json:"has_rsu"`
 	HasRSURefresher   bool            `json:"has_rsu_refresher"`
+	OfficeModes       []string        `json:"office_modes"`
 	CompensationBands json.RawMessage `json:"compensation_bands,omitempty"`
 }
 
@@ -121,6 +122,7 @@ func (s seedCompany) toDomain() domain.Company {
 		CompensationTier:  s.CompensationTier,
 		HasRSU:            s.HasRSU,
 		HasRSURefresher:   s.HasRSURefresher,
+		OfficeModes:       s.OfficeModes,
 		CompensationBands: s.CompensationBands,
 	}
 	if s.Size != nil {
@@ -132,6 +134,9 @@ func (s seedCompany) toDomain() domain.Company {
 	}
 	if c.Domains == nil {
 		c.Domains = []string{}
+	}
+	if c.OfficeModes == nil {
+		c.OfficeModes = []string{}
 	}
 	return c
 }

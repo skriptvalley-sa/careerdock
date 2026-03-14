@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"github.com/skriptvalley/careerdock/internal/domain"
 )
 
@@ -34,4 +36,16 @@ func (s *CompanyService) GetBySlug(ctx context.Context, slug string) (*domain.Co
 		return nil, domain.ValidationError("slug is required", nil)
 	}
 	return s.companies.GetBySlug(ctx, slug)
+}
+
+// GetNamesByIDs returns a map of company ID → name for a batch of IDs.
+// Used to enrich list entries with human-readable company names.
+func (s *CompanyService) GetNamesByIDs(ctx context.Context, ids []uuid.UUID) (map[uuid.UUID]string, error) {
+	return s.companies.GetNamesByIDs(ctx, ids)
+}
+
+// GetNameAndSlugsByIDs returns a map of company ID → {name, slug} for a batch of IDs.
+// Used to enrich list entries with both names and profile links.
+func (s *CompanyService) GetNameAndSlugsByIDs(ctx context.Context, ids []uuid.UUID) (map[uuid.UUID]domain.CompanyNameSlug, error) {
+	return s.companies.GetNameAndSlugsByIDs(ctx, ids)
 }

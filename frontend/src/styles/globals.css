@@ -1,1 +1,100 @@
 @import 'tailwindcss';
+
+/* ═══════════════════════════════════════════════════════
+   NEON DARK THEME — multi-color cyberpunk aesthetic
+   Primary:   Electric Cyan  (#00f0ff)
+   Secondary: Neon Magenta   (#ff00e5)
+   Tertiary:  Neon Green     (#39ff14)
+   ═══════════════════════════════════════════════════════ */
+
+@theme {
+  /* Base surfaces — deep space dark */
+  --color-surface: #06080f;
+  --color-card: #0a0e1a;
+  --color-overlay: #080b14;
+  --color-input: #0e1220;
+  --color-edge: rgba(0, 240, 255, 0.08);
+  --color-edge-input: rgba(0, 240, 255, 0.15);
+  --color-edge-hover: rgba(0, 240, 255, 0.25);
+  --color-accent: #00f0ff;
+
+  /* Neon palette */
+  --color-neon-cyan: #00f0ff;
+  --color-neon-magenta: #ff00e5;
+  --color-neon-green: #39ff14;
+  --color-neon-amber: #ffb800;
+}
+
+/* ── Custom scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080b14;
+}
+::-webkit-scrollbar-thumb {
+  background: #00f0ff33;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00f0ff55;
+}
+
+/* ── Focus ring ── */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* ── Neon glow utilities ── */
+.glow-cyan {
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.25), 0 0 4px rgba(0, 240, 255, 0.1);
+}
+.glow-magenta {
+  box-shadow: 0 0 12px rgba(255, 0, 229, 0.25), 0 0 4px rgba(255, 0, 229, 0.1);
+}
+.glow-green {
+  box-shadow: 0 0 12px rgba(57, 255, 20, 0.25), 0 0 4px rgba(57, 255, 20, 0.1);
+}
+.glow-amber {
+  box-shadow: 0 0 12px rgba(255, 184, 0, 0.25), 0 0 4px rgba(255, 184, 0, 0.1);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.5), 0 0 16px rgba(0, 240, 255, 0.2);
+}
+.text-glow-magenta {
+  text-shadow: 0 0 8px rgba(255, 0, 229, 0.5), 0 0 16px rgba(255, 0, 229, 0.2);
+}
+.text-glow-green {
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.5), 0 0 16px rgba(57, 255, 20, 0.2);
+}
+
+/* ── Neon gradient button ── */
+.btn-neon {
+  background: linear-gradient(135deg, #00f0ff, #6366f1, #a855f7);
+  color: white;
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+.btn-neon:hover {
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 40px rgba(99, 102, 241, 0.15);
+}
+.btn-neon:active {
+  transform: scale(0.98);
+}
+
+/* ── Neon card hover ── */
+.card-neon-hover {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.card-neon-hover:hover {
+  border-color: rgba(0, 240, 255, 0.2);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.06), inset 0 0 16px rgba(0, 240, 255, 0.02);
+}
+
+/* ── Neon link hover ── */
+a.neon-link:hover {
+  color: #00f0ff;
+  text-shadow: 0 0 6px rgba(0, 240, 255, 0.4);
+}

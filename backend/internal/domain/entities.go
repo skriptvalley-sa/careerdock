@@ -7,6 +7,12 @@ import (
 	"github.com/google/uuid"
 )
 
+// CompanyNameSlug holds a company's name and URL slug.
+type CompanyNameSlug struct {
+	Name string
+	Slug string
+}
+
 // User represents a registered user account.
 type User struct {
 	ID            uuid.UUID  `json:"id"`
@@ -57,6 +63,7 @@ type Company struct {
 	CompensationTier  *string         `json:"compensation_tier,omitempty"`
 	HasRSU            bool            `json:"has_rsu"`
 	HasRSURefresher   bool            `json:"has_rsu_refresher"`
+	OfficeModes       []string        `json:"office_modes"`
 	CompensationBands json.RawMessage `json:"compensation_bands,omitempty"`
 	LastVerifiedAt    *time.Time      `json:"last_verified_at,omitempty"`
 	CreatedAt         time.Time       `json:"created_at"`
@@ -87,18 +94,43 @@ type UserList struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-// ListEntry is a company + role pair within a list, with application tracking.
+// ListEntry tracks a company within a list with an overall company status.
+// Optionally carries inline application details (role, app status, date).
 type ListEntry struct {
-	ID          uuid.UUID         `json:"id"`
-	ListID      uuid.UUID         `json:"list_id"`
-	CompanyID   uuid.UUID         `json:"company_id"`
-	RoleTitle   string            `json:"role_title"`
-	Status      ApplicationStatus `json:"status"`
-	DateApplied *time.Time        `json:"date_applied,omitempty"`
-	Notes       *string           `json:"notes,omitempty"`
-	Position    int               `json:"position"`
-	CreatedAt   time.Time         `json:"created_at"`
-	UpdatedAt   time.Time         `json:"updated_at"`
+	ID            uuid.UUID             `json:"id"`
+	ListID        uuid.UUID             `json:"list_id"`
+	CompanyID     uuid.UUID             `json:"company_id"`
+	CompanyStatus CompanyTrackingStatus `json:"company_status"`
+	RoleTitle     *string               `json:"role_title,omitempty"`
+	Status        ApplicationStatus     `json:"status"`
+	DateApplied   *time.Time            `json:"date_applied,omitempty"`
+	Notes         *string               `json:"notes,omitempty"`
+	Position      int                   `json:"position"`
+	CreatedAt     time.Time             `json:"created_at"`
+	UpdatedAt     time.Time             `json:"updated_at"`
+}
+
+// ListEntryWithList extends ListEntry with the parent list's name.
+// Used when fetching entries across multiple lists (e.g., by company).
+type ListEntryWithList struct {
+	ListEntry
+	ListName string `json:"list_name"`
+}
+
+// ListEntryFull extends ListEntry with both list name and company name.
+// Used in the cross-list "all applications" view.
+type ListEntryFull struct {
+	ListEntry
+	ListName    string `json:"list_name"`
+	CompanyName string `json:"company_name"`
+}
+
+// ListCompanyFlag holds a list with a boolean indicating whether it
+// contains a specific company. Used for the quick-add-to-list modal.
+type ListCompanyFlag struct {
+	ListID          uuid.UUID `json:"list_id"`
+	Name            string    `json:"name"`
+	ContainsCompany bool      `json:"contains_company"`
 }
 
 // StatusHistory tracks every application status change.

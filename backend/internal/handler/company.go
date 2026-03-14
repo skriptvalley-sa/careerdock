@@ -41,6 +41,7 @@ type companyListItem struct {
 	CompensationTier *string  `json:"compensation_tier,omitempty"`
 	HasRSU           bool     `json:"has_rsu"`
 	HasRSURefresher  bool     `json:"has_rsu_refresher"`
+	OfficeModes      []string `json:"office_modes"`
 	UpdatedAt        string   `json:"updated_at"`
 }
 
@@ -58,6 +59,7 @@ func toCompanyListItem(c domain.Company) companyListItem {
 		CompensationTier: c.CompensationTier,
 		HasRSU:           c.HasRSU,
 		HasRSURefresher:  c.HasRSURefresher,
+		OfficeModes:      c.OfficeModes,
 		UpdatedAt:        c.UpdatedAt.Format(time.RFC3339),
 	}
 	if c.Size != nil {
@@ -69,6 +71,9 @@ func toCompanyListItem(c domain.Company) companyListItem {
 	}
 	if item.Domains == nil {
 		item.Domains = []string{}
+	}
+	if item.OfficeModes == nil {
+		item.OfficeModes = []string{}
 	}
 	return item
 }
@@ -94,6 +99,7 @@ type companyDetailResponse struct {
 	CompensationTier  *string  `json:"compensation_tier,omitempty"`
 	HasRSU            bool     `json:"has_rsu"`
 	HasRSURefresher   bool     `json:"has_rsu_refresher"`
+	OfficeModes       []string `json:"office_modes"`
 	CompensationBands any      `json:"compensation_bands,omitempty"`
 	LastVerifiedAt    *string  `json:"last_verified_at,omitempty"`
 	CreatedAt         string   `json:"created_at"`
@@ -119,6 +125,7 @@ func toCompanyDetailResponse(c *domain.Company) companyDetailResponse {
 		CompensationTier: c.CompensationTier,
 		HasRSU:           c.HasRSU,
 		HasRSURefresher:  c.HasRSURefresher,
+		OfficeModes:      c.OfficeModes,
 		CreatedAt:        c.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:        c.UpdatedAt.Format(time.RFC3339),
 	}
@@ -132,6 +139,9 @@ func toCompanyDetailResponse(c *domain.Company) companyDetailResponse {
 	}
 	if resp.Domains == nil {
 		resp.Domains = []string{}
+	}
+	if resp.OfficeModes == nil {
+		resp.OfficeModes = []string{}
 	}
 	if c.LastVerifiedAt != nil {
 		s := c.LastVerifiedAt.Format(time.RFC3339)

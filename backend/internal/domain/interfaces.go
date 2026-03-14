@@ -24,6 +24,8 @@ type CompanyRepository interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*Company, error)
 	GetBySlug(ctx context.Context, slug string) (*Company, error)
 	Search(ctx context.Context, query string, filter CompanyFilter) ([]Company, string, error)
+	GetNamesByIDs(ctx context.Context, ids []uuid.UUID) (map[uuid.UUID]string, error)
+	GetNameAndSlugsByIDs(ctx context.Context, ids []uuid.UUID) (map[uuid.UUID]CompanyNameSlug, error)
 	Create(ctx context.Context, company *Company) error
 	Update(ctx context.Context, company *Company) error
 }
@@ -49,8 +51,21 @@ type ListRepository interface {
 	CreateEntry(ctx context.Context, entry *ListEntry) error
 	GetEntryByID(ctx context.Context, id uuid.UUID) (*ListEntry, error)
 	ListEntries(ctx context.Context, listID uuid.UUID) ([]ListEntry, error)
+	ListEntriesByCompanyID(ctx context.Context, userID, companyID uuid.UUID) ([]ListEntryWithList, error)
+	ListAllEntries(ctx context.Context, userID uuid.UUID, statusFilter *ApplicationStatus, excludeNotApplied bool) ([]ListEntryFull, error)
+	ListsWithCompanyFlag(ctx context.Context, userID, companyID uuid.UUID) ([]ListCompanyFlag, error)
+	CompanyListCounts(ctx context.Context, userID uuid.UUID) (map[uuid.UUID]int, error)
 	UpdateEntry(ctx context.Context, entry *ListEntry) error
 	DeleteEntry(ctx context.Context, id uuid.UUID) error
+	DeleteEntryByCompany(ctx context.Context, listID, companyID uuid.UUID) error
+
+	CreateStatusHistory(ctx context.Context, h *StatusHistory) error
+	ListStatusHistory(ctx context.Context, entryID uuid.UUID) ([]StatusHistory, error)
+
+	CreateInterviewRound(ctx context.Context, round *InterviewRound) error
+	GetInterviewRoundByID(ctx context.Context, id uuid.UUID) (*InterviewRound, error)
+	UpdateInterviewRound(ctx context.Context, round *InterviewRound) error
+	DeleteInterviewRound(ctx context.Context, id uuid.UUID) error
 }
 
 // ATSCheckRepository defines data access for ATS check results.

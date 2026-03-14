@@ -53,6 +53,7 @@ export interface CompanyListItem {
   compensation_tier: string | null;
   has_rsu: boolean;
   has_rsu_refresher: boolean;
+  office_modes: string[];
   updated_at: string;
 }
 
@@ -81,4 +82,91 @@ export interface CompanyFilterParams {
   order?: string;
   cursor?: string;
   limit?: string;
+}
+
+// --- Lists & Tracking (Sprint 2) ---
+
+export type ApplicationStatus =
+  | 'not_applied'
+  | 'applied'
+  | 'phone_screen'
+  | 'interview'
+  | 'offer'
+  | 'rejected'
+  | 'accepted'
+  | 'withdrawn';
+
+export type CompanyTrackingStatus =
+  | 'marked'
+  | 'researching'
+  | 'applied'
+  | 'interviewing'
+  | 'offered'
+  | 'accepted'
+  | 'rejected';
+
+export interface UserList {
+  id: string;
+  name: string;
+  description: string | null;
+  position: number;
+  entry_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListEntry {
+  id: string;
+  list_id: string;
+  company_id: string;
+  company_name: string;
+  company_slug?: string;
+  company_status: CompanyTrackingStatus;
+  role_title: string | null;
+  status: ApplicationStatus;
+  date_applied: string | null;
+  notes: string | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListDetail extends UserList {
+  entries: ListEntry[];
+}
+
+export interface StatusHistoryItem {
+  id: string;
+  from_status: string | null;
+  to_status: string;
+  changed_at: string;
+}
+
+export interface InterviewRound {
+  id: string;
+  round_number: number;
+  round_type: string;
+  scheduled_date: string | null;
+  outcome: 'passed' | 'failed' | 'pending';
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListCompanyFlag {
+  list_id: string;
+  name: string;
+  contains_company: boolean;
+}
+
+export interface DashboardCounts {
+  not_applied: number;
+  applied: number;
+  phone_screen: number;
+  interview: number;
+  offer: number;
+  rejected: number;
+  accepted: number;
+  withdrawn: number;
+  total: number;
 }
