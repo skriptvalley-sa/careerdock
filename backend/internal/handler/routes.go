@@ -9,6 +9,8 @@ import (
 
 // MountRoutes wires all HTTP routes onto the given router.
 // This is the single place that maps URLs → handlers.
+//
+//nolint:revive // function is necessarily long — it's the route table
 func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 	r.Route("/api", func(r chi.Router) {
 		// --- Health ---
@@ -88,7 +90,19 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 			sseH := NewSSEHandler()
 			r.Get("/events", sseH.Events)
 
-			// TODO (Sprint 3): Payment routes, Resume routes
+			// --- Payments (Sprint 3) ---
+			paymentH := NewPaymentHandler(svc.Payment, svc.Credit, svc.RazorpayKeyID)
+			r.Route("/payments", func(r chi.Router) {
+				r.Post("/orders", paymentH.CreateOrder)
+				r.Get("/", paymentH.ListPayments)
+			})
+
+			// --- Credits (Sprint 3) ---
+			r.Route("/credits", func(r chi.Router) {
+				r.Get("/", paymentH.GetCredits)
+				r.Get("/transactions", paymentH.GetCreditTransactions)
+			})
+
 			// TODO (Sprint 4): ATS routes, Curated list routes
 
 			// --- Premium routes ---
@@ -120,7 +134,11 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 			r.Get("/{slug}", companyH.GetCompany)
 		})
 
-		// --- Webhooks ---
-		// TODO (Sprint 3): Razorpay webhook
+		// --- Webhooks (no auth — signature-verified) ---
+		paymentH := NewPaymentHandler(svc.Payment, svc.Credit, svc.RazorpayKeyID)
+		r.Route("/webhooks", func(r chi.Router) {
+			r.With(middleware.VerifyRazorpayWebhook(svc.VerifyWebhookSignature)).
+				Post("/razorpay", paymentH.HandleWebhook)
+		})
 	})
 }

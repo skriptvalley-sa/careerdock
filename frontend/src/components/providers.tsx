@@ -38,14 +38,25 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-/** Register the service worker for offline company directory support. */
+/** Register the service worker for offline company directory support.
+ *  Disabled in development to prevent stale asset caching on public dev deployments. */
 function useServiceWorker() {
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {
-        // SW registration failed — offline caching unavailable, non-critical
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+
+    if (process.env.NODE_ENV === 'development') {
+      // Unregister any existing SW in dev mode to avoid stale caching
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const reg of registrations) {
+          reg.unregister();
+        }
       });
+      return;
     }
+
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // SW registration failed — offline caching unavailable, non-critical
+    });
   }, []);
 }
 

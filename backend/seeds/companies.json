@@ -1973,5 +1973,849 @@
     "office_modes": [
       "hybrid"
     ]
+  },
+  {
+    "slug": "fiserv",
+    "name": "Fiserv",
+    "description": "Global fintech and payments company with major India engineering teams working on merchant acquiring, core banking, and digital payments infrastructure.",
+    "size": "enterprise",
+    "headquarters": "Noida, Uttar Pradesh",
+    "founded_year": 1984,
+    "careers_page_url": "https://www.careers.fiserv.com/us/en",
+    "linkedin_url": "https://linkedin.com/company/fiserv",
+    "tech_stack": [
+      "Java",
+      "Spring Boot",
+      "React",
+      "Angular",
+      "Kafka",
+      "Kubernetes",
+      "AWS"
+    ],
+    "domains": [
+      "FinTech",
+      "Payments",
+      "Core Banking",
+      "Merchant Solutions"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_3",
+    "has_rsu": false,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
+  },
+  {
+    "slug": "citi",
+    "name": "Citi",
+    "description": "Global banking and financial services company with large technology centres in India building payments, risk, trading, and consumer banking platforms.",
+    "size": "enterprise",
+    "headquarters": "Pune, Maharashtra",
+    "founded_year": 1902,
+    "careers_page_url": "https://jobs.citi.com/",
+    "linkedin_url": "https://linkedin.com/company/citi",
+    "tech_stack": [
+      "Java",
+      "Spring Boot",
+      "Python",
+      "React",
+      "Angular",
+      "Oracle",
+      "Kafka"
+    ],
+    "domains": [
+      "Banking",
+      "FinTech",
+      "Capital Markets",
+      "Risk"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_3",
+    "has_rsu": false,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
+  },
+  {
+    "slug": "barclays",
+    "name": "Barclays",
+    "description": "Universal bank with a major India technology hub supporting digital banking, cards, fraud systems, and investment banking platforms.",
+    "size": "enterprise",
+    "headquarters": "Pune, Maharashtra",
+    "founded_year": 2007,
+    "careers_page_url": "https://search.jobs.barclays/",
+    "linkedin_url": "https://linkedin.com/company/barclays-bank",
+    "tech_stack": [
+      "Java",
+      "Spring Boot",
+      "React",
+      "Angular",
+      "Python",
+      "AWS",
+      "Kubernetes"
+    ],
+    "domains": [
+      "Banking",
+      "Cards",
+      "Investment Banking",
+      "Risk"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_3",
+    "has_rsu": false,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
+  },
+  {
+    "slug": "nutanix",
+    "name": "Nutanix",
+    "description": "Cloud infrastructure company with strong India engineering presence building hyperconverged infrastructure, virtualization, and Kubernetes management products.",
+    "size": "large",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 2009,
+    "careers_page_url": "https://www.nutanix.com/company/careers",
+    "linkedin_url": "https://linkedin.com/company/nutanix",
+    "tech_stack": [
+      "Go",
+      "Python",
+      "Java",
+      "React",
+      "Kubernetes",
+      "gRPC",
+      "AWS"
+    ],
+    "domains": [
+      "Cloud Infrastructure",
+      "Enterprise Software",
+      "Virtualization",
+      "Kubernetes"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_1",
+    "has_rsu": true,
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "tomtom",
+    "name": "TomTom",
+    "description": "Location technology company with India engineering teams focused on maps, navigation APIs, automotive software, and geospatial platforms.",
+    "size": "large",
+    "headquarters": "Pune, Maharashtra",
+    "founded_year": 1991,
+    "careers_page_url": "https://www.tomtom.com/careers/",
+    "linkedin_url": "https://linkedin.com/company/tomtom",
+    "tech_stack": [
+      "C++",
+      "Java",
+      "Kotlin",
+      "React",
+      "Node.js",
+      "AWS",
+      "GIS"
+    ],
+    "domains": [
+      "Maps",
+      "Navigation",
+      "Automotive",
+      "Geospatial"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_3",
+    "has_rsu": false,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "syngenta",
+    "name": "Syngenta",
+    "description": "Agritech and life sciences company with a digital hub in India building software for crop science, supply chain, and farm intelligence platforms.",
+    "size": "enterprise",
+    "headquarters": "Pune, Maharashtra",
+    "founded_year": 2000,
+    "careers_page_url": "https://jobs.syngenta.com/",
+    "linkedin_url": "https://linkedin.com/company/syngenta",
+    "tech_stack": [
+      "Java",
+      "Python",
+      "React",
+      "TypeScript",
+      "AWS",
+      "Snowflake",
+      "Kubernetes"
+    ],
+    "domains": [
+      "AgriTech",
+      "Supply Chain",
+      "Data Platforms",
+      "Sustainability"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_3",
+    "has_rsu": false,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "pubmatic",
+    "name": "PubMatic",
+    "description": "Programmatic advertising platform with core engineering in Pune building real-time bidding, publisher monetization, and ad infrastructure systems.",
+    "size": "large",
+    "headquarters": "Pune, Maharashtra",
+    "founded_year": 2006,
+    "careers_page_url": "https://pubmatic.com/careers/",
+    "linkedin_url": "https://linkedin.com/company/pubmatic",
+    "tech_stack": [
+      "Java",
+      "Go",
+      "Python",
+      "React",
+      "Kafka",
+      "Hadoop",
+      "MySQL"
+    ],
+    "domains": [
+      "AdTech",
+      "Programmatic Advertising",
+      "Publisher Monetization",
+      "Analytics"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_2",
+    "has_rsu": true,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "intuit",
+    "name": "Intuit",
+    "description": "Financial software company with a major Bangalore engineering centre building products across tax, accounting, credit, and personal finance.",
+    "size": "enterprise",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 1983,
+    "careers_page_url": "https://www.intuit.com/careers/",
+    "linkedin_url": "https://linkedin.com/company/intuit",
+    "tech_stack": [
+      "Java",
+      "Kotlin",
+      "React",
+      "TypeScript",
+      "Python",
+      "AWS",
+      "Kubernetes"
+    ],
+    "domains": [
+      "FinTech",
+      "Tax Software",
+      "Accounting",
+      "Personal Finance"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_1",
+    "has_rsu": true,
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "expedia-group",
+    "name": "Expedia Group",
+    "description": "Travel technology company with strong India engineering teams building booking, pricing, marketplace, and traveler experience systems.",
+    "size": "large",
+    "headquarters": "Gurgaon, Haryana",
+    "founded_year": 1996,
+    "careers_page_url": "https://careers.expediagroup.com/jobs/",
+    "linkedin_url": "https://linkedin.com/company/expedia-group",
+    "tech_stack": [
+      "Java",
+      "Kotlin",
+      "React",
+      "TypeScript",
+      "GraphQL",
+      "AWS",
+      "Kafka"
+    ],
+    "domains": [
+      "Travel Tech",
+      "E-commerce",
+      "Marketplaces",
+      "Consumer Internet"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_2",
+    "has_rsu": true,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "walmart-global-tech",
+    "name": "Walmart Global Tech",
+    "description": "Technology arm of Walmart with one of the largest India product engineering teams, building retail, marketplace, data, and supply chain platforms.",
+    "size": "enterprise",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 1962,
+    "careers_page_url": "https://careers.walmart.com/us/en/home/careers-areas/technology",
+    "linkedin_url": "https://linkedin.com/company/walmart-global-tech-india",
+    "tech_stack": [
+      "Java",
+      "React",
+      "Node.js",
+      "Python",
+      "Kotlin",
+      "Kafka",
+      "Kubernetes"
+    ],
+    "domains": [
+      "Retail Tech",
+      "Supply Chain",
+      "E-commerce",
+      "Data Platforms"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_2",
+    "has_rsu": true,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "akamai",
+    "name": "Akamai",
+    "description": "Cloud delivery and security company with India engineering presence across edge computing, web performance, and application security products.",
+    "size": "enterprise",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 1998,
+    "careers_page_url": "https://www.akamai.com/careers",
+    "linkedin_url": "https://linkedin.com/company/akamai-technologies",
+    "tech_stack": [
+      "Go",
+      "Java",
+      "Python",
+      "TypeScript",
+      "Kubernetes",
+      "Linux",
+      "Terraform"
+    ],
+    "domains": [
+      "CDN",
+      "Cloud Security",
+      "Edge Computing",
+      "Performance"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_2",
+    "has_rsu": true,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
+  },
+  {
+    "slug": "twilio",
+    "name": "Twilio",
+    "description": "Communications platform company with India teams building messaging, voice, email, and customer engagement infrastructure.",
+    "size": "large",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 2008,
+    "careers_page_url": "https://jobs.twilio.com/careers",
+    "linkedin_url": "https://linkedin.com/company/twilio-inc-",
+    "tech_stack": [
+      "Java",
+      "Go",
+      "Python",
+      "React",
+      "Kafka",
+      "AWS",
+      "Terraform"
+    ],
+    "domains": [
+      "CPaaS",
+      "Messaging",
+      "Customer Engagement",
+      "Communications APIs"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_1",
+    "has_rsu": true,
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "remote",
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "paypal",
+    "name": "PayPal",
+    "description": "Global payments company with major India technology centres building checkout, risk, merchant, and consumer money movement products.",
+    "size": "enterprise",
+    "headquarters": "Chennai, Tamil Nadu",
+    "founded_year": 1998,
+    "careers_page_url": "https://careers.pypl.com/home/",
+    "linkedin_url": "https://linkedin.com/company/paypal",
+    "tech_stack": [
+      "Java",
+      "React",
+      "Node.js",
+      "Python",
+      "Kotlin",
+      "Kafka",
+      "AWS"
+    ],
+    "domains": [
+      "FinTech",
+      "Payments",
+      "Risk",
+      "Commerce"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_1",
+    "has_rsu": true,
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "netapp",
+    "name": "NetApp",
+    "description": "Enterprise data infrastructure company with large India engineering teams working on cloud storage, data management, and hybrid infrastructure.",
+    "size": "enterprise",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 1992,
+    "careers_page_url": "https://www.netapp.com/company/careers/",
+    "linkedin_url": "https://linkedin.com/company/netapp",
+    "tech_stack": [
+      "Go",
+      "Java",
+      "Python",
+      "React",
+      "Kubernetes",
+      "AWS",
+      "Ansible"
+    ],
+    "domains": [
+      "Cloud Storage",
+      "Data Management",
+      "Infrastructure",
+      "Security"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_2",
+    "has_rsu": true,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "rubrik",
+    "name": "Rubrik",
+    "description": "Cloud data protection and cybersecurity company with strong Bangalore engineering presence across backup, ransomware recovery, and SaaS security.",
+    "size": "large",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 2014,
+    "careers_page_url": "https://www.rubrik.com/company/careers",
+    "linkedin_url": "https://linkedin.com/company/rubrik-inc",
+    "tech_stack": [
+      "Go",
+      "Java",
+      "Python",
+      "React",
+      "Kubernetes",
+      "GraphQL",
+      "AWS"
+    ],
+    "domains": [
+      "Cybersecurity",
+      "Data Protection",
+      "Cloud Backup",
+      "SaaS"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_1",
+    "has_rsu": true,
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "juniper-networks",
+    "name": "Juniper Networks",
+    "description": "Networking and cloud infrastructure company with India engineering teams building routing, switching, security, and AI-ops products.",
+    "size": "enterprise",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 1996,
+    "careers_page_url": "https://careers.hpe.com/juniper",
+    "linkedin_url": "https://linkedin.com/company/juniper-networks",
+    "tech_stack": [
+      "C++",
+      "Python",
+      "Go",
+      "React",
+      "Linux",
+      "Kubernetes",
+      "Ansible"
+    ],
+    "domains": [
+      "Networking",
+      "Cloud Infrastructure",
+      "Security",
+      "AI Ops"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_2",
+    "has_rsu": true,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
+  },
+  {
+    "slug": "linkedin",
+    "name": "LinkedIn",
+    "description": "Professional network and developer platform with a large Bangalore engineering base building feed, search, ads, and AI-powered products.",
+    "size": "large",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 2002,
+    "careers_page_url": "https://careers.linkedin.com/",
+    "linkedin_url": "https://linkedin.com/company/linkedin",
+    "tech_stack": [
+      "Java",
+      "Scala",
+      "React",
+      "Kafka",
+      "Hadoop",
+      "Pinot",
+      "Rest.li"
+    ],
+    "domains": [
+      "Professional Networking",
+      "Ads",
+      "Creator Tools",
+      "AI/ML"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_1",
+    "has_rsu": true,
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "servicenow",
+    "name": "ServiceNow",
+    "description": "Enterprise workflow software company with India engineering teams building ITSM, platform automation, and AI-assisted workflow products.",
+    "size": "enterprise",
+    "headquarters": "Hyderabad, Telangana",
+    "founded_year": 2004,
+    "careers_page_url": "https://careers.servicenow.com/",
+    "linkedin_url": "https://linkedin.com/company/servicenow",
+    "tech_stack": [
+      "Java",
+      "JavaScript",
+      "React",
+      "TypeScript",
+      "Kubernetes",
+      "MySQL",
+      "Elastic"
+    ],
+    "domains": [
+      "Workflow Automation",
+      "Enterprise Software",
+      "ITSM",
+      "AI"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_1",
+    "has_rsu": true,
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "athenahealth",
+    "name": "athenahealth",
+    "description": "Health technology company with India product teams building cloud software for electronic health records, billing, and provider workflows.",
+    "size": "large",
+    "headquarters": "Chennai, Tamil Nadu",
+    "founded_year": 1997,
+    "careers_page_url": "https://www.athenahealth.com/careers",
+    "linkedin_url": "https://linkedin.com/company/athenahealth",
+    "tech_stack": [
+      "Java",
+      "Python",
+      "React",
+      "Node.js",
+      "AWS",
+      "PostgreSQL",
+      "Kubernetes"
+    ],
+    "domains": [
+      "HealthTech",
+      "EHR",
+      "Revenue Cycle",
+      "SaaS"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_3",
+    "has_rsu": false,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "wells-fargo",
+    "name": "Wells Fargo",
+    "description": "Global financial services firm with large India engineering centres building payments, fraud, risk, and consumer banking systems.",
+    "size": "enterprise",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 2006,
+    "careers_page_url": "https://www.wellsfargojobs.com/",
+    "linkedin_url": "https://linkedin.com/company/wells-fargo",
+    "tech_stack": [
+      "Java",
+      "Spring Boot",
+      "Angular",
+      "React",
+      "Python",
+      "Oracle",
+      "Kubernetes"
+    ],
+    "domains": [
+      "Banking",
+      "FinTech",
+      "Risk",
+      "Data Platforms"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_3",
+    "has_rsu": false,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
+  },
+  {
+    "slug": "cloudera",
+    "name": "Cloudera",
+    "description": "Enterprise data platform company with India engineering teams working on analytics, data warehousing, machine learning, and hybrid cloud tooling.",
+    "size": "large",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 2008,
+    "careers_page_url": "https://www.cloudera.com/careers.html",
+    "linkedin_url": "https://linkedin.com/company/cloudera",
+    "tech_stack": [
+      "Java",
+      "C++",
+      "Python",
+      "Scala",
+      "Kubernetes",
+      "Hadoop",
+      "Kafka"
+    ],
+    "domains": [
+      "Data Platforms",
+      "Analytics",
+      "AI/ML",
+      "Cloud"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_2",
+    "has_rsu": false,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "remote",
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "okta",
+    "name": "Okta",
+    "description": "Identity and access management company with India engineering teams building authentication, authorization, and workforce identity products.",
+    "size": "large",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 2009,
+    "careers_page_url": "https://www.okta.com/company/careers/",
+    "linkedin_url": "https://linkedin.com/company/okta-inc-",
+    "tech_stack": [
+      "Go",
+      "Java",
+      "Kotlin",
+      "React",
+      "TypeScript",
+      "Kubernetes",
+      "AWS"
+    ],
+    "domains": [
+      "Identity",
+      "Access Management",
+      "Security",
+      "SaaS"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_1",
+    "has_rsu": true,
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "hybrid",
+      "remote"
+    ]
+  },
+  {
+    "slug": "american-express",
+    "name": "American Express",
+    "description": "Global payments and financial services company with a large Gurgaon technology centre building card, rewards, fraud, and payments platforms.",
+    "size": "enterprise",
+    "headquarters": "Gurgaon, Haryana",
+    "founded_year": 1921,
+    "careers_page_url": "https://www.americanexpress.com/en-us/careers/",
+    "linkedin_url": "https://linkedin.com/company/american-express",
+    "tech_stack": [
+      "Java",
+      "Python",
+      "React",
+      "TypeScript",
+      "Kafka",
+      "Kubernetes",
+      "AWS"
+    ],
+    "domains": [
+      "Payments",
+      "Banking",
+      "Risk",
+      "Rewards"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_2",
+    "has_rsu": false,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid",
+      "onsite"
+    ]
+  },
+  {
+    "slug": "airbnb",
+    "name": "Airbnb",
+    "description": "Travel marketplace company with India-facing remote engineering opportunities across booking, trust and safety, payments, and consumer product systems.",
+    "size": "large",
+    "headquarters": "Remote, India",
+    "founded_year": 2008,
+    "careers_page_url": "https://careers.airbnb.com/",
+    "linkedin_url": "https://linkedin.com/company/airbnb",
+    "tech_stack": [
+      "Java",
+      "Kotlin",
+      "React",
+      "TypeScript",
+      "GraphQL",
+      "Kubernetes",
+      "AWS"
+    ],
+    "domains": [
+      "Travel Tech",
+      "Marketplaces",
+      "Trust & Safety",
+      "Payments"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_1",
+    "has_rsu": true,
+    "has_rsu_refresher": true,
+    "office_modes": [
+      "remote",
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "cloudflare",
+    "name": "Cloudflare",
+    "description": "Connectivity cloud and internet infrastructure company building products across CDN, zero trust, networking, security, and developer platform systems with globally distributed teams.",
+    "size": "large",
+    "headquarters": "Remote, India",
+    "founded_year": 2009,
+    "careers_page_url": "https://www.cloudflare.com/careers/",
+    "linkedin_url": "https://linkedin.com/company/cloudflare",
+    "tech_stack": [
+      "Go",
+      "Rust",
+      "JavaScript",
+      "TypeScript",
+      "Kubernetes",
+      "Linux",
+      "Cloudflare Workers"
+    ],
+    "domains": [
+      "CDN",
+      "Security",
+      "Networking",
+      "Developer Platform"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_1",
+    "has_rsu": true,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "remote",
+      "hybrid"
+    ]
+  },
+  {
+    "slug": "ebay",
+    "name": "eBay",
+    "description": "Global commerce marketplace company with India engineering presence building buyer, seller, trust, search, and large-scale marketplace platform systems.",
+    "size": "large",
+    "headquarters": "Bangalore, Karnataka",
+    "founded_year": 1995,
+    "careers_page_url": "https://jobs.ebayinc.com/us/en",
+    "linkedin_url": "https://linkedin.com/company/ebay",
+    "tech_stack": [
+      "Java",
+      "Python",
+      "React",
+      "TypeScript",
+      "Kafka",
+      "Kubernetes",
+      "AWS"
+    ],
+    "domains": [
+      "E-commerce",
+      "Marketplaces",
+      "Trust & Safety",
+      "Search"
+    ],
+    "hiring_status": "active",
+    "compensation_tier": "tier_2",
+    "has_rsu": true,
+    "has_rsu_refresher": false,
+    "office_modes": [
+      "hybrid"
+    ]
   }
 ]

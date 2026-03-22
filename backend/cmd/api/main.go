@@ -27,6 +27,7 @@ import (
 	"github.com/skriptvalley/careerdock/internal/config"
 	"github.com/skriptvalley/careerdock/internal/handler"
 	"github.com/skriptvalley/careerdock/internal/middleware"
+	"github.com/skriptvalley/careerdock/internal/payment"
 	"github.com/skriptvalley/careerdock/internal/repository"
 	"github.com/skriptvalley/careerdock/internal/service"
 )
@@ -77,6 +78,8 @@ func main() {
 	companyRepo := repository.NewCompanyRepo(db)
 	listRepo := repository.NewListRepo(db)
 	featureFlagRepo := repository.NewFeatureFlagRepo(db)
+	paymentRepo := repository.NewPaymentRepo(db)
+	creditRepo := repository.NewCreditRepo(db)
 
 	// 5. Build service layer
 	authSvc := service.NewAuthService(userRepo, tokenRepo, txr, redisClient, cfg.JWTSecret)
@@ -84,7 +87,10 @@ func main() {
 	listSvc := service.NewListService(listRepo, userRepo, txr)
 	userSvc := service.NewUserService(userRepo, txr)
 	featureFlagSvc := service.NewFeatureFlagService(featureFlagRepo)
-	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, db, redisClient, version, cfg.IsProduction())
+	razorpayGateway := payment.NewRazorpayGateway(cfg.RazorpayKeyID, cfg.RazorpayKeySecret, cfg.RazorpayWebhookSecret)
+	paymentSvc := service.NewPaymentService(paymentRepo, creditRepo, userRepo, razorpayGateway, txr)
+	creditSvc := service.NewCreditService(creditRepo, txr)
+	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, paymentSvc, creditSvc, db, redisClient, version, cfg.IsProduction(), cfg.RazorpayKeyID, razorpayGateway.VerifyWebhookSignature)
 
 	// 6. Build handler layer + mount routes
 	r := chi.NewRouter()

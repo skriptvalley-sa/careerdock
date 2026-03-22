@@ -1,8 +1,8 @@
 # Feedback Status Tracker
 
-> Sources: `ai/feedback/session_01.md`, `ai/feedback/session_02.md`, `ai/feedback/session_03.md`, `ai/feedback/session_04.md`
-> Branch: `feature/sprint-2-lists-tracking`
-> Last updated: 2026-03-14 (Session 01 Batch 1–6 complete, Session 02 Batch 1–7 complete, Session 03 Batch 1–6 complete, Session 04 Batch 1–8 complete)
+> Sources: `ai/feedback/session_01.md` – `ai/feedback/session_05.md`
+> Branch: `feature/sprint-3-payments`
+> Last updated: 2026-03-22 (Session 01–04 complete, Session 05 complete)
 
 ## Legend
 
@@ -231,3 +231,40 @@ Lists are company curation tools, not application containers. Companies are the 
 | 6 | S4-UX-01 — Applications page company filter | `[x]` |
 | 7 | S4-UX-04 — Header fixed during fast scroll | `[x]` |
 | 8 | Bookkeeping — Final FEEDBACK-STATUS update | `[x]` |
+
+---
+
+## Session 05 Feedback
+
+> Source: `ai/feedback/session_05.md`
+> Context: First live VPS deployment on Hostinger behind Nginx
+
+### Deployment / Infrastructure
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| S5-INFRA-01 | dev.sh: bootstrap PATH for go and air | `[x]` | Adds `/usr/local/go/bin`, `$HOME/go/bin`, `$HOME/.local/bin` to PATH. Validates go + air before starting backend. Fails fast with actionable error. |
+| S5-INFRA-02 | Sync frontend env from root .env | `[x]` | `sync_frontend_env()` extracts `NEXT_PUBLIC_*` vars from root `.env` into `frontend/.env.local`. Called on setup, start, and restart. |
+| S5-INFRA-03 | Fix frontend restart / process cleanup | `[x]` | `launch_component` uses `setsid` for process groups (Linux). `graceful_stop` kills process group + orphan children. `_cleanup_port` kills stale port holders before restart. |
+| S5-INFRA-04 | Allow public dev hostname in Next.js config | `[x]` | Added `careerdock.skriptvalley.com` to `allowedDevOrigins` in `next.config.ts`. |
+| S5-INFRA-05 | VPS-safe Docker Compose override | `[x]` | `docker-compose.vps.yml` binds Postgres, Redis, MinIO, Mailhog to `127.0.0.1` only. |
+| S5-INFRA-06 | VPS deployment documentation | `[x]` | `docs/VPS-DEPLOYMENT.md`: architecture diagram, Nginx config, env split table, setup steps, troubleshooting. |
+
+### Implementation Issues
+
+| ID | Task | Status | Notes |
+|----|------|--------|-------|
+| S5-IMPL-01 | Disable service worker in dev mode | `[x]` | `useServiceWorker()` in `providers.tsx` now checks `process.env.NODE_ENV`. Dev mode: unregisters existing SWs. Production: registers normally. |
+| S5-IMPL-02 | Reduce stale-client failure modes | `[x]` | Addressed by combining: correct env sync (S5-INFRA-02), reliable process cleanup (S5-INFRA-03), and dev-only SW gating (S5-IMPL-01). |
+
+### Session 05 Implementation Order
+
+| Batch | Items | Status |
+|-------|-------|--------|
+| 1 | S5-INFRA-01 — PATH bootstrapping + validation | `[x]` |
+| 2 | S5-INFRA-02 — Frontend env sync | `[x]` |
+| 3 | S5-INFRA-03 — Process group cleanup | `[x]` |
+| 4 | S5-INFRA-04 — Next.js allowedDevOrigins | `[x]` |
+| 5 | S5-INFRA-05 — docker-compose.vps.yml | `[x]` |
+| 6 | S5-INFRA-06 — VPS deployment docs | `[x]` |
+| 7 | S5-IMPL-01, S5-IMPL-02 — Service worker gating | `[x]` |

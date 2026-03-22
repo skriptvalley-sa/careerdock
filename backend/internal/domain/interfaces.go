@@ -88,15 +88,18 @@ type PaymentRepository interface {
 	Create(ctx context.Context, payment *Payment) error
 	GetByOrderID(ctx context.Context, orderID string) (*Payment, error)
 	UpdateStatus(ctx context.Context, id uuid.UUID, status PaymentStatus) error
+	UpdateWebhookCapture(ctx context.Context, id uuid.UUID, razorpayPaymentID string, webhookReceivedAt time.Time) error
 	ListByUser(ctx context.Context, userID uuid.UUID) ([]Payment, error)
 }
 
 // CreditRepository defines data access for credits and transactions.
 type CreditRepository interface {
 	GetBalance(ctx context.Context, userID uuid.UUID, creditType CreditType) (int, error)
+	GetAllBalances(ctx context.Context, userID uuid.UUID) (map[CreditType]int, error)
 	Allocate(ctx context.Context, userID uuid.UUID, creditType CreditType, amount int) error
 	Deduct(ctx context.Context, userID uuid.UUID, creditType CreditType, amount int) error
 	LogTransaction(ctx context.Context, txn *CreditTransaction) error
+	ListTransactionsByUser(ctx context.Context, userID uuid.UUID, creditType *CreditType, limit int) ([]CreditTransaction, error)
 }
 
 // NotificationRepository defines data access for user notifications.

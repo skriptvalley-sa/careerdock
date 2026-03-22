@@ -15,6 +15,13 @@ STATE_DIR="$DEV_DIR/state"
 API_PORT=8080
 FRONTEND_PORT=3000
 
+# ─── PATH Bootstrapping ────────────────────────────────────────────────────
+# On VPS or non-login shells, Go and Air may not be in PATH.
+# Bootstrap common install locations so the script is self-sufficient.
+for p in /usr/local/go/bin "$HOME/go/bin" "$HOME/.local/bin"; do
+  [[ -d "$p" ]] && [[ ":$PATH:" != *":$p:"* ]] && export PATH="$p:$PATH"
+done
+
 WATCHDOG_INTERVAL=30
 GRACEFUL_TIMEOUT=10
 HEALTH_TIMEOUT=30
@@ -109,7 +116,7 @@ port_pid() {
   lsof -i ":${port}" -t 2>/dev/null | head -1
 }
 
-# Gracefully stop a process
+# Gracefully stop a process and its entire process tree
 graceful_stop() {
   local component="$1"
   local timeout="${2:-$GRACEFUL_TIMEOUT}"
@@ -128,7 +135,7 @@ graceful_stop() {
 
   printf "  Stopping %-12s (PID %s) " "$component" "$pid"
 
-  # Send SIGTERM to the process group
+  # Send SIGTERM to the process group (negative PID), then to the process itself
   kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
 
   # Wait for graceful shutdown
@@ -137,17 +144,42 @@ graceful_stop() {
     if ! kill -0 "$pid" 2>/dev/null; then
       echo -e "${GREEN}stopped${NC}"
       rm -f "$pidfile"
+      _cleanup_port "$component"
       return 0
     fi
     sleep 1
     elapsed=$((elapsed + 1))
   done
 
-  # Force kill
+  # Force kill the entire process tree
   kill -9 -- "-$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null || true
+  # Also kill any children that escaped the process group
+  pkill -9 -P "$pid" 2>/dev/null || true
   sleep 1
   echo -e "${YELLOW}killed${NC}"
   rm -f "$pidfile"
+  _cleanup_port "$component"
+}
+
+# Kill any orphan process still holding the component's port
+_cleanup_port() {
+  local component="$1"
+  local port=""
+  case "$component" in
+    api)      port="$API_PORT" ;;
+    frontend) port="$FRONTEND_PORT" ;;
+    *)        return 0 ;;
+  esac
+
+  if port_in_use "$port"; then
+    local orphan_pid
+    orphan_pid=$(port_pid "$port")
+    if [[ -n "$orphan_pid" ]]; then
+      warn "Killing orphan process $orphan_pid on port $port"
+      kill -9 "$orphan_pid" 2>/dev/null || true
+      sleep 1
+    fi
+  fi
 }
 
 # Ensure .dev directories exist
@@ -196,10 +228,60 @@ launch_component() {
   esac
 
   cd "$PROJECT_ROOT"
-  bash -c "$command" >> "$LOG_DIR/${component}.log" 2>&1 &
+
+  # Start in a new session (setsid) so we can kill the entire process tree.
+  # On macOS, setsid may not exist — fall back to plain bash.
+  if command -v setsid >/dev/null 2>&1; then
+    setsid bash -c "$command" >> "$LOG_DIR/${component}.log" 2>&1 &
+  else
+    bash -c "$command" >> "$LOG_DIR/${component}.log" 2>&1 &
+  fi
   STARTED_PID=$!
   echo "$STARTED_PID" > "$PID_DIR/${component}.pid"
   mark_managed "$component"
+}
+
+# Sync NEXT_PUBLIC_* vars from root .env to frontend/.env.local.
+# Next.js only reads env files relative to the frontend/ directory, so the
+# root .env is invisible to it when launched from frontend/.
+sync_frontend_env() {
+  local root_env="$PROJECT_ROOT/.env"
+  local frontend_env="$PROJECT_ROOT/frontend/.env.local"
+
+  if [[ ! -f "$root_env" ]]; then
+    return
+  fi
+
+  # Extract all NEXT_PUBLIC_* lines from root .env
+  local next_vars
+  next_vars=$(grep -E '^NEXT_PUBLIC_' "$root_env" 2>/dev/null || true)
+
+  if [[ -z "$next_vars" ]]; then
+    return
+  fi
+
+  # Write (or overwrite) frontend/.env.local
+  {
+    echo "# Auto-generated from root .env by scripts/dev.sh"
+    echo "# Do not edit — changes will be overwritten on next start/setup."
+    echo "$next_vars"
+  } > "$frontend_env"
+
+  success "Synced frontend/.env.local ($(echo "$next_vars" | wc -l | tr -d ' ') vars)"
+}
+
+# Validate that go and air are available before starting backend processes.
+require_go_and_air() {
+  if ! command -v go >/dev/null 2>&1; then
+    error "go not found in PATH. Install Go >= 1.25 or check your PATH."
+    error "Searched: $PATH"
+    exit 1
+  fi
+  if ! command -v air >/dev/null 2>&1; then
+    error "air not found in PATH. Install with: go install github.com/air-verse/air@latest"
+    error "Searched: $PATH"
+    exit 1
+  fi
 }
 
 # ─── Setup Command ───────────────────────────────────────────────────────────
@@ -349,6 +431,9 @@ cmd_setup() {
     success ".env created from .env.example"
   fi
 
+  # Sync frontend env
+  sync_frontend_env
+
   # Frontend dependencies
   echo ""
   echo -e "${BOLD}Frontend dependencies...${NC}"
@@ -380,6 +465,8 @@ cmd_start() {
   echo ""
 
   # Pre-flight checks
+  require_go_and_air
+
   if [[ ! -f "$PROJECT_ROOT/.env" ]]; then
     error "No .env file found. Run './scripts/dev.sh setup' first."
     exit 3
@@ -451,6 +538,9 @@ cmd_start() {
     success "Worker started (PID $STARTED_PID)"
     started+=(worker)
   fi
+
+  # Sync frontend env before launch
+  sync_frontend_env
 
   # Frontend
   if is_running frontend; then
@@ -536,6 +626,11 @@ cmd_restart() {
 
       ensure_dev_dirs
       : > "$LOG_DIR/${component}.log"
+
+      # Sync frontend env before restarting frontend
+      if [[ "$component" == "frontend" ]]; then
+        sync_frontend_env
+      fi
 
       launch_component "$component"
       success "$component restarted (PID $STARTED_PID)"

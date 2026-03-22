@@ -1,6 +1,6 @@
 # Project Status
 
-> **Last updated:** 2026-03-14
+> **Last updated:** 2026-03-22
 
 ## Design Phases (Complete)
 - Phase 1: ✅ Complete (PRD.md)
@@ -18,7 +18,7 @@
 - Sprint 0 (Foundation): ✅ Complete — PR #13 (merged)
 - Sprint 1 (Company Directory): ✅ Complete — PR #15 (merged), CI ✅
 - Sprint 2 (Lists & Tracking): ✅ Complete — PR #17 (merged), PR #18 (merged)
-- Sprint 3 (Payments & Resume): ⬜ Not started
+- Sprint 3 (Payments & Resume): 🔨 In progress (tasks 3.1–3.8 complete)
 - Sprint 4 (AI Features): ⬜ Not started
 - Sprint 5 (Admin & Polish): ⬜ Not started
 - Sprint 6 (Launch Prep): ⬜ Not started
@@ -173,23 +173,23 @@
 
 ## Sprint 3 — Payments & Resume Foundation (Tasks 3.1–3.23)
 
-**Branch:** TBD (per SESSION-GUIDE: `feature/sprint-3-payments-resume`)
+**Branch:** `feature/sprint-3-payments`
 **PR:** TBD
-**CI:** ⬜ Not started
+**CI:** ✅ Lint + build passing locally
 **Est. hours:** ~95
 
 ### Task Checklist
 
 | # | Task | Status |
 |:-:|------|:------:|
-| 3.1 | Payment repository (`repository/payment_repo.go` — create order, update status, list) | ⬜ |
-| 3.2 | Credit repository (`repository/credit_repo.go` — allocate, deduct, balance, log) | ⬜ |
-| 3.3 | Payment service (`service/payment_service.go` — Razorpay order, webhook, refund) | ⬜ |
-| 3.4 | Razorpay adapter (`payment/razorpay.go` — create order, verify signature, refund) | ⬜ |
-| 3.5 | Payment handlers (`handler/payment.go` — create order, webhook, history) | ⬜ |
-| 3.6 | Webhook signature verification (HMAC-SHA256 for `/api/webhooks/razorpay`) | ⬜ |
-| 3.7 | Credit service (`service/credit_service.go` — balance, deduction, premium gating) | ⬜ |
-| 3.8 | Premium middleware (`auth.RequirePremium` — checks `premium_since`) | ⬜ |
+| 3.1 | Payment repository (`repository/payment_repo.go` — create order, update status, list) | ✅ |
+| 3.2 | Credit repository (`repository/credit_repo.go` — allocate, deduct, balance, log) | ✅ |
+| 3.3 | Payment service (`service/payment_service.go` — Razorpay order, webhook, refund) | ✅ |
+| 3.4 | Razorpay adapter (`payment/razorpay.go` — create order, verify signature, refund) | ✅ |
+| 3.5 | Payment handlers (`handler/payment.go` — create order, webhook, history) | ✅ |
+| 3.6 | Webhook signature verification (HMAC-SHA256 for `/api/webhooks/razorpay`) | ✅ |
+| 3.7 | Credit service (`service/credit_service.go` — balance, deduction, premium gating) | ✅ |
+| 3.8 | Premium middleware (`auth.RequirePremium` — checks `premium_since`) | ✅ |
 | 3.9 | Resume repository (`repository/resume_repo.go` — CRUD, list by user) | ⬜ |
 | 3.10 | Resume service (`service/resume_service.go` — upload, validate, S3 store) | ⬜ |
 | 3.11 | Resume handlers (`handler/resume.go` — upload multipart, list, get, archive) | ⬜ |
@@ -206,12 +206,20 @@
 | 3.22 | Frontend: Resume management (`app/(dashboard)/resumes/page.tsx`) | ⬜ |
 | 3.23 | Frontend: Credit balance display (dashboard sidebar/header) | ⬜ |
 
+### Implementation Notes (Tasks 3.1–3.8)
+
+- **Product catalog** in code: starter_pack (₹399), resume_upload (₹49), ats_bundle (₹99), rebuy_pack (₹399)
+- **Idempotent webhooks**: duplicate `payment.captured` events detected and safely ignored
+- **Atomic credit allocation**: payment capture + credits + audit log + premium_since in single DB transaction
+- **Business rules**: starter_pack only for non-premium users; rebuy_pack only for premium users
+- **Endpoints added**: `POST /api/payments/orders`, `GET /api/payments`, `POST /api/webhooks/razorpay`, `GET /api/credits`, `GET /api/credits/transactions`
+
 ### Definition of Done
 
 | Criterion | Status |
 |-----------|:------:|
 | User can purchase Starter Pack via Razorpay (test mode) | ⬜ |
-| Webhook correctly allocates credits and sets `premium_since` | ⬜ |
+| Webhook correctly allocates credits and sets `premium_since` | ✅ |
 | À la carte purchases work (resume upload credit, ATS bundle) | ⬜ |
 | Credit balance shown in UI, deducted on premium actions | ⬜ |
 | User can upload PDF resume (validated, stored in S3/MinIO) | ⬜ |

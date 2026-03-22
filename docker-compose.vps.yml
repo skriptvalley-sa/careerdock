@@ -1,0 +1,26 @@
+# VPS override — binds data services to localhost only.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.vps.yml up -d
+#
+# The base docker-compose.yml publishes ports on all interfaces (0.0.0.0),
+# which is fine for local laptop development. On a public VPS, internal
+# services like Postgres, Redis, MinIO, and Mailhog must NOT be reachable
+# from the internet.
+
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"
+
+  minio:
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+
+  mailhog:
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"

@@ -16,14 +16,18 @@ type Services struct {
 	List        *ListService
 	User        *UserService
 	FeatureFlag *FeatureFlagService
+	Payment     *PaymentService
+	Credit      *CreditService
 
 	// Infrastructure references for health checks
 	db    *pgxpool.Pool
 	redis *redis.Client
 
 	// Runtime metadata
-	Version      string
-	IsProduction bool
+	Version                string
+	IsProduction           bool
+	RazorpayKeyID          string
+	VerifyWebhookSignature func(payload []byte, signature string) bool
 }
 
 // NewServices creates a Services container.
@@ -33,21 +37,29 @@ func NewServices(
 	list *ListService,
 	user *UserService,
 	featureFlag *FeatureFlagService,
+	payment *PaymentService,
+	credit *CreditService,
 	db *pgxpool.Pool,
 	redisClient *redis.Client,
 	version string,
 	isProduction bool,
+	razorpayKeyID string,
+	verifyWebhookSig func(payload []byte, signature string) bool,
 ) *Services {
 	return &Services{
-		Auth:         auth,
-		Company:      company,
-		List:         list,
-		User:         user,
-		FeatureFlag:  featureFlag,
-		db:           db,
-		redis:        redisClient,
-		Version:      version,
-		IsProduction: isProduction,
+		Auth:                   auth,
+		Company:                company,
+		List:                   list,
+		User:                   user,
+		FeatureFlag:            featureFlag,
+		Payment:                payment,
+		Credit:                 credit,
+		db:                     db,
+		redis:                  redisClient,
+		Version:                version,
+		IsProduction:           isProduction,
+		RazorpayKeyID:          razorpayKeyID,
+		VerifyWebhookSignature: verifyWebhookSig,
 	}
 }
 

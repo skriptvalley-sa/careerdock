@@ -124,6 +124,8 @@ func mapErrorCodeToHTTP(code domain.ErrorCode) int {
 		return http.StatusBadGateway
 	case domain.ErrCodeAIUnavailable:
 		return http.StatusServiceUnavailable
+	case domain.ErrCodeInternal:
+		return http.StatusInternalServerError
 	default:
 		return http.StatusInternalServerError
 	}
