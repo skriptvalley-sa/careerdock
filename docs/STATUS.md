@@ -1,6 +1,6 @@
 # Project Status
 
-> **Last updated:** 2026-03-22
+> **Last updated:** 2026-03-23
 
 ## Design Phases (Complete)
 - Phase 1: ✅ Complete (PRD.md)
@@ -18,7 +18,7 @@
 - Sprint 0 (Foundation): ✅ Complete — PR #13 (merged)
 - Sprint 1 (Company Directory): ✅ Complete — PR #15 (merged), CI ✅
 - Sprint 2 (Lists & Tracking): ✅ Complete — PR #17 (merged), PR #18 (merged)
-- Sprint 3 (Payments & Resume): 🔨 In progress (tasks 3.1–3.8 complete)
+- Sprint 3 (Payments & Resume): 🔨 In progress (tasks 3.1–3.20 complete)
 - Sprint 4 (AI Features): ⬜ Not started
 - Sprint 5 (Admin & Polish): ⬜ Not started
 - Sprint 6 (Launch Prep): ⬜ Not started
@@ -173,9 +173,9 @@
 
 ## Sprint 3 — Payments & Resume Foundation (Tasks 3.1–3.23)
 
-**Branch:** `feature/sprint-3-payments`
-**PR:** TBD
-**CI:** ✅ Lint + build passing locally
+**Branch 1:** `feature/sprint-3-payments` — PR #19 (merged)
+**Branch 2:** `feature/sprint-3-resume-and-ai` — PR TBD
+**CI:** ✅ All jobs passing
 **Est. hours:** ~95
 
 ### Task Checklist
@@ -190,29 +190,36 @@
 | 3.6 | Webhook signature verification (HMAC-SHA256 for `/api/webhooks/razorpay`) | ✅ |
 | 3.7 | Credit service (`service/credit_service.go` — balance, deduction, premium gating) | ✅ |
 | 3.8 | Premium middleware (`auth.RequirePremium` — checks `premium_since`) | ✅ |
-| 3.9 | Resume repository (`repository/resume_repo.go` — CRUD, list by user) | ⬜ |
-| 3.10 | Resume service (`service/resume_service.go` — upload, validate, S3 store) | ⬜ |
-| 3.11 | Resume handlers (`handler/resume.go` — upload multipart, list, get, archive) | ⬜ |
-| 3.12 | PDF extraction (`pdf/extractor.go` — extract text from PDF) | ⬜ |
-| 3.13 | AI provider interface (`ai/provider.go` — interface definition) | ⬜ |
-| 3.14 | Claude provider (`ai/claude.go` — API client, callWithPDF, response parsing) | ⬜ |
-| 3.15 | OpenAI provider (`ai/openai.go` — API client, text-only calls) | ⬜ |
-| 3.16 | Fallback provider (`ai/fallback.go` — cache → Claude → OpenAI → cache) | ⬜ |
-| 3.17 | Prompt templates (`ai/prompts/` — resume parse, system/user prompts) | ⬜ |
-| 3.18 | AI result cache (`ai/cache.go` — Redis GET/SET with SHA256 keys, TTL) | ⬜ |
-| 3.19 | Worker: resume parse+score task (`worker/task_resume_parse.go`) | ⬜ |
-| 3.20 | Worker: email send task (`worker/task_email_send.go` — Resend integration) | ⬜ |
+| 3.9 | Resume repository (`repository/resume_repo.go` — CRUD, list by user, slot lookup) | ✅ |
+| 3.10 | Resume service (`service/resume_service.go` — upload, validate, S3 store, credit deduct) | ✅ |
+| 3.11 | Resume handlers (`handler/resume.go` — upload multipart, list, get, set default, archive, download URL) | ✅ |
+| 3.12 | PDF extraction (`pdf/extractor.go` — extract text from PDF using pdfcpu) | ✅ |
+| 3.13 | AI provider interface (`ai/provider.go` — LLMProvider interface + all types) | ✅ |
+| 3.14 | Claude provider (`ai/claude.go` — Messages API, callWithPDF, response parsing) | ✅ |
+| 3.15 | OpenAI provider (`ai/openai.go` — Chat Completions API, text-only calls) | ✅ |
+| 3.16 | Fallback provider (`ai/fallback.go` — Claude → OpenAI fallback) | ✅ |
+| 3.17 | Prompt templates (`ai/prompts/` — security preamble, resume parse, ATS general) | ✅ |
+| 3.18 | AI result cache (`ai/cache.go` — Redis GET/SET with SHA256 keys, per-op TTL) | ✅ |
+| 3.19 | Worker: resume parse+score task (`worker/task_resume_parse.go` — parse + general ATS) | ✅ |
+| 3.20 | Worker: email send task (`worker/task_email_send.go` — Resend integration) | ✅ |
 | 3.21 | Frontend: Pricing + checkout (Razorpay Checkout.js, order, confirmation) | ⬜ |
 | 3.22 | Frontend: Resume management (`app/(dashboard)/resumes/page.tsx`) | ⬜ |
 | 3.23 | Frontend: Credit balance display (dashboard sidebar/header) | ⬜ |
 
-### Implementation Notes (Tasks 3.1–3.8)
+### Implementation Notes (Tasks 3.1–3.8, 3.9–3.20)
 
 - **Product catalog** in code: starter_pack (₹399), resume_upload (₹49), ats_bundle (₹99), rebuy_pack (₹399)
 - **Idempotent webhooks**: duplicate `payment.captured` events detected and safely ignored
 - **Atomic credit allocation**: payment capture + credits + audit log + premium_since in single DB transaction
 - **Business rules**: starter_pack only for non-premium users; rebuy_pack only for premium users
 - **Endpoints added**: `POST /api/payments/orders`, `GET /api/payments`, `POST /api/webhooks/razorpay`, `GET /api/credits`, `GET /api/credits/transactions`
+- **Resume endpoints**: `POST /api/resumes` (multipart upload), `GET /api/resumes`, `GET /api/resumes/:id`, `PUT /api/resumes/:id/default`, `DELETE /api/resumes/:id`, `GET /api/resumes/:id/download`
+- **PDF extraction** via pdfcpu (pure Go); text stored in DB, raw PDF sent to Claude for ATS scoring
+- **AI providers**: Claude (primary, supports native PDF), OpenAI (fallback, text-only), FallbackProvider wraps both
+- **Prompt templates**: anti-injection preamble, XML-delimited user content, resume parse + ATS general system prompts
+- **AI result cache**: Redis-backed, SHA256 cache keys, per-operation TTL (24h for parse/ATS general)
+- **Worker tasks**: `resume:parse_and_score` (parse + general ATS, cache-aware), `email:send` (Resend integration)
+- **DI wiring**: Asynq client in API server, full AI provider chain in worker, S3 resume store with auto-bucket in dev
 
 ### Definition of Done
 
@@ -222,8 +229,8 @@
 | Webhook correctly allocates credits and sets `premium_since` | ✅ |
 | À la carte purchases work (resume upload credit, ATS bundle) | ⬜ |
 | Credit balance shown in UI, deducted on premium actions | ⬜ |
-| User can upload PDF resume (validated, stored in S3/MinIO) | ⬜ |
-| Resume parse + general ATS runs async, results stored in DB | ⬜ |
+| User can upload PDF resume (validated, stored in S3/MinIO) | ✅ |
+| Resume parse + general ATS runs async, results stored in DB | ✅ |
 | SSE notifies user when resume processing completes | ⬜ |
-| AI fallback: if Claude fails, OpenAI is used | ⬜ |
-| AI result cache: repeated requests return cached result | ⬜ |
+| AI fallback: if Claude fails, OpenAI is used | ✅ |
+| AI result cache: repeated requests return cached result | ✅ |

@@ -22,6 +22,12 @@ Docker Compose (localhost only):
 - Nginx installed and configured for the domain
 - DNS A record pointing `careerdock.skriptvalley.com` to the VPS IP
 
+### VPS Configurations (local)
+
+- IP: 187.127.130.97
+- User: root
+- Identity key path: /Users/sujaykumar/.ssh/hostinger_id
+
 ## Setup
 
 ### 1. Clone and configure

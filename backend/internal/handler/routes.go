@@ -108,8 +108,21 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 			// --- Premium routes ---
 			r.Group(func(r chi.Router) {
 				r.Use(auth.RequirePremium)
-				// TODO (Sprint 3): Resume upload, ATS checks
-				// TODO (Sprint 4): Curated list generation
+
+				// --- Resumes (Sprint 3) ---
+				resumeH := NewResumeHandler(svc.Resume)
+				r.Route("/resumes", func(r chi.Router) {
+					r.Get("/", resumeH.ListResumes)
+					r.Post("/", resumeH.UploadResume)
+					r.Route("/{id}", func(r chi.Router) {
+						r.Get("/", resumeH.GetResume)
+						r.Put("/default", resumeH.SetDefaultResume)
+						r.Delete("/", resumeH.ArchiveResume)
+						r.Get("/download", resumeH.GetResumeDownloadURL)
+					})
+				})
+
+				// TODO (Sprint 4): ATS checks, Curated list generation
 			})
 
 			// --- Admin routes ---

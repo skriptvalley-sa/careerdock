@@ -37,6 +37,8 @@ type ResumeRepository interface {
 	ListByUser(ctx context.Context, userID uuid.UUID) ([]Resume, error)
 	Update(ctx context.Context, resume *Resume) error
 	Archive(ctx context.Context, id uuid.UUID) error
+	GetByUserAndSlot(ctx context.Context, userID uuid.UUID, slot int) (*Resume, error)
+	ClearDefaultForUser(ctx context.Context, userID uuid.UUID) error
 }
 
 // ListRepository defines data access for user lists and entries.
@@ -132,15 +134,9 @@ type Transactor interface {
 
 // --- External service interfaces ---
 
-// AIProvider abstracts LLM operations behind a common interface.
-type AIProvider interface {
-	ParseResume(ctx context.Context, req *ParseResumeRequest) (*ParsedResume, error)
-	ScoreATSGeneral(ctx context.Context, req *ATSGeneralRequest) (*ATSResult, error)
-	ScoreATSCompany(ctx context.Context, req *ATSCompanyRequest) (*ATSResult, error)
-	ScoreATSJob(ctx context.Context, req *ATSJobRequest) (*ATSResult, error)
-	CurateCompanyList(ctx context.Context, req *CurateListRequest) (*CuratedListResult, error)
-	EnrichCompanyProfile(ctx context.Context, req *EnrichRequest) (*CompanyProfile, error)
-}
+// AIProvider is defined in internal/ai.LLMProvider.
+// Keeping a comment here for cross-reference. The concrete interface lives
+// in the ai package to avoid circular imports with the prompt/type layer.
 
 // PaymentGateway abstracts the payment provider (Razorpay).
 type PaymentGateway interface {
@@ -187,60 +183,10 @@ type AuditLogFilter struct {
 	Offset     int
 }
 
-// --- AI request/response types (placeholders — fleshed out in Sprint 3) ---
-
-// ParseResumeRequest holds inputs for resume parsing.
-type ParseResumeRequest struct {
-	ResumeText string
-}
-
-// ParsedResume holds AI-extracted structured resume data.
-type ParsedResume struct {
-	Data []byte // raw JSON
-}
-
-// ATSGeneralRequest holds inputs for general ATS scoring.
-type ATSGeneralRequest struct {
-	ResumeText string
-}
-
-// ATSCompanyRequest holds inputs for company-specific ATS scoring.
-type ATSCompanyRequest struct {
-	ResumeText string
-	Company    *Company
-}
-
-// ATSJobRequest holds inputs for job-specific ATS scoring.
-type ATSJobRequest struct {
-	ResumeText     string
-	JobDescription string
-}
-
-// ATSResult holds an ATS scoring result.
-type ATSResult struct {
-	Data []byte // raw JSON
-}
-
-// CurateListRequest holds inputs for AI-curated company list generation.
-type CurateListRequest struct {
-	ResumeText  string
-	Preferences *User // user profile + prefs
-}
-
-// CuratedListResult holds the AI-generated company recommendations.
-type CuratedListResult struct {
-	Data []byte // raw JSON
-}
-
-// EnrichRequest holds inputs for AI company profile enrichment.
-type EnrichRequest struct {
-	Company *Company
-}
-
-// CompanyProfile holds enriched company data.
-type CompanyProfile struct {
-	Data []byte // raw JSON
-}
+// Note: AI request/response types are defined in internal/ai/provider.go.
+// The domain.AIProvider interface above uses those types indirectly — the
+// actual LLM abstraction is internal/ai.LLMProvider. The domain-level
+// AIProvider is kept for reference but may be removed in a future cleanup.
 
 // --- Payment request/response types (placeholders — fleshed out in Sprint 3) ---
 

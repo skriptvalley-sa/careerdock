@@ -18,6 +18,7 @@ type Services struct {
 	FeatureFlag *FeatureFlagService
 	Payment     *PaymentService
 	Credit      *CreditService
+	Resume      *ResumeService
 
 	// Infrastructure references for health checks
 	db    *pgxpool.Pool
@@ -31,6 +32,8 @@ type Services struct {
 }
 
 // NewServices creates a Services container.
+//
+//nolint:revive // parameter list is necessarily long — this is the DI constructor
 func NewServices(
 	auth *AuthService,
 	company *CompanyService,
@@ -39,6 +42,7 @@ func NewServices(
 	featureFlag *FeatureFlagService,
 	payment *PaymentService,
 	credit *CreditService,
+	resume *ResumeService,
 	db *pgxpool.Pool,
 	redisClient *redis.Client,
 	version string,
@@ -54,6 +58,7 @@ func NewServices(
 		FeatureFlag:            featureFlag,
 		Payment:                payment,
 		Credit:                 credit,
+		Resume:                 resume,
 		db:                     db,
 		redis:                  redisClient,
 		Version:                version,

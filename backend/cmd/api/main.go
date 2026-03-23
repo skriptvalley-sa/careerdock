@@ -24,12 +24,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 
+	"github.com/hibiken/asynq"
+
 	"github.com/skriptvalley/careerdock/internal/config"
 	"github.com/skriptvalley/careerdock/internal/handler"
 	"github.com/skriptvalley/careerdock/internal/middleware"
 	"github.com/skriptvalley/careerdock/internal/payment"
 	"github.com/skriptvalley/careerdock/internal/repository"
 	"github.com/skriptvalley/careerdock/internal/service"
+	"github.com/skriptvalley/careerdock/internal/storage"
 )
 
 // version is set at build time via -ldflags.
@@ -80,6 +83,23 @@ func main() {
 	featureFlagRepo := repository.NewFeatureFlagRepo(db)
 	paymentRepo := repository.NewPaymentRepo(db)
 	creditRepo := repository.NewCreditRepo(db)
+	resumeRepo := repository.NewResumeRepo(db)
+
+	// S3 storage for resume files
+	resumeStore, err := storage.NewS3Store(ctx, cfg.S3, cfg.S3.ResumeBucket)
+	if err != nil {
+		logger.Error("failed to create S3 resume store", "error", err)
+		return
+	}
+	if cfg.IsDevelopment() {
+		if err := resumeStore.EnsureBucket(ctx); err != nil {
+			logger.Warn("failed to ensure resume bucket (MinIO may not be running)", "error", err)
+		}
+	}
+
+	// Asynq client for queuing background tasks
+	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: cfg.RedisURL})
+	defer func() { _ = asynqClient.Close() }()
 
 	// 5. Build service layer
 	authSvc := service.NewAuthService(userRepo, tokenRepo, txr, redisClient, cfg.JWTSecret)
@@ -90,7 +110,8 @@ func main() {
 	razorpayGateway := payment.NewRazorpayGateway(cfg.RazorpayKeyID, cfg.RazorpayKeySecret, cfg.RazorpayWebhookSecret)
 	paymentSvc := service.NewPaymentService(paymentRepo, creditRepo, userRepo, razorpayGateway, txr)
 	creditSvc := service.NewCreditService(creditRepo, txr)
-	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, paymentSvc, creditSvc, db, redisClient, version, cfg.IsProduction(), cfg.RazorpayKeyID, razorpayGateway.VerifyWebhookSignature)
+	resumeSvc := service.NewResumeService(resumeRepo, userRepo, creditRepo, resumeStore, txr, asynqClient)
+	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, paymentSvc, creditSvc, resumeSvc, db, redisClient, version, cfg.IsProduction(), cfg.RazorpayKeyID, razorpayGateway.VerifyWebhookSignature)
 
 	// 6. Build handler layer + mount routes
 	r := chi.NewRouter()

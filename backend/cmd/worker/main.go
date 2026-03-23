@@ -17,7 +17,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 
+	"github.com/skriptvalley/careerdock/internal/ai"
 	"github.com/skriptvalley/careerdock/internal/config"
+	"github.com/skriptvalley/careerdock/internal/email"
+	"github.com/skriptvalley/careerdock/internal/repository"
+	"github.com/skriptvalley/careerdock/internal/storage"
+	"github.com/skriptvalley/careerdock/internal/worker"
 )
 
 // Task type constants — kept here as the canonical registry.
@@ -66,9 +71,25 @@ func main() {
 	defer func() { _ = redisClient.Close() }()
 	logger.Info("connected to Redis")
 
-	// Keep references for future task handlers
-	_ = db
-	_ = redisClient
+	// Build repositories and services needed by worker tasks
+	resumeRepo := repository.NewResumeRepo(db)
+	resumeStore, err := storage.NewS3Store(ctx, cfg.S3, cfg.S3.ResumeBucket)
+	if err != nil {
+		logger.Error("failed to create S3 resume store", "error", err)
+		return
+	}
+
+	// Build AI provider (fallback: Claude → OpenAI)
+	var aiProvider ai.LLMProvider
+	claudeProvider := ai.NewClaudeProvider(cfg.ClaudeAPIKey, "", 0)
+	openaiProvider := ai.NewOpenAIProvider(cfg.OpenAIAPIKey, "", 0)
+	aiProvider = ai.NewFallbackProvider(claudeProvider, openaiProvider)
+
+	// AI result cache
+	aiCache := ai.NewResultCache(redisClient)
+
+	// Email sender
+	emailSender := email.NewResendSender(cfg.ResendAPIKey, cfg.FromEmail)
 
 	// 4. Create Asynq server
 	srv := asynq.NewServer(
@@ -87,19 +108,18 @@ func main() {
 	// 5. Register task handlers
 	mux := asynq.NewServeMux()
 
-	// TODO (Sprint 3): mux.HandleFunc(TaskSendEmail, worker.HandleSendEmail)
-	// TODO (Sprint 3): mux.HandleFunc(TaskResumeParseAndScore, worker.HandleResumeParse)
+	// Sprint 3: Email send + Resume parse/score
+	emailHandler := worker.NewEmailSendHandler(emailSender)
+	mux.HandleFunc(TaskSendEmail, emailHandler.Handle)
+
+	resumeParseHandler := worker.NewResumeParseHandler(resumeRepo, resumeStore, aiProvider, aiCache)
+	mux.HandleFunc(TaskResumeParseAndScore, resumeParseHandler.Handle)
+
 	// TODO (Sprint 4): mux.HandleFunc(TaskATSCompanyCheck, worker.HandleATSCompany)
 	// TODO (Sprint 4): mux.HandleFunc(TaskATSJobCheck, worker.HandleATSJob)
 	// TODO (Sprint 4): mux.HandleFunc(TaskCurateCompanyList, worker.HandleCurateList)
 	// TODO (Sprint 5): mux.HandleFunc(TaskCompanyEnrich, worker.HandleCompanyEnrich)
 	// TODO (Sprint 5): mux.HandleFunc(TaskCompanyRefresh, worker.HandleCompanyRefresh)
-
-	// Placeholder handler for unregistered tasks
-	mux.HandleFunc(TaskSendEmail, func(_ context.Context, t *asynq.Task) error {
-		logger.Warn("unimplemented task handler called", "type", t.Type())
-		return nil
-	})
 
 	// 6. Start server with graceful shutdown
 	errCh := make(chan error, 1)
