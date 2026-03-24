@@ -59,23 +59,46 @@ func PublishSSEEvent(redisClient *redis.Client, userID uuid.UUID, eventType stri
 	return redisClient.Publish(context.Background(), channel, eventJSON).Err()
 }
 
+// unwrapper is implemented by middleware ResponseWriter wrappers (like Chi's)
+// that allow access to the underlying http.ResponseWriter.
+type unwrapper interface {
+	Unwrap() http.ResponseWriter
+}
+
+// getFlusher extracts http.Flusher from a ResponseWriter, unwrapping
+// middleware wrappers as needed.
+func getFlusher(w http.ResponseWriter) (http.Flusher, bool) {
+	for {
+		if f, ok := w.(http.Flusher); ok {
+			return f, true
+		}
+		if u, ok := w.(unwrapper); ok {
+			w = u.Unwrap()
+		} else {
+			return nil, false
+		}
+	}
+}
+
 // Events handles GET /api/events.
 // Opens a persistent SSE connection. Subscribes to the user's Redis pub/sub
 // channel and forwards events as they arrive. Sends heartbeats every 30s.
 func (h *SSEHandler) Events(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.UserIDFromContext(r.Context())
 
+	// Get flusher by unwrapping middleware wrappers
+	flusher, ok := getFlusher(w)
+	if !ok {
+		slog.Error("SSE: ResponseWriter does not support Flusher")
+		http.Error(w, "streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+
 	// Set SSE headers
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("X-Accel-Buffering", "no") // Disable nginx buffering
-
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-		http.Error(w, "streaming unsupported", http.StatusInternalServerError)
-		return
-	}
 
 	// Send initial connection event
 	_, _ = fmt.Fprintf(w, "event: connected\ndata: {\"user_id\":\"%s\"}\n\n", userID)
@@ -89,7 +112,7 @@ func (h *SSEHandler) Events(w http.ResponseWriter, r *http.Request) {
 	defer func() { _ = sub.Close() }()
 
 	msgCh := sub.Channel()
-	heartbeat := time.NewTicker(30 * time.Second)
+	heartbeat := time.NewTicker(25 * time.Second)
 	defer heartbeat.Stop()
 
 	for {
@@ -113,6 +136,7 @@ func (h *SSEHandler) Events(w http.ResponseWriter, r *http.Request) {
 			flusher.Flush()
 
 		case <-heartbeat.C:
+			// Heartbeat keeps the connection alive and resets the WriteTimeout.
 			_, _ = fmt.Fprintf(w, ": heartbeat\n\n")
 			flusher.Flush()
 		}
