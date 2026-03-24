@@ -30,6 +30,9 @@ type LLMProvider interface {
 	// ScoreATSJob evaluates resume fit against a specific job description.
 	ScoreATSJob(ctx context.Context, req *ATSJobRequest) (*ATSResult, error)
 
+	// CurateCompanyList ranks companies by fit for a candidate profile.
+	CurateCompanyList(ctx context.Context, req *CurateListRequest) (*CuratedListResult, error)
+
 	// Name returns the provider name (e.g., "claude", "openai").
 	Name() string
 }
@@ -153,6 +156,27 @@ type CompanySummary struct {
 	Size             string    `json:"size"`
 	CompensationTier string    `json:"compensation_tier"`
 	HiringStatus     string    `json:"hiring_status"`
+}
+
+// CuratedListResult holds the AI-ranked list of best-fit companies.
+type CuratedListResult struct {
+	Companies   []RankedCompany `json:"companies"`
+	GeneratedAt time.Time       `json:"generated_at"`
+	TokensUsed  TokenUsage      `json:"tokens_used"`
+}
+
+// RankedCompany holds a single company's fit assessment within a curated list.
+type RankedCompany struct {
+	CompanyID      uuid.UUID `json:"company_id"`
+	Name           string    `json:"name"`
+	MatchScore     int       `json:"match_score"`
+	MatchReasons   []string  `json:"match_reasons"`
+	Recommendation string    `json:"recommendation"`
+}
+
+// MarshalCuratedListResult serialises a CuratedListResult to JSON for storage.
+func MarshalCuratedListResult(r *CuratedListResult) (json.RawMessage, error) {
+	return json.Marshal(r)
 }
 
 // MarshalParsedResume serialises a ParsedResume to JSON for storage.

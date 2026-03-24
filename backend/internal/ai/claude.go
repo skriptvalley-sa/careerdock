@@ -172,6 +172,44 @@ func (c *ClaudeProvider) ScoreATSJob(ctx context.Context, req *ATSJobRequest) (*
 	return result, err
 }
 
+// CurateCompanyList ranks companies by fit for a candidate profile.
+func (c *ClaudeProvider) CurateCompanyList(ctx context.Context, req *CurateListRequest) (*CuratedListResult, error) {
+	systemPrompt := prompts.BuildSystemPrompt(prompts.CurateListSystem())
+
+	candidateProfile := ""
+	companiesJSON := "[]"
+	if req.ParsedResume != nil {
+		pr := req.ParsedResume
+		candidateProfile = prompts.BuildCandidateProfile(
+			pr.Name, pr.YearsOfExperience, pr.RoleLevel,
+			pr.Skills.Languages, pr.Skills.Frameworks, pr.Skills.Tools,
+			pr.Domains,
+		)
+	}
+	if len(req.Companies) > 0 {
+		if data, err := json.Marshal(req.Companies); err == nil {
+			companiesJSON = string(data)
+		}
+	}
+
+	result, err := ValidateCuratedListResultRetry(ctx, 2, func() (*CuratedListResult, error) {
+		userMessage := prompts.CurateListUser(candidateProfile, companiesJSON)
+		raw, tokens, callErr := c.callText(ctx, systemPrompt, userMessage)
+		if callErr != nil {
+			return nil, fmt.Errorf("claude curate list: %w", callErr)
+		}
+
+		var r CuratedListResult
+		if err := json.Unmarshal(raw, &r); err != nil {
+			return nil, fmt.Errorf("claude curate list JSON: %w (raw: %s)", err, truncate(raw, 200))
+		}
+		r.TokensUsed = tokens
+		r.GeneratedAt = time.Now()
+		return &r, nil
+	})
+	return result, err
+}
+
 // --- Internal HTTP methods ---
 
 // claudeRequest is the request body for the Claude Messages API.

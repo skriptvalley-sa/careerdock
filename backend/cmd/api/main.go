@@ -85,6 +85,7 @@ func main() {
 	creditRepo := repository.NewCreditRepo(db)
 	resumeRepo := repository.NewResumeRepo(db)
 	atsCheckRepo := repository.NewATSCheckRepo(db)
+	curatedListRepo := repository.NewCuratedListRepo(db)
 
 	// S3 storage for resume files
 	resumeStore, err := storage.NewS3Store(ctx, cfg.S3, cfg.S3.ResumeBucket)
@@ -113,7 +114,8 @@ func main() {
 	creditSvc := service.NewCreditService(creditRepo, txr)
 	resumeSvc := service.NewResumeService(resumeRepo, userRepo, creditRepo, resumeStore, txr, asynqClient)
 	atsSvc := service.NewATSService(atsCheckRepo, resumeRepo, companyRepo, creditRepo, txr, asynqClient)
-	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, paymentSvc, creditSvc, resumeSvc, atsSvc, db, redisClient, version, cfg.IsProduction(), cfg.RazorpayKeyID, razorpayGateway.VerifyWebhookSignature)
+	curatedListSvc := service.NewCuratedListService(curatedListRepo, resumeRepo, creditRepo, txr, asynqClient)
+	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, paymentSvc, creditSvc, resumeSvc, atsSvc, curatedListSvc, db, redisClient, version, cfg.IsProduction(), cfg.RazorpayKeyID, razorpayGateway.VerifyWebhookSignature)
 
 	// 6. Build handler layer + mount routes
 	r := chi.NewRouter()

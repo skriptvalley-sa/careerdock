@@ -1,6 +1,6 @@
 # Project Status
 
-> **Last updated:** 2026-03-24
+> **Last updated:** 2026-03-25
 
 ## Design Phases (Complete)
 - Phase 1: ✅ Complete (PRD.md)
@@ -19,7 +19,7 @@
 - Sprint 1 (Company Directory): ✅ Complete — PR #15 (merged), CI ✅
 - Sprint 2 (Lists & Tracking): ✅ Complete — PR #17 (merged), PR #18 (merged)
 - Sprint 3 (Payments & Resume): ✅ Complete — PR #19, #20, #21, #22, #23, #24, #25, #26 (all merged)
-- Sprint 4 (AI Features): ⬜ Not started
+- Sprint 4 (AI Features): 🔄 In progress — backend complete (tasks 4.1–4.11), frontend pending (4.12–4.17)
 - Sprint 5 (Admin & Polish): ⬜ Not started
 - Sprint 6 (Launch Prep): ⬜ Not started
 
@@ -261,25 +261,25 @@
 
 ## Sprint 4 — AI Features (Tasks 4.1–4.17)
 
-**Branch:** TBD
-**PR:** TBD
+**Branch (ATS backend):** `feature/sprint-4-ats-backend` — **PR #28 (merged)**
+**Branch (Curated lists):** `feature/sprint-4-curated-lists` — **PR #29 (open)**
 **Est. hours:** ~78
 
 ### Task Checklist
 
 | # | Task | Status |
 |:-:|------|:------:|
-| 4.1 | ATS check repository (`repository/ats_repo.go` — create, get, list by user/resume) | ⬜ |
-| 4.2 | ATS service (`service/ats_service.go` — company check, job check, credit deduction) | ⬜ |
-| 4.3 | ATS handlers (`handler/ats.go` — POST /ats/company, POST /ats/job, GET /ats/:id, GET /ats/) | ⬜ |
-| 4.4 | Worker: company ATS task (`worker/task_ats_company.go` — download PDF, score with AI, store result) | ⬜ |
-| 4.5 | Worker: job ATS task (`worker/task_ats_job.go` — download PDF, score with AI + JD, store result) | ⬜ |
-| 4.6 | Curated list repository (`repository/curated_list_repo.go` — create, get, list) | ⬜ |
-| 4.7 | Curated list service (`service/curated_list_service.go` — trigger generation, credit deduction) | ⬜ |
-| 4.8 | Curated list handler (`handler/curated_list.go` — POST /curated-lists, GET /curated-lists/:id) | ⬜ |
-| 4.9 | Worker: curate company list task (`worker/task_curate_list.go` — build profile, query companies, AI curation) | ⬜ |
-| 4.10 | AI prompt templates (remaining) — Company ATS, Job ATS, Curated List prompts | ⬜ |
-| 4.11 | Output validation (`ai/validation.go` — schema validation for AI responses, score bounds, retry) | ⬜ |
+| 4.1 | ATS check repository (`repository/ats_repo.go` — create, get, list by user/resume) | ✅ |
+| 4.2 | ATS service (`service/ats_service.go` — company check, job check, credit deduction) | ✅ |
+| 4.3 | ATS handlers (`handler/ats.go` — POST /ats/company, POST /ats/job, GET /ats/:id, GET /ats/) | ✅ |
+| 4.4 | Worker: company ATS task (`worker/task_ats_company.go` — download PDF, score with AI, store result) | ✅ |
+| 4.5 | Worker: job ATS task (`worker/task_ats_job.go` — download PDF, score with AI + JD, store result) | ✅ |
+| 4.6 | Curated list repository (`repository/curated_list_repo.go` — create, get, list) | ✅ |
+| 4.7 | Curated list service (`service/curated_list_service.go` — trigger generation, credit deduction) | ✅ |
+| 4.8 | Curated list handler (`handler/curated_list.go` — POST /curated-lists, GET /curated-lists/:id) | ✅ |
+| 4.9 | Worker: curate company list task (`worker/task_curate_list.go` — build profile, query companies, AI curation) | ✅ |
+| 4.10 | AI prompt templates — Company ATS, Job ATS, Curated List prompts | ✅ |
+| 4.11 | Output validation (`ai/validation.go` — schema validation for AI responses, score bounds, retry) | ✅ |
 | 4.12 | Frontend: ATS check page (`app/(dashboard)/ats/page.tsx` — select resume, choose company/paste JD) | ⬜ |
 | 4.13 | Frontend: ATS result page (`app/(dashboard)/ats/[id]/page.tsx` — score display, breakdown, recommendations) | ⬜ |
 | 4.14 | Frontend: Curated lists page (`app/(dashboard)/curated-lists/page.tsx` — generate new, view results) | ⬜ |
@@ -287,15 +287,28 @@
 | 4.16 | Frontend: SSE integration for ATS/curated list completion events | ⬜ |
 | 4.17 | Asynq scheduler setup (periodic tasks — user hard-delete cleanup) | ⬜ |
 
+### Implementation Notes (Tasks 4.1–4.11)
+
+- **ATS DB dedup**: `ats_checks.cache_key = sha256(resumeID + ":" + companyID)` prevents double-charging for identical requests
+- **Curated list DB dedup**: `curated_lists.preferences_hash = sha256(resumeID)` — per-resume dedup with cache miss check before credit deduction
+- **Two-level caching**: DB-level dedup (no re-charge) + Redis AI cache (7-day TTL for company/curated, 24h for job) prevents redundant LLM calls
+- **Async result pattern**: Workers create records with `result = '{}'` placeholder; frontend detects pending by checking `result == {}`; workers call `UpdateResult` on completion
+- **SSE events published**: `ats_company_complete`, `ats_job_complete`, `curated_list_complete` — all sent to `sse:user:{userID}` Redis channel
+- **AI prompt categories**:
+  - Company ATS: `tech_stack_match`, `domain_fit`, `seniority_fit`, `keyword_density`, `impact_metrics`
+  - Job ATS: `required_skills`, `preferred_skills`, `experience_level`, `domain_relevance`, `keyword_density`
+- **Curated list**: AI selects top-20 companies from `CompanyRepository.ListAll()` (capped at 500); returns ranked list with `match_score`, `match_reasons`, `recommendation`
+- **Output validation + retry**: `ValidateATSResultRetry` / `ValidateCuratedListResultRetry` retry up to 2 times on schema/bounds violations before returning error
+
 ### Definition of Done
 
 | Criterion | Status |
 |-----------|:------:|
-| Company ATS check: user selects resume + company, gets score with breakdown | ⬜ |
-| Job ATS check: user selects resume + pastes JD, gets score with breakdown | ⬜ |
-| Curated list: AI-curated company list based on resume profile | ⬜ |
-| All AI operations async — loading state → SSE notification on completion | ⬜ |
-| Credit deduction works correctly for each operation | ⬜ |
-| Results are cached — repeat requests return instantly | ⬜ |
-| AI fallback works end-to-end (Claude → OpenAI) | ⬜ |
-| Premium dashboard shows resume health, credits, recent activity | ⬜ |
+| Company ATS check: user selects resume + company, gets score with breakdown | ✅ (backend) |
+| Job ATS check: user selects resume + pastes JD, gets score with breakdown | ✅ (backend) |
+| Curated list: AI-curated company list based on resume profile | ✅ (backend) |
+| All AI operations async — loading state → SSE notification on completion | ✅ (backend) |
+| Credit deduction works correctly for each operation | ✅ |
+| Results are cached — repeat requests return instantly | ✅ |
+| AI fallback works end-to-end (Claude → OpenAI) | ✅ |
+| Premium dashboard shows resume health, credits, recent activity | ⬜ (frontend pending) |

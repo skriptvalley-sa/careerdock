@@ -646,6 +646,22 @@ func scanCompanyDetail(row pgx.Row) (*domain.Company, error) {
 	return c, nil
 }
 
+// ListAll returns all companies as compact list-column summaries, ordered by name.
+// Results are capped at 500 rows — sufficient for the AI curation use-case.
+func (r *CompanyRepo) ListAll(ctx context.Context) ([]domain.Company, error) {
+	q := getDBTX(ctx, r.pool)
+
+	rows, err := q.Query(ctx, fmt.Sprintf(
+		`SELECT %s FROM companies ORDER BY name ASC LIMIT 500`, listColumns,
+	))
+	if err != nil {
+		return nil, domain.InternalError(err)
+	}
+	defer rows.Close()
+
+	return scanCompanyListRows(rows)
+}
+
 // GetNamesByIDs returns a map of company ID → name for the given IDs.
 // This is a lightweight batch lookup used to enrich list entries with company names.
 func (r *CompanyRepo) GetNamesByIDs(ctx context.Context, ids []uuid.UUID) (map[uuid.UUID]string, error) {

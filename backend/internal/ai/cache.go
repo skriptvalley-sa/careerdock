@@ -17,6 +17,7 @@ const (
 	CacheTTLATSGeneral  = 24 * time.Hour     // general ATS scores
 	CacheTTLATSCompany  = 7 * 24 * time.Hour // company ATS scores (stable)
 	CacheTTLATSJob      = 24 * time.Hour     // job ATS scores
+	CacheTTLCuratedList = 7 * 24 * time.Hour // curated company list (stable)
 )
 
 // ResultCache provides Redis-backed caching for AI operation results.
@@ -86,4 +87,10 @@ func CacheKeyForATSCompany(resumeText, companyID string) string {
 // Uses resumeText and the full job description text.
 func CacheKeyForATSJob(resumeText, jobDescription string) string {
 	return resumeText + "|job:" + jobDescription
+}
+
+// CacheKeyForCuratedList generates the cache input string for curated list generation.
+// Uses the preferencesHash (derived from resumeID) as a stable key.
+func CacheKeyForCuratedList(preferencesHash string) string {
+	return "curated:" + preferencesHash
 }

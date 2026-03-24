@@ -103,8 +103,6 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 				r.Get("/transactions", paymentH.GetCreditTransactions)
 			})
 
-			// TODO (Sprint 4): Curated list routes (non-premium: GET history)
-
 			// --- Premium routes ---
 			r.Group(func(r chi.Router) {
 				r.Use(auth.RequirePremium)
@@ -131,7 +129,13 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 					r.Get("/{id}", atsH.GetCheck)
 				})
 
-				// TODO (Sprint 4): Curated list generation
+				// --- Curated company lists (Sprint 4) ---
+				curatedH := NewCuratedListHandler(svc.CuratedList)
+				r.Route("/curated-lists", func(r chi.Router) {
+					r.Get("/", curatedH.ListByUser)
+					r.Post("/", curatedH.GenerateList)
+					r.Get("/{id}", curatedH.GetList)
+				})
 			})
 
 			// --- Admin routes ---

@@ -75,6 +75,7 @@ func main() {
 	resumeRepo := repository.NewResumeRepo(db)
 	companyRepo := repository.NewCompanyRepo(db)
 	atsCheckRepo := repository.NewATSCheckRepo(db)
+	curatedListRepo := repository.NewCuratedListRepo(db)
 	resumeStore, err := storage.NewS3Store(ctx, cfg.S3, cfg.S3.ResumeBucket)
 	if err != nil {
 		logger.Error("failed to create S3 resume store", "error", err)
@@ -124,7 +125,10 @@ func main() {
 	atsJobHandler := worker.NewATSJobHandler(atsCheckRepo, resumeRepo, resumeStore, aiProvider, aiCache, redisClient)
 	mux.HandleFunc(TaskATSJobCheck, atsJobHandler.Handle)
 
-	// TODO (Sprint 4): mux.HandleFunc(TaskCurateCompanyList, worker.HandleCurateList)
+	// Sprint 4: Curated company list worker
+	curateListHandler := worker.NewCurateListHandler(curatedListRepo, resumeRepo, companyRepo, aiProvider, aiCache, redisClient)
+	mux.HandleFunc(TaskCurateCompanyList, curateListHandler.Handle)
+
 	// TODO (Sprint 5): mux.HandleFunc(TaskCompanyEnrich, worker.HandleCompanyEnrich)
 	// TODO (Sprint 5): mux.HandleFunc(TaskCompanyRefresh, worker.HandleCompanyRefresh)
 

@@ -27,6 +27,8 @@ type CompanyRepository interface {
 	Search(ctx context.Context, query string, filter CompanyFilter) ([]Company, string, error)
 	GetNamesByIDs(ctx context.Context, ids []uuid.UUID) (map[uuid.UUID]string, error)
 	GetNameAndSlugsByIDs(ctx context.Context, ids []uuid.UUID) (map[uuid.UUID]CompanyNameSlug, error)
+	// ListAll returns all companies as compact summaries for AI curation (capped at 500).
+	ListAll(ctx context.Context) ([]Company, error)
 	Create(ctx context.Context, company *Company) error
 	Update(ctx context.Context, company *Company) error
 }
@@ -86,6 +88,10 @@ type CuratedListRepository interface {
 	Create(ctx context.Context, list *CuratedList) error
 	GetByID(ctx context.Context, id uuid.UUID) (*CuratedList, error)
 	ListByUser(ctx context.Context, userID uuid.UUID) ([]CuratedList, error)
+	// GetByPreferencesHash returns the most recent list with the given hash, or nil if not found.
+	GetByPreferencesHash(ctx context.Context, hash string) (*CuratedList, error)
+	// UpdateResult stores the AI-generated ranking result for a completed curated list.
+	UpdateResult(ctx context.Context, id uuid.UUID, result json.RawMessage) error
 }
 
 // PaymentRepository defines data access for payment records.

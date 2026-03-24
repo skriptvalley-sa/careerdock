@@ -88,6 +88,27 @@ func (f *FallbackProvider) ScoreATSJob(ctx context.Context, req *ATSJobRequest) 
 	return result, nil
 }
 
+// CurateCompanyList tries primary, falls back to secondary.
+func (f *FallbackProvider) CurateCompanyList(ctx context.Context, req *CurateListRequest) (*CuratedListResult, error) {
+	result, err := f.primary.CurateCompanyList(ctx, req)
+	if err == nil {
+		return result, nil
+	}
+
+	slog.Warn("primary provider failed, trying fallback",
+		"operation", "curate_company_list",
+		"primary", f.primary.Name(),
+		"primary_error", err.Error(),
+	)
+
+	result, err = f.secondary.CurateCompanyList(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("all providers failed: primary=%s, fallback=%s: %w",
+			f.primary.Name(), f.secondary.Name(), err)
+	}
+	return result, nil
+}
+
 // ScoreATSGeneral tries primary, falls back to secondary.
 func (f *FallbackProvider) ScoreATSGeneral(ctx context.Context, req *ATSGeneralRequest) (*ATSResult, error) {
 	result, err := f.primary.ScoreATSGeneral(ctx, req)
