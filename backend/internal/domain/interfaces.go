@@ -17,6 +17,9 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	Update(ctx context.Context, user *User) error
 	SoftDelete(ctx context.Context, id uuid.UUID) error
+	// HardDeleteExpired permanently deletes users soft-deleted before cutoff.
+	// Returns the number of rows deleted.
+	HardDeleteExpired(ctx context.Context, cutoff time.Time) (int64, error)
 }
 
 // CompanyRepository defines data access for the company directory.

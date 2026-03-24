@@ -33,6 +33,7 @@ const (
 	TaskATSCompanyCheck     = "ats:company_check"
 	TaskATSJobCheck         = "ats:job_check"
 	TaskCurateCompanyList   = "ai:curate_company_list"
+	TaskUserCleanup         = "admin:user_cleanup"
 	TaskCompanyEnrich       = "admin:company_enrich"
 	TaskCompanyRefresh      = "admin:company_refresh"
 )
@@ -129,14 +130,41 @@ func main() {
 	curateListHandler := worker.NewCurateListHandler(curatedListRepo, resumeRepo, companyRepo, aiProvider, aiCache, redisClient)
 	mux.HandleFunc(TaskCurateCompanyList, curateListHandler.Handle)
 
+	// Sprint 4: Periodic user hard-delete cleanup
+	userRepo := repository.NewUserRepo(db)
+	userCleanupHandler := worker.NewUserCleanupHandler(userRepo)
+	mux.HandleFunc(TaskUserCleanup, userCleanupHandler.Handle)
+
 	// TODO (Sprint 5): mux.HandleFunc(TaskCompanyEnrich, worker.HandleCompanyEnrich)
 	// TODO (Sprint 5): mux.HandleFunc(TaskCompanyRefresh, worker.HandleCompanyRefresh)
 
-	// 6. Start server with graceful shutdown
+	// 6. Set up Asynq scheduler for periodic tasks
+	scheduler := asynq.NewScheduler(
+		asynq.RedisClientOpt{Addr: cfg.RedisURL},
+		&asynq.SchedulerOpts{
+			Logger: newAsynqLogger(logger),
+		},
+	)
+
+	// Run user hard-delete sweep daily at 02:00 UTC.
+	if _, err := scheduler.Register("0 2 * * *", asynq.NewTask(TaskUserCleanup, nil),
+		asynq.Queue("low"),
+	); err != nil {
+		logger.Error("failed to register scheduler task", "task", TaskUserCleanup, "error", err)
+		return
+	}
+
+	// 7. Start server + scheduler with graceful shutdown
 	errCh := make(chan error, 1)
 	go func() {
 		logger.Info("Asynq worker starting", "concurrency", 5)
 		errCh <- srv.Run(mux)
+	}()
+
+	schedErrCh := make(chan error, 1)
+	go func() {
+		logger.Info("Asynq scheduler starting")
+		schedErrCh <- scheduler.Run()
 	}()
 
 	// Wait for interrupt
@@ -150,8 +178,13 @@ func main() {
 		if err != nil {
 			logger.Error("worker error", "error", err)
 		}
+	case err := <-schedErrCh:
+		if err != nil {
+			logger.Error("scheduler error", "error", err)
+		}
 	}
 
+	scheduler.Shutdown()
 	srv.Shutdown()
 	logger.Info("worker stopped gracefully")
 }

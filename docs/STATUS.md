@@ -1,6 +1,6 @@
 # Project Status
 
-> **Last updated:** 2026-03-25
+> **Last updated:** 2026-03-25 — Sprint 4 complete ✅
 
 ## Design Phases (Complete)
 - Phase 1: ✅ Complete (PRD.md)
@@ -19,7 +19,7 @@
 - Sprint 1 (Company Directory): ✅ Complete — PR #15 (merged), CI ✅
 - Sprint 2 (Lists & Tracking): ✅ Complete — PR #17 (merged), PR #18 (merged)
 - Sprint 3 (Payments & Resume): ✅ Complete — PR #19, #20, #21, #22, #23, #24, #25, #26 (all merged)
-- Sprint 4 (AI Features): 🔄 In progress — backend complete (tasks 4.1–4.11), frontend pending (4.12–4.17)
+- Sprint 4 (AI Features): ✅ Complete — PR #28, #29, #30, #31 (all merged)
 - Sprint 5 (Admin & Polish): ⬜ Not started
 - Sprint 6 (Launch Prep): ⬜ Not started
 
@@ -262,8 +262,11 @@
 ## Sprint 4 — AI Features (Tasks 4.1–4.17)
 
 **Branch (ATS backend):** `feature/sprint-4-ats-backend` — **PR #28 (merged)**
-**Branch (Curated lists):** `feature/sprint-4-curated-lists` — **PR #29 (open)**
-**Est. hours:** ~78
+**Branch (Curated lists):** `feature/sprint-4-curated-lists` — **PR #29 (merged)**
+**Branch (Frontend):** `feature/sprint-4-frontend` — **PR #30 (merged)**
+**Branch (Scheduler):** `feature/sprint-4-scheduler` — **PR #31 (merged)**
+**CI:** ✅ All jobs passing
+**Est. hours:** ~90
 
 ### Task Checklist
 
@@ -280,12 +283,12 @@
 | 4.9 | Worker: curate company list task (`worker/task_curate_list.go` — build profile, query companies, AI curation) | ✅ |
 | 4.10 | AI prompt templates — Company ATS, Job ATS, Curated List prompts | ✅ |
 | 4.11 | Output validation (`ai/validation.go` — schema validation for AI responses, score bounds, retry) | ✅ |
-| 4.12 | Frontend: ATS check page (`app/(dashboard)/ats/page.tsx` — select resume, choose company/paste JD) | ⬜ |
-| 4.13 | Frontend: ATS result page (`app/(dashboard)/ats/[id]/page.tsx` — score display, breakdown, recommendations) | ⬜ |
-| 4.14 | Frontend: Curated lists page (`app/(dashboard)/curated-lists/page.tsx` — generate new, view results) | ⬜ |
-| 4.15 | Frontend: Premium dashboard (resume health, credit tracker, recent ATS scores, quick actions) | ⬜ |
-| 4.16 | Frontend: SSE integration for ATS/curated list completion events | ⬜ |
-| 4.17 | Asynq scheduler setup (periodic tasks — user hard-delete cleanup) | ⬜ |
+| 4.12 | Frontend: ATS check page (`app/(dashboard)/ats/page.tsx` — select resume, choose company/paste JD) | ✅ |
+| 4.13 | Frontend: ATS result page (`app/(dashboard)/ats/[id]/page.tsx` — score display, breakdown, recommendations) | ✅ |
+| 4.14 | Frontend: Curated lists page (`app/(dashboard)/curated-lists/page.tsx` — generate new, view results) | ✅ |
+| 4.15 | Frontend: Premium dashboard (resume health, credit tracker, recent ATS scores, quick actions) | ✅ |
+| 4.16 | Frontend: SSE integration for ATS/curated list completion events | ✅ |
+| 4.17 | Asynq scheduler setup (periodic tasks — user hard-delete cleanup) | ✅ |
 
 ### Implementation Notes (Tasks 4.1–4.11)
 
@@ -300,15 +303,64 @@
 - **Curated list**: AI selects top-20 companies from `CompanyRepository.ListAll()` (capped at 500); returns ranked list with `match_score`, `match_reasons`, `recommendation`
 - **Output validation + retry**: `ValidateATSResultRetry` / `ValidateCuratedListResultRetry` retry up to 2 times on schema/bounds violations before returning error
 
+### Implementation Notes (Tasks 4.12–4.17)
+
+- **ATS check page** (`/ats`): Resume selector (ready resumes only), company/JD mode toggle, `CompanyCombobox` for company mode, JD textarea with 100–10,000 char counter; submits → navigates to `/ats/{id}`
+- **ATS result page** (`/ats/[id]`): Score ring (color-coded: ≥80 neon green, ≥60 amber, <60 red), match label, breakdown grid with progress bars + feedback text, suggestions list; polls via `useATSCheck` every 5s while pending; SSE invalidates cache on completion
+- **Curated lists page** (`/curated-lists`): Inline generate form with resume selector; `CuratedListCard` shows 5 companies collapsed / expand-all; `PendingListPoller` polls `useCuratedList(id)` every 8s while pending
+- **Premium dashboard section**: Only rendered for `user.premium_since != null`; shows resume health card (default resume + ATS score), credit tracker (resume_upload/ats_check/curated_list), quick action links, recent ATS checks mini-list (last 3)
+- **SSE hooks** (`use-ats.ts`, `use-curated-lists.ts`): `isATSComplete(result)` and `isCuratedListComplete(result)` are TypeScript type guards checking for `score`/`companies` key presence; `use-sse.ts` invalidates query caches on `ats_company_complete`, `ats_job_complete`, `curated_list_complete`
+- **Scheduler** (task 4.17): `asynq.Scheduler` in `cmd/worker/main.go`; cron `0 2 * * *` enqueues `admin:user_cleanup`; handler calls `UserRepo.HardDeleteExpired(ctx, now-30d)`; scheduler shuts down alongside the task server on SIGTERM
+
+### End-to-End Test Results (VPS — 2026-03-25)
+
+| Test | Result |
+|------|--------|
+| Upload resume (slot 1) | ✅ — file stored in MinIO |
+| Worker parse: PDF with no text | ✅ — correctly marked `status=failed` |
+| ATS company check (Go resume vs company) | ✅ — score=62, 5 breakdown categories, 5 suggestions, cached in Redis 7d |
+| ATS job check (Go resume vs JD) | ✅ — score=78, 5 breakdown categories, 5 suggestions, cached 24h |
+| Curated list generation | ✅ — 20 companies ranked (Google 95%, Uber 94%, Cloudflare 93%, Razorpay 92%, PhonePe 91%) |
+| SSE `ats_company_complete` | ✅ — `{check_id, resume_id, score: 72}` received live |
+| SSE `curated_list_complete` | ✅ — `{list_id, resume_id, companies_ranked: 20}` received live |
+| Heartbeat | ✅ — `: heartbeat` every 25s |
+
 ### Definition of Done
 
 | Criterion | Status |
 |-----------|:------:|
-| Company ATS check: user selects resume + company, gets score with breakdown | ✅ (backend) |
-| Job ATS check: user selects resume + pastes JD, gets score with breakdown | ✅ (backend) |
-| Curated list: AI-curated company list based on resume profile | ✅ (backend) |
-| All AI operations async — loading state → SSE notification on completion | ✅ (backend) |
+| Company ATS check: user selects resume + company, gets score with breakdown | ✅ |
+| Job ATS check: user selects resume + pastes JD, gets score with breakdown | ✅ |
+| Curated list: AI-curated company list based on resume profile | ✅ |
+| All AI operations async — loading state → SSE notification on completion | ✅ |
 | Credit deduction works correctly for each operation | ✅ |
 | Results are cached — repeat requests return instantly | ✅ |
 | AI fallback works end-to-end (Claude → OpenAI) | ✅ |
-| Premium dashboard shows resume health, credits, recent activity | ⬜ (frontend pending) |
+| Premium dashboard shows resume health, credits, recent activity | ✅ |
+| Scheduler: daily user hard-delete cleanup at 02:00 UTC | ✅ |
+| VPS deployed + full end-to-end test passing | ✅ |
+| SSE events verified: `ats_company_complete`, `ats_job_complete`, `curated_list_complete` | ✅ |
+
+---
+
+## Sprint 5 — Admin & Polish (Tasks 5.1–5.x)
+
+**Branch:** `feature/sprint-5-admin-polish` *(not started)*
+**Status:** ⬜ Not started
+
+### Planned Tasks
+
+| # | Task | Status |
+|:-:|------|:------:|
+| 5.1 | Admin panel — company CRUD (create, edit, logo upload) | ⬜ |
+| 5.2 | Admin panel — user management (list, ban, grant premium) | ⬜ |
+| 5.3 | Admin panel — credit management (manual allocation) | ⬜ |
+| 5.4 | Admin panel — payment & transaction logs | ⬜ |
+| 5.5 | Company enrichment worker (`admin:company_enrich` — auto-populate tech stack from web) | ⬜ |
+| 5.6 | Company refresh worker (`admin:company_refresh` — periodic re-enrichment) | ⬜ |
+| 5.7 | SSR + `generateMetadata` for company profile page (OG tags, Twitter card) | ⬜ |
+| 5.8 | Rate limiting middleware (per-IP + per-user) | ⬜ |
+| 5.9 | Notification system (in-app notifications for events) | ⬜ |
+| 5.10 | UI polish — loading skeletons, error boundaries, empty states | ⬜ |
+| 5.11 | Onboarding flow — guided setup for new users | ⬜ |
+| 5.12 | Mobile nav improvements — bottom tab bar | ⬜ |

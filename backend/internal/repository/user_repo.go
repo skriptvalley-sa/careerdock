@@ -143,6 +143,19 @@ func (r *UserRepo) SoftDelete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
+// HardDeleteExpired permanently removes users that were soft-deleted before
+// the given cutoff time (i.e. the 30-day grace period has elapsed).
+// Returns the number of rows deleted.
+func (r *UserRepo) HardDeleteExpired(ctx context.Context, cutoff time.Time) (int64, error) {
+	tag, err := r.pool.Exec(ctx, `
+		DELETE FROM users
+		WHERE deleted_at IS NOT NULL AND deleted_at < $1`, cutoff)
+	if err != nil {
+		return 0, domain.InternalError(err)
+	}
+	return tag.RowsAffected(), nil
+}
+
 // --- Token repositories for auth flow ---
 
 // TokenRepo implements email verification and password reset token operations.
