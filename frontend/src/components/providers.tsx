@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
+import { useSSE } from '@/hooks/use-sse';
 import { setAuthFailureHandler } from '@/lib/api';
 import { useAuthStore } from '@/store/auth-store';
 import { SidebarContext, useSidebarState } from '@/hooks/use-sidebar';
@@ -34,6 +35,9 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
   }, [handleFocus]);
+
+  // Connect to SSE for real-time updates (resume processing, etc.)
+  useSSE();
 
   return <>{children}</>;
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hibiken/asynq"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/skriptvalley/careerdock/internal/ai"
 	"github.com/skriptvalley/careerdock/internal/domain"
@@ -16,10 +17,11 @@ import (
 
 // ResumeParseHandler processes uploaded resumes: parses with AI + runs general ATS scoring.
 type ResumeParseHandler struct {
-	resumeRepo domain.ResumeRepository
-	fileStore  domain.FileStore
-	aiProvider ai.LLMProvider
-	aiCache    *ai.ResultCache
+	resumeRepo  domain.ResumeRepository
+	fileStore   domain.FileStore
+	aiProvider  ai.LLMProvider
+	aiCache     *ai.ResultCache
+	redisClient *redis.Client
 }
 
 // NewResumeParseHandler creates a handler for resume:parse_and_score tasks.
@@ -28,12 +30,14 @@ func NewResumeParseHandler(
 	fileStore domain.FileStore,
 	aiProvider ai.LLMProvider,
 	aiCache *ai.ResultCache,
+	redisClient *redis.Client,
 ) *ResumeParseHandler {
 	return &ResumeParseHandler{
-		resumeRepo: resumeRepo,
-		fileStore:  fileStore,
-		aiProvider: aiProvider,
-		aiCache:    aiCache,
+		resumeRepo:  resumeRepo,
+		fileStore:   fileStore,
+		aiProvider:  aiProvider,
+		aiCache:     aiCache,
+		redisClient: redisClient,
 	}
 }
 
@@ -104,6 +108,7 @@ func (h *ResumeParseHandler) Handle(ctx context.Context, t *asynq.Task) error {
 		if err := h.resumeRepo.Update(ctx, resume); err != nil {
 			return fmt.Errorf("update resume: %w", err)
 		}
+		h.publishResumeReady(resume.UserID, resumeID, resume.FileName, 0)
 		return nil // don't retry — partial success
 	}
 
@@ -126,6 +131,9 @@ func (h *ResumeParseHandler) Handle(ctx context.Context, t *asynq.Task) error {
 		"ats_score", atsResult.Score,
 		"provider", h.aiProvider.Name(),
 	)
+
+	// Publish SSE event to notify connected client
+	h.publishResumeReady(resume.UserID, resumeID, resume.FileName, atsResult.Score)
 
 	return nil
 }
@@ -193,4 +201,40 @@ func (h *ResumeParseHandler) scoreATSGeneral(ctx context.Context, resumeText str
 	}
 
 	return result, nil
+}
+
+// publishResumeReady publishes an SSE event to notify the user their resume is ready.
+func (h *ResumeParseHandler) publishResumeReady(userID, resumeID uuid.UUID, fileName string, atsScore int) {
+	if h.redisClient == nil {
+		return
+	}
+
+	event := map[string]any{
+		"resume_id": resumeID,
+		"file_name": fileName,
+		"status":    "ready",
+		"ats_score": atsScore,
+	}
+
+	payload, err := json.Marshal(event)
+	if err != nil {
+		slog.Warn("failed to marshal SSE event", "error", err)
+		return
+	}
+
+	sseEvent := map[string]any{
+		"type": "resume_ready",
+		"data": json.RawMessage(payload),
+	}
+
+	eventJSON, err := json.Marshal(sseEvent)
+	if err != nil {
+		slog.Warn("failed to marshal SSE wrapper", "error", err)
+		return
+	}
+
+	channel := fmt.Sprintf("sse:user:%s", userID)
+	if err := h.redisClient.Publish(context.Background(), channel, eventJSON).Err(); err != nil {
+		slog.Warn("failed to publish SSE event", "error", err, "user_id", userID)
+	}
 }

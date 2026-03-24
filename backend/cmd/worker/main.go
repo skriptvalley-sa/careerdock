@@ -112,7 +112,7 @@ func main() {
 	emailHandler := worker.NewEmailSendHandler(emailSender)
 	mux.HandleFunc(TaskSendEmail, emailHandler.Handle)
 
-	resumeParseHandler := worker.NewResumeParseHandler(resumeRepo, resumeStore, aiProvider, aiCache)
+	resumeParseHandler := worker.NewResumeParseHandler(resumeRepo, resumeStore, aiProvider, aiCache, redisClient)
 	mux.HandleFunc(TaskResumeParseAndScore, resumeParseHandler.Handle)
 
 	// TODO (Sprint 4): mux.HandleFunc(TaskATSCompanyCheck, worker.HandleATSCompany)

@@ -20,9 +20,9 @@ type Services struct {
 	Credit      *CreditService
 	Resume      *ResumeService
 
-	// Infrastructure references for health checks
+	// Infrastructure references for health checks and SSE
 	db    *pgxpool.Pool
-	redis *redis.Client
+	Redis *redis.Client
 
 	// Runtime metadata
 	Version                string
@@ -60,7 +60,7 @@ func NewServices(
 		Credit:                 credit,
 		Resume:                 resume,
 		db:                     db,
-		redis:                  redisClient,
+		Redis:                  redisClient,
 		Version:                version,
 		IsProduction:           isProduction,
 		RazorpayKeyID:          razorpayKeyID,
@@ -75,5 +75,5 @@ func (s *Services) PingDB(ctx context.Context) error {
 
 // PingRedis checks Redis connectivity.
 func (s *Services) PingRedis(ctx context.Context) error {
-	return s.redis.Ping(ctx).Err()
+	return s.Redis.Ping(ctx).Err()
 }

@@ -232,6 +232,7 @@
 - **Sidebar**: Added "Resumes" nav link (FileText icon) between Applications and Companies
 - **Hooks**: `use-payments.ts` (credit balance, transactions, order creation, payment confirmation), `use-resumes.ts` (list, upload, set default, archive, download URL)
 - **API types**: Added PaymentOrder, CreditBalances, CreditTransaction, ResumeListItem, ResumeDetail, ParsedSummary types
+- **SSE real-time updates**: Redis pub/sub backend — worker publishes `resume_ready` events, SSE handler subscribes per-user and forwards to connected clients; frontend `useSSE` hook auto-invalidates TanStack Query caches on events
 
 ### Definition of Done
 
@@ -243,6 +244,6 @@
 | Credit balance shown in UI, deducted on premium actions | ✅ |
 | User can upload PDF resume (validated, stored in S3/MinIO) | ✅ |
 | Resume parse + general ATS runs async, results stored in DB | ✅ |
-| SSE notifies user when resume processing completes | ⬜ |
+| SSE notifies user when resume processing completes | ✅ |
 | AI fallback: if Claude fails, OpenAI is used | ✅ |
 | AI result cache: repeated requests return cached result | ✅ |

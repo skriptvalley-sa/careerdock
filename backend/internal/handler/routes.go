@@ -86,8 +86,8 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 				r.Delete("/", userH.DeleteAccount)
 			})
 
-			// --- SSE (Sprint 2 skeleton) ---
-			sseH := NewSSEHandler()
+			// --- SSE (real-time events via Redis pub/sub) ---
+			sseH := NewSSEHandler(svc.Redis)
 			r.Get("/events", sseH.Events)
 
 			// --- Payments (Sprint 3) ---
