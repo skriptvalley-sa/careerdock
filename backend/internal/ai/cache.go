@@ -75,3 +75,15 @@ func CacheKeyForResumeParse(resumeText string) string {
 func CacheKeyForATSGeneral(resumeText string) string {
 	return resumeText
 }
+
+// CacheKeyForATSCompany generates the cache input string for company-specific ATS scoring.
+// Uses resumeText and company UUID to produce a stable, deterministic key.
+func CacheKeyForATSCompany(resumeText, companyID string) string {
+	return resumeText + "|company:" + companyID
+}
+
+// CacheKeyForATSJob generates the cache input string for job-specific ATS scoring.
+// Uses resumeText and the full job description text.
+func CacheKeyForATSJob(resumeText, jobDescription string) string {
+	return resumeText + "|job:" + jobDescription
+}

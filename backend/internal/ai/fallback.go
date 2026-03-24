@@ -46,6 +46,48 @@ func (f *FallbackProvider) ParseResume(ctx context.Context, req *ParseResumeRequ
 	return result, nil
 }
 
+// ScoreATSCompany tries primary, falls back to secondary.
+func (f *FallbackProvider) ScoreATSCompany(ctx context.Context, req *ATSCompanyRequest) (*ATSResult, error) {
+	result, err := f.primary.ScoreATSCompany(ctx, req)
+	if err == nil {
+		return result, nil
+	}
+
+	slog.Warn("primary provider failed, trying fallback",
+		"operation", "score_ats_company",
+		"primary", f.primary.Name(),
+		"primary_error", err.Error(),
+	)
+
+	result, err = f.secondary.ScoreATSCompany(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("all providers failed: primary=%s, fallback=%s: %w",
+			f.primary.Name(), f.secondary.Name(), err)
+	}
+	return result, nil
+}
+
+// ScoreATSJob tries primary, falls back to secondary.
+func (f *FallbackProvider) ScoreATSJob(ctx context.Context, req *ATSJobRequest) (*ATSResult, error) {
+	result, err := f.primary.ScoreATSJob(ctx, req)
+	if err == nil {
+		return result, nil
+	}
+
+	slog.Warn("primary provider failed, trying fallback",
+		"operation", "score_ats_job",
+		"primary", f.primary.Name(),
+		"primary_error", err.Error(),
+	)
+
+	result, err = f.secondary.ScoreATSJob(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("all providers failed: primary=%s, fallback=%s: %w",
+			f.primary.Name(), f.secondary.Name(), err)
+	}
+	return result, nil
+}
+
 // ScoreATSGeneral tries primary, falls back to secondary.
 func (f *FallbackProvider) ScoreATSGeneral(ctx context.Context, req *ATSGeneralRequest) (*ATSResult, error) {
 	result, err := f.primary.ScoreATSGeneral(ctx, req)

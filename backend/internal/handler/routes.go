@@ -103,7 +103,7 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 				r.Get("/transactions", paymentH.GetCreditTransactions)
 			})
 
-			// TODO (Sprint 4): ATS routes, Curated list routes
+			// TODO (Sprint 4): Curated list routes (non-premium: GET history)
 
 			// --- Premium routes ---
 			r.Group(func(r chi.Router) {
@@ -122,7 +122,16 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 					})
 				})
 
-				// TODO (Sprint 4): ATS checks, Curated list generation
+				// --- ATS checks (Sprint 4) ---
+				atsH := NewATSHandler(svc.ATS)
+				r.Route("/ats", func(r chi.Router) {
+					r.Get("/", atsH.ListChecks)
+					r.Post("/company", atsH.CheckCompany)
+					r.Post("/job", atsH.CheckJob)
+					r.Get("/{id}", atsH.GetCheck)
+				})
+
+				// TODO (Sprint 4): Curated list generation
 			})
 
 			// --- Admin routes ---

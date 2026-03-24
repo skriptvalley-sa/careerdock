@@ -97,6 +97,81 @@ func (c *ClaudeProvider) ScoreATSGeneral(ctx context.Context, req *ATSGeneralReq
 	return &result, nil
 }
 
+// ScoreATSCompany evaluates resume fit against a specific company profile.
+// Uses the raw PDF bytes for document-level analysis when available.
+func (c *ClaudeProvider) ScoreATSCompany(ctx context.Context, req *ATSCompanyRequest) (*ATSResult, error) {
+	systemPrompt := prompts.BuildSystemPrompt(prompts.ATSCompanySystem())
+
+	companyProfile := ""
+	if req.Company != nil {
+		companyProfile = prompts.CompanyProfileText(
+			req.Company.Name,
+			req.Company.Size,
+			req.Company.TechStack,
+			req.Company.Domains,
+			req.Company.CompensationTier,
+		)
+	}
+
+	result, err := ValidateATSResultRetry(ctx, 2, ATSCompanyCategories, func() (*ATSResult, error) {
+		var raw []byte
+		var tokens TokenUsage
+		var callErr error
+
+		if len(req.PDFBytes) > 0 {
+			userMessage := prompts.ATSCompanyUserPDF(companyProfile)
+			raw, tokens, callErr = c.callWithPDF(ctx, systemPrompt, userMessage, req.PDFBytes)
+		} else {
+			userMessage := prompts.ATSCompanyUserText(req.ResumeText, companyProfile)
+			raw, tokens, callErr = c.callText(ctx, systemPrompt, userMessage)
+		}
+		if callErr != nil {
+			return nil, fmt.Errorf("claude ATS company: %w", callErr)
+		}
+
+		var r ATSResult
+		if err := json.Unmarshal(raw, &r); err != nil {
+			return nil, fmt.Errorf("claude ATS company JSON: %w (raw: %s)", err, truncate(raw, 200))
+		}
+		r.TokensUsed = tokens
+		r.GeneratedAt = time.Now()
+		return &r, nil
+	})
+	return result, err
+}
+
+// ScoreATSJob evaluates resume fit against a specific job description.
+// Uses the raw PDF bytes for document-level analysis when available.
+func (c *ClaudeProvider) ScoreATSJob(ctx context.Context, req *ATSJobRequest) (*ATSResult, error) {
+	systemPrompt := prompts.BuildSystemPrompt(prompts.ATSJobSystem())
+
+	result, err := ValidateATSResultRetry(ctx, 2, ATSJobCategories, func() (*ATSResult, error) {
+		var raw []byte
+		var tokens TokenUsage
+		var callErr error
+
+		if len(req.PDFBytes) > 0 {
+			userMessage := prompts.ATSJobUserPDF(req.JobDescription)
+			raw, tokens, callErr = c.callWithPDF(ctx, systemPrompt, userMessage, req.PDFBytes)
+		} else {
+			userMessage := prompts.ATSJobUserText(req.ResumeText, req.JobDescription)
+			raw, tokens, callErr = c.callText(ctx, systemPrompt, userMessage)
+		}
+		if callErr != nil {
+			return nil, fmt.Errorf("claude ATS job: %w", callErr)
+		}
+
+		var r ATSResult
+		if err := json.Unmarshal(raw, &r); err != nil {
+			return nil, fmt.Errorf("claude ATS job JSON: %w (raw: %s)", err, truncate(raw, 200))
+		}
+		r.TokensUsed = tokens
+		r.GeneratedAt = time.Now()
+		return &r, nil
+	})
+	return result, err
+}
+
 // --- Internal HTTP methods ---
 
 // claudeRequest is the request body for the Claude Messages API.

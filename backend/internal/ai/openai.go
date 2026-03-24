@@ -87,6 +87,63 @@ func (o *OpenAIProvider) ScoreATSGeneral(ctx context.Context, req *ATSGeneralReq
 	return &result, nil
 }
 
+// ScoreATSCompany evaluates resume fit against a specific company profile.
+// OpenAI can only use extracted text, not the raw PDF.
+func (o *OpenAIProvider) ScoreATSCompany(ctx context.Context, req *ATSCompanyRequest) (*ATSResult, error) {
+	systemPrompt := prompts.BuildSystemPrompt(prompts.ATSCompanySystem())
+
+	companyProfile := ""
+	if req.Company != nil {
+		companyProfile = prompts.CompanyProfileText(
+			req.Company.Name,
+			req.Company.Size,
+			req.Company.TechStack,
+			req.Company.Domains,
+			req.Company.CompensationTier,
+		)
+	}
+
+	result, err := ValidateATSResultRetry(ctx, 2, ATSCompanyCategories, func() (*ATSResult, error) {
+		userMessage := prompts.ATSCompanyUserText(req.ResumeText, companyProfile)
+		raw, tokens, callErr := o.call(ctx, systemPrompt, userMessage)
+		if callErr != nil {
+			return nil, fmt.Errorf("openai ATS company: %w", callErr)
+		}
+
+		var r ATSResult
+		if err := json.Unmarshal(raw, &r); err != nil {
+			return nil, fmt.Errorf("openai ATS company JSON: %w (raw: %s)", err, truncate(raw, 200))
+		}
+		r.TokensUsed = tokens
+		r.GeneratedAt = time.Now()
+		return &r, nil
+	})
+	return result, err
+}
+
+// ScoreATSJob evaluates resume fit against a specific job description.
+// OpenAI can only use extracted text, not the raw PDF.
+func (o *OpenAIProvider) ScoreATSJob(ctx context.Context, req *ATSJobRequest) (*ATSResult, error) {
+	systemPrompt := prompts.BuildSystemPrompt(prompts.ATSJobSystem())
+
+	result, err := ValidateATSResultRetry(ctx, 2, ATSJobCategories, func() (*ATSResult, error) {
+		userMessage := prompts.ATSJobUserText(req.ResumeText, req.JobDescription)
+		raw, tokens, callErr := o.call(ctx, systemPrompt, userMessage)
+		if callErr != nil {
+			return nil, fmt.Errorf("openai ATS job: %w", callErr)
+		}
+
+		var r ATSResult
+		if err := json.Unmarshal(raw, &r); err != nil {
+			return nil, fmt.Errorf("openai ATS job JSON: %w (raw: %s)", err, truncate(raw, 200))
+		}
+		r.TokensUsed = tokens
+		r.GeneratedAt = time.Now()
+		return &r, nil
+	})
+	return result, err
+}
+
 // --- Internal HTTP methods ---
 
 type openAIRequest struct {

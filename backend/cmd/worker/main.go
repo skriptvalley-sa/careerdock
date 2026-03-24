@@ -73,6 +73,8 @@ func main() {
 
 	// Build repositories and services needed by worker tasks
 	resumeRepo := repository.NewResumeRepo(db)
+	companyRepo := repository.NewCompanyRepo(db)
+	atsCheckRepo := repository.NewATSCheckRepo(db)
 	resumeStore, err := storage.NewS3Store(ctx, cfg.S3, cfg.S3.ResumeBucket)
 	if err != nil {
 		logger.Error("failed to create S3 resume store", "error", err)
@@ -115,8 +117,13 @@ func main() {
 	resumeParseHandler := worker.NewResumeParseHandler(resumeRepo, resumeStore, aiProvider, aiCache, redisClient)
 	mux.HandleFunc(TaskResumeParseAndScore, resumeParseHandler.Handle)
 
-	// TODO (Sprint 4): mux.HandleFunc(TaskATSCompanyCheck, worker.HandleATSCompany)
-	// TODO (Sprint 4): mux.HandleFunc(TaskATSJobCheck, worker.HandleATSJob)
+	// Sprint 4: ATS company + job check workers
+	atsCompanyHandler := worker.NewATSCompanyHandler(atsCheckRepo, resumeRepo, companyRepo, resumeStore, aiProvider, aiCache, redisClient)
+	mux.HandleFunc(TaskATSCompanyCheck, atsCompanyHandler.Handle)
+
+	atsJobHandler := worker.NewATSJobHandler(atsCheckRepo, resumeRepo, resumeStore, aiProvider, aiCache, redisClient)
+	mux.HandleFunc(TaskATSJobCheck, atsJobHandler.Handle)
+
 	// TODO (Sprint 4): mux.HandleFunc(TaskCurateCompanyList, worker.HandleCurateList)
 	// TODO (Sprint 5): mux.HandleFunc(TaskCompanyEnrich, worker.HandleCompanyEnrich)
 	// TODO (Sprint 5): mux.HandleFunc(TaskCompanyRefresh, worker.HandleCompanyRefresh)

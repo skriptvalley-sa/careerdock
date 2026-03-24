@@ -19,6 +19,7 @@ type Services struct {
 	Payment     *PaymentService
 	Credit      *CreditService
 	Resume      *ResumeService
+	ATS         *ATSService
 
 	// Infrastructure references for health checks and SSE
 	db    *pgxpool.Pool
@@ -43,6 +44,7 @@ func NewServices(
 	payment *PaymentService,
 	credit *CreditService,
 	resume *ResumeService,
+	ats *ATSService,
 	db *pgxpool.Pool,
 	redisClient *redis.Client,
 	version string,
@@ -59,6 +61,7 @@ func NewServices(
 		Payment:                payment,
 		Credit:                 credit,
 		Resume:                 resume,
+		ATS:                    ats,
 		db:                     db,
 		Redis:                  redisClient,
 		Version:                version,

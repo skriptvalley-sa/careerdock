@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -76,6 +77,8 @@ type ATSCheckRepository interface {
 	GetByID(ctx context.Context, id uuid.UUID) (*ATSCheck, error)
 	ListByUser(ctx context.Context, userID uuid.UUID) ([]ATSCheck, error)
 	GetByCacheKey(ctx context.Context, cacheKey string) (*ATSCheck, error)
+	// UpdateResult stores the AI-generated score result for a completed ATS check.
+	UpdateResult(ctx context.Context, id uuid.UUID, result json.RawMessage) error
 }
 
 // CuratedListRepository defines data access for AI-curated lists.

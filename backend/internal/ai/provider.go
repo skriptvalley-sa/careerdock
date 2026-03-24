@@ -24,6 +24,12 @@ type LLMProvider interface {
 	// ScoreATSGeneral evaluates a resume's general ATS compatibility.
 	ScoreATSGeneral(ctx context.Context, req *ATSGeneralRequest) (*ATSResult, error)
 
+	// ScoreATSCompany evaluates resume fit against a specific company profile.
+	ScoreATSCompany(ctx context.Context, req *ATSCompanyRequest) (*ATSResult, error)
+
+	// ScoreATSJob evaluates resume fit against a specific job description.
+	ScoreATSJob(ctx context.Context, req *ATSJobRequest) (*ATSResult, error)
+
 	// Name returns the provider name (e.g., "claude", "openai").
 	Name() string
 }
