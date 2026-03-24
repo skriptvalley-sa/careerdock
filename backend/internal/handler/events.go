@@ -82,7 +82,10 @@ func getFlusher(w http.ResponseWriter) (http.Flusher, bool) {
 
 // Events handles GET /api/events.
 // Opens a persistent SSE connection. Subscribes to the user's Redis pub/sub
-// channel and forwards events as they arrive. Sends heartbeats every 30s.
+// channel and forwards events as they arrive. Sends heartbeats every 25s.
+//
+// Uses http.ResponseController to extend the server's WriteTimeout before each
+// write, keeping the long-lived connection alive indefinitely.
 func (h *SSEHandler) Events(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.UserIDFromContext(r.Context())
 
@@ -94,15 +97,26 @@ func (h *SSEHandler) Events(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// ResponseController lets us extend the write deadline on each write,
+	// preventing the server's WriteTimeout (30s) from killing the connection.
+	rc := http.NewResponseController(w)
+
 	// Set SSE headers
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("X-Accel-Buffering", "no") // Disable nginx buffering
 
+	// Helper: extend write deadline and write+flush
+	writeSSE := func(data string) {
+		// Push the write deadline 60s into the future before each write
+		_ = rc.SetWriteDeadline(time.Now().Add(60 * time.Second))
+		_, _ = fmt.Fprint(w, data)
+		flusher.Flush()
+	}
+
 	// Send initial connection event
-	_, _ = fmt.Fprintf(w, "event: connected\ndata: {\"user_id\":\"%s\"}\n\n", userID)
-	flusher.Flush()
+	writeSSE(fmt.Sprintf("event: connected\ndata: {\"user_id\":\"%s\"}\n\n", userID))
 
 	slog.Info("SSE client connected", "user_id", userID)
 
@@ -132,13 +146,10 @@ func (h *SSEHandler) Events(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			_, _ = fmt.Fprintf(w, "event: %s\ndata: %s\n\n", event.Type, string(event.Data))
-			flusher.Flush()
+			writeSSE(fmt.Sprintf("event: %s\ndata: %s\n\n", event.Type, string(event.Data)))
 
 		case <-heartbeat.C:
-			// Heartbeat keeps the connection alive and resets the WriteTimeout.
-			_, _ = fmt.Fprintf(w, ": heartbeat\n\n")
-			flusher.Flush()
+			writeSSE(": heartbeat\n\n")
 		}
 	}
 }
