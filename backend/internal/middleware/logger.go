@@ -25,6 +25,12 @@ func (w *statusWriter) Write(b []byte) (int, error) {
 	return n, err
 }
 
+// Unwrap returns the underlying ResponseWriter, allowing middleware-aware
+// code (e.g. SSE handler) to access interfaces like http.Flusher.
+func (w *statusWriter) Unwrap() http.ResponseWriter {
+	return w.ResponseWriter
+}
+
 // Logger returns a middleware that logs each request with structured fields.
 // Uses slog for structured, JSON-compatible logging.
 func Logger(logger *slog.Logger) func(http.Handler) http.Handler {
