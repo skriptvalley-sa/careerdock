@@ -17,9 +17,15 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	Update(ctx context.Context, user *User) error
 	SoftDelete(ctx context.Context, id uuid.UUID) error
+	// UndoSoftDelete restores a soft-deleted user (clears deleted_at).
+	UndoSoftDelete(ctx context.Context, id uuid.UUID) error
 	// HardDeleteExpired permanently deletes users soft-deleted before cutoff.
 	// Returns the number of rows deleted.
 	HardDeleteExpired(ctx context.Context, cutoff time.Time) (int64, error)
+	// GetByIDIncludeDeleted retrieves a user by ID, including soft-deleted users.
+	GetByIDIncludeDeleted(ctx context.Context, id uuid.UUID) (*User, error)
+	// ListUsers returns users matching the filter (admin use).
+	ListUsers(ctx context.Context, filter UserFilter) ([]User, int, error) // users, total count, error
 }
 
 // CompanyRepository defines data access for the company directory.
@@ -104,6 +110,8 @@ type PaymentRepository interface {
 	UpdateStatus(ctx context.Context, id uuid.UUID, status PaymentStatus) error
 	UpdateWebhookCapture(ctx context.Context, id uuid.UUID, razorpayPaymentID string, webhookReceivedAt time.Time) error
 	ListByUser(ctx context.Context, userID uuid.UUID) ([]Payment, error)
+	// ListAll returns payments matching the filter (admin use).
+	ListAll(ctx context.Context, filter PaymentFilter) ([]Payment, int, error) // payments, total count, error
 }
 
 // CreditRepository defines data access for credits and transactions.
@@ -114,6 +122,8 @@ type CreditRepository interface {
 	Deduct(ctx context.Context, userID uuid.UUID, creditType CreditType, amount int) error
 	LogTransaction(ctx context.Context, txn *CreditTransaction) error
 	ListTransactionsByUser(ctx context.Context, userID uuid.UUID, creditType *CreditType, limit int) ([]CreditTransaction, error)
+	// ListAllTransactions returns credit transactions matching the filter (admin use).
+	ListAllTransactions(ctx context.Context, filter CreditTransactionFilter) ([]CreditTransaction, int, error)
 }
 
 // NotificationRepository defines data access for user notifications.
@@ -184,6 +194,30 @@ type CompanyFilter struct {
 	Headquarters      string        // partial match (ILIKE)
 	Sort              string        // name, size, compensation_tier, updated_at
 	Order             string        // asc (default), desc
+}
+
+// UserFilter defines filtering options for admin user listing.
+type UserFilter struct {
+	Query  string // search by name or email (ILIKE)
+	Role   *Role
+	Limit  int
+	Offset int
+}
+
+// PaymentFilter defines filtering options for admin payment listing.
+type PaymentFilter struct {
+	UserID *uuid.UUID
+	Status *PaymentStatus
+	Limit  int
+	Offset int
+}
+
+// CreditTransactionFilter defines filtering options for admin credit transaction listing.
+type CreditTransactionFilter struct {
+	UserID     *uuid.UUID
+	CreditType *CreditType
+	Limit      int
+	Offset     int
 }
 
 // AuditLogFilter defines filtering options for admin audit log.

@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -181,4 +183,79 @@ func (r *CreditRepo) ListTransactionsByUser(ctx context.Context, userID uuid.UUI
 		return nil, domain.InternalError(err)
 	}
 	return txns, nil
+}
+
+// ListAllTransactions returns credit transactions matching the filter with total count (admin use).
+func (r *CreditRepo) ListAllTransactions(ctx context.Context, filter domain.CreditTransactionFilter) ([]domain.CreditTransaction, int, error) {
+	q := getDBTX(ctx, r.pool)
+
+	clauses := []string{}
+	args := []any{}
+	argIdx := 1
+
+	if filter.UserID != nil {
+		args = append(args, *filter.UserID)
+		clauses = append(clauses, fmt.Sprintf("user_id = $%d", argIdx))
+		argIdx++
+	}
+	if filter.CreditType != nil {
+		args = append(args, string(*filter.CreditType))
+		clauses = append(clauses, fmt.Sprintf("credit_type = $%d", argIdx))
+		argIdx++
+	}
+
+	where := ""
+	if len(clauses) > 0 {
+		where = "WHERE " + strings.Join(clauses, " AND ")
+	}
+
+	var total int
+	if err := q.QueryRow(ctx, fmt.Sprintf("SELECT COUNT(*) FROM credit_transactions %s", where), args...).Scan(&total); err != nil {
+		return nil, 0, domain.InternalError(err)
+	}
+
+	limit := filter.Limit
+	if limit <= 0 || limit > 100 {
+		limit = 50
+	}
+	offset := filter.Offset
+	if offset < 0 {
+		offset = 0
+	}
+
+	args = append(args, limit)
+	limitParam := fmt.Sprintf("$%d", argIdx)
+	argIdx++
+	args = append(args, offset)
+	offsetParam := fmt.Sprintf("$%d", argIdx)
+
+	query := fmt.Sprintf(`
+		SELECT id, user_id, credit_type, amount, balance_after,
+		       reason, reference_id, created_at
+		FROM credit_transactions
+		%s
+		ORDER BY created_at DESC
+		LIMIT %s OFFSET %s`, where, limitParam, offsetParam)
+
+	rows, err := q.Query(ctx, query, args...)
+	if err != nil {
+		return nil, 0, domain.InternalError(err)
+	}
+	defer rows.Close()
+
+	var txns []domain.CreditTransaction
+	for rows.Next() {
+		var t domain.CreditTransaction
+		if err := rows.Scan(
+			&t.ID, &t.UserID, &t.CreditType, &t.Amount, &t.BalanceAfter,
+			&t.Reason, &t.ReferenceID, &t.CreatedAt,
+		); err != nil {
+			return nil, 0, domain.InternalError(err)
+		}
+		txns = append(txns, t)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, domain.InternalError(err)
+	}
+	return txns, total, nil
 }

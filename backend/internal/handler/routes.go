@@ -149,7 +149,23 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 					r.Put("/{id}", ffH.ToggleFlag)
 				})
 
-				// TODO (Sprint 5): Additional admin endpoints
+				// Admin panel (Sprint 5)
+				adminH := NewAdminHandler(svc.Admin)
+				r.Route("/admin", func(r chi.Router) {
+					// Companies
+					r.Post("/companies", adminH.CreateCompany)
+					r.Put("/companies/{id}", adminH.UpdateCompany)
+					r.Post("/companies/{id}/logo", adminH.UploadCompanyLogo)
+
+					// Users
+					r.Get("/users", adminH.ListUsers)
+					r.Put("/users/{id}", adminH.UpdateUser)
+					r.Post("/users/{id}/credits", adminH.AllocateCredits)
+
+					// Payments & credit transactions
+					r.Get("/payments", adminH.ListPayments)
+					r.Get("/credits/transactions", adminH.ListCreditTransactions)
+				})
 			})
 		})
 

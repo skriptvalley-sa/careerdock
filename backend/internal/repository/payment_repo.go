@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -160,4 +162,83 @@ func (r *PaymentRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]domai
 		return nil, domain.InternalError(err)
 	}
 	return payments, nil
+}
+
+// ListAll returns payments matching the filter with total count (admin use).
+func (r *PaymentRepo) ListAll(ctx context.Context, filter domain.PaymentFilter) ([]domain.Payment, int, error) {
+	q := getDBTX(ctx, r.pool)
+
+	clauses := []string{}
+	args := []any{}
+	argIdx := 1
+
+	if filter.UserID != nil {
+		args = append(args, *filter.UserID)
+		clauses = append(clauses, fmt.Sprintf("user_id = $%d", argIdx))
+		argIdx++
+	}
+	if filter.Status != nil {
+		args = append(args, string(*filter.Status))
+		clauses = append(clauses, fmt.Sprintf("status = $%d", argIdx))
+		argIdx++
+	}
+
+	where := ""
+	if len(clauses) > 0 {
+		where = "WHERE " + strings.Join(clauses, " AND ")
+	}
+
+	var total int
+	if err := q.QueryRow(ctx, fmt.Sprintf("SELECT COUNT(*) FROM payments %s", where), args...).Scan(&total); err != nil {
+		return nil, 0, domain.InternalError(err)
+	}
+
+	limit := filter.Limit
+	if limit <= 0 || limit > 100 {
+		limit = 50
+	}
+	offset := filter.Offset
+	if offset < 0 {
+		offset = 0
+	}
+
+	args = append(args, limit)
+	limitParam := fmt.Sprintf("$%d", argIdx)
+	argIdx++
+	args = append(args, offset)
+	offsetParam := fmt.Sprintf("$%d", argIdx)
+
+	query := fmt.Sprintf(`
+		SELECT id, user_id, razorpay_order_id, razorpay_payment_id,
+		       amount_paise, currency, product_type, status,
+		       receipt_number, refund_reason, refunded_at, refunded_by,
+		       webhook_received_at, created_at, updated_at
+		FROM payments
+		%s
+		ORDER BY created_at DESC
+		LIMIT %s OFFSET %s`, where, limitParam, offsetParam)
+
+	rows, err := q.Query(ctx, query, args...)
+	if err != nil {
+		return nil, 0, domain.InternalError(err)
+	}
+	defer rows.Close()
+
+	var payments []domain.Payment
+	for rows.Next() {
+		var p domain.Payment
+		if err := rows.Scan(
+			&p.ID, &p.UserID, &p.RazorpayOrderID, &p.RazorpayPaymentID,
+			&p.AmountPaise, &p.Currency, &p.ProductType, &p.Status,
+			&p.ReceiptNumber, &p.RefundReason, &p.RefundedAt, &p.RefundedBy,
+			&p.WebhookReceivedAt, &p.CreatedAt, &p.UpdatedAt,
+		); err != nil {
+			return nil, 0, domain.InternalError(err)
+		}
+		payments = append(payments, p)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, domain.InternalError(err)
+	}
+	return payments, total, nil
 }

@@ -86,6 +86,7 @@ func main() {
 	resumeRepo := repository.NewResumeRepo(db)
 	atsCheckRepo := repository.NewATSCheckRepo(db)
 	curatedListRepo := repository.NewCuratedListRepo(db)
+	auditLogRepo := repository.NewAuditLogRepo(db)
 
 	// S3 storage for resume files
 	resumeStore, err := storage.NewS3Store(ctx, cfg.S3, cfg.S3.ResumeBucket)
@@ -96,6 +97,18 @@ func main() {
 	if cfg.IsDevelopment() {
 		if err := resumeStore.EnsureBucket(ctx); err != nil {
 			logger.Warn("failed to ensure resume bucket (MinIO may not be running)", "error", err)
+		}
+	}
+
+	// S3 storage for company logos
+	logoStore, err := storage.NewS3Store(ctx, cfg.S3, cfg.S3.LogoBucket)
+	if err != nil {
+		logger.Error("failed to create S3 logo store", "error", err)
+		return
+	}
+	if cfg.IsDevelopment() {
+		if err := logoStore.EnsureBucket(ctx); err != nil {
+			logger.Warn("failed to ensure logo bucket (MinIO may not be running)", "error", err)
 		}
 	}
 
@@ -115,7 +128,8 @@ func main() {
 	resumeSvc := service.NewResumeService(resumeRepo, userRepo, creditRepo, resumeStore, txr, asynqClient)
 	atsSvc := service.NewATSService(atsCheckRepo, resumeRepo, companyRepo, creditRepo, txr, asynqClient)
 	curatedListSvc := service.NewCuratedListService(curatedListRepo, resumeRepo, creditRepo, txr, asynqClient)
-	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, paymentSvc, creditSvc, resumeSvc, atsSvc, curatedListSvc, db, redisClient, version, cfg.IsProduction(), cfg.RazorpayKeyID, razorpayGateway.VerifyWebhookSignature)
+	adminSvc := service.NewAdminService(companyRepo, userRepo, creditRepo, paymentRepo, auditLogRepo, logoStore, txr)
+	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, paymentSvc, creditSvc, resumeSvc, atsSvc, curatedListSvc, adminSvc, db, redisClient, version, cfg.IsProduction(), cfg.RazorpayKeyID, razorpayGateway.VerifyWebhookSignature)
 
 	// 6. Build handler layer + mount routes
 	r := chi.NewRouter()

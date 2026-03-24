@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -154,6 +156,124 @@ func (r *UserRepo) HardDeleteExpired(ctx context.Context, cutoff time.Time) (int
 		return 0, domain.InternalError(err)
 	}
 	return tag.RowsAffected(), nil
+}
+
+// GetByIDIncludeDeleted retrieves a user by ID, including soft-deleted users.
+func (r *UserRepo) GetByIDIncludeDeleted(ctx context.Context, id uuid.UUID) (*domain.User, error) {
+	q := getDBTX(ctx, r.pool)
+	return scanUser(q.QueryRow(ctx, `
+		SELECT id, email, password_hash, name, role,
+			premium_since, email_verified, current_title, experience_level,
+			preferred_tech_stacks, target_domains, target_locations,
+			default_resume_id, deleted_at, created_at, updated_at
+		FROM users
+		WHERE id = $1`, id))
+}
+
+// UndoSoftDelete restores a soft-deleted user by clearing deleted_at.
+func (r *UserRepo) UndoSoftDelete(ctx context.Context, id uuid.UUID) error {
+	q := getDBTX(ctx, r.pool)
+	now := time.Now().UTC()
+
+	var returnedID uuid.UUID
+	err := q.QueryRow(ctx, `
+		UPDATE users SET deleted_at = NULL, updated_at = $2
+		WHERE id = $1 AND deleted_at IS NOT NULL
+		RETURNING id`, id, now).Scan(&returnedID)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.NotFound("user", id)
+		}
+		return domain.InternalError(err)
+	}
+	return nil
+}
+
+// ListUsers returns users matching the filter with total count (admin use).
+func (r *UserRepo) ListUsers(ctx context.Context, filter domain.UserFilter) ([]domain.User, int, error) {
+	q := getDBTX(ctx, r.pool)
+
+	clauses := []string{}
+	args := []any{}
+	argIdx := 1
+
+	if filter.Query != "" {
+		args = append(args, "%"+filter.Query+"%")
+		clauses = append(clauses, fmt.Sprintf("(name ILIKE $%d OR email ILIKE $%d)", argIdx, argIdx))
+		argIdx++
+	}
+	if filter.Role != nil {
+		args = append(args, string(*filter.Role))
+		clauses = append(clauses, fmt.Sprintf("role = $%d", argIdx))
+		argIdx++
+	}
+
+	where := ""
+	if len(clauses) > 0 {
+		where = "WHERE " + strings.Join(clauses, " AND ")
+	}
+
+	// Count total
+	countQuery := fmt.Sprintf("SELECT COUNT(*) FROM users %s", where)
+	var total int
+	if err := q.QueryRow(ctx, countQuery, args...).Scan(&total); err != nil {
+		return nil, 0, domain.InternalError(err)
+	}
+
+	limit := filter.Limit
+	if limit <= 0 || limit > 100 {
+		limit = 50
+	}
+	offset := filter.Offset
+	if offset < 0 {
+		offset = 0
+	}
+
+	args = append(args, limit)
+	limitParam := fmt.Sprintf("$%d", argIdx)
+	argIdx++
+	args = append(args, offset)
+	offsetParam := fmt.Sprintf("$%d", argIdx)
+
+	query := fmt.Sprintf(`
+		SELECT id, email, password_hash, name, role,
+			premium_since, email_verified, current_title, experience_level,
+			preferred_tech_stacks, target_domains, target_locations,
+			default_resume_id, deleted_at, created_at, updated_at
+		FROM users
+		%s
+		ORDER BY created_at DESC
+		LIMIT %s OFFSET %s`, where, limitParam, offsetParam)
+
+	rows, err := q.Query(ctx, query, args...)
+	if err != nil {
+		return nil, 0, domain.InternalError(err)
+	}
+	defer rows.Close()
+
+	var users []domain.User
+	for rows.Next() {
+		u := domain.User{}
+		var expLevel *string
+		if err := rows.Scan(
+			&u.ID, &u.Email, &u.PasswordHash, &u.Name, &u.Role,
+			&u.PremiumSince, &u.EmailVerified, &u.CurrentTitle, &expLevel,
+			&u.PreferredTechStacks, &u.TargetDomains, &u.TargetLocations,
+			&u.DefaultResumeID, &u.DeletedAt, &u.CreatedAt, &u.UpdatedAt,
+		); err != nil {
+			return nil, 0, domain.InternalError(err)
+		}
+		if expLevel != nil {
+			el := domain.ExperienceLevel(*expLevel)
+			u.ExperienceLevel = &el
+		}
+		users = append(users, u)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, domain.InternalError(err)
+	}
+	return users, total, nil
 }
 
 // --- Token repositories for auth flow ---

@@ -21,6 +21,7 @@ type Services struct {
 	Resume      *ResumeService
 	ATS         *ATSService
 	CuratedList *CuratedListService
+	Admin       *AdminService
 
 	// Infrastructure references for health checks and SSE
 	db    *pgxpool.Pool
@@ -47,6 +48,7 @@ func NewServices(
 	resume *ResumeService,
 	ats *ATSService,
 	curatedList *CuratedListService,
+	admin *AdminService,
 	db *pgxpool.Pool,
 	redisClient *redis.Client,
 	version string,
@@ -65,6 +67,7 @@ func NewServices(
 		Resume:                 resume,
 		ATS:                    ats,
 		CuratedList:            curatedList,
+		Admin:                  admin,
 		db:                     db,
 		Redis:                  redisClient,
 		Version:                version,
