@@ -13,8 +13,10 @@ import {
   ChevronRight,
   LogIn,
   DollarSign,
+  FileText,
   X,
 } from 'lucide-react';
+import { CreditBalance } from '@/components/credit-balance';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -27,6 +29,7 @@ const authedNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/lists', label: 'My Lists', icon: List },
   { href: '/applications', label: 'Applications', icon: Briefcase },
+  { href: '/resumes', label: 'Resumes', icon: FileText },
   { href: '/companies', label: 'Companies', icon: Building2 },
   { href: '/pricing', label: 'Pricing', icon: DollarSign },
   { href: '/settings', label: 'Settings', icon: Settings },
@@ -89,6 +92,13 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
           );
         })}
       </nav>
+
+      {/* Credit balance (premium users) */}
+      {isAuthenticated && (
+        <div className="px-3 pb-2">
+          <CreditBalance collapsed={collapsed} />
+        </div>
+      )}
 
       {/* User info at bottom (authenticated only) */}
       {isAuthenticated && user && (

@@ -18,7 +18,7 @@
 - Sprint 0 (Foundation): ✅ Complete — PR #13 (merged)
 - Sprint 1 (Company Directory): ✅ Complete — PR #15 (merged), CI ✅
 - Sprint 2 (Lists & Tracking): ✅ Complete — PR #17 (merged), PR #18 (merged)
-- Sprint 3 (Payments & Resume): 🔨 In progress (tasks 3.1–3.20 complete)
+- Sprint 3 (Payments & Resume): 🔨 In progress (tasks 3.1–3.23 complete)
 - Sprint 4 (AI Features): ⬜ Not started
 - Sprint 5 (Admin & Polish): ⬜ Not started
 - Sprint 6 (Launch Prep): ⬜ Not started
@@ -174,7 +174,8 @@
 ## Sprint 3 — Payments & Resume Foundation (Tasks 3.1–3.23)
 
 **Branch 1:** `feature/sprint-3-payments` — PR #19 (merged)
-**Branch 2:** `feature/sprint-3-resume-and-ai` — PR TBD
+**Branch 2:** `feature/sprint-3-resume-and-ai` — PR #20 (merged)
+**Branch 3:** `feature/sprint-3-frontend` — PR TBD
 **CI:** ✅ All jobs passing
 **Est. hours:** ~95
 
@@ -202,9 +203,9 @@
 | 3.18 | AI result cache (`ai/cache.go` — Redis GET/SET with SHA256 keys, per-op TTL) | ✅ |
 | 3.19 | Worker: resume parse+score task (`worker/task_resume_parse.go` — parse + general ATS) | ✅ |
 | 3.20 | Worker: email send task (`worker/task_email_send.go` — Resend integration) | ✅ |
-| 3.21 | Frontend: Pricing + checkout (Razorpay Checkout.js, order, confirmation) | ⬜ |
-| 3.22 | Frontend: Resume management (`app/(dashboard)/resumes/page.tsx`) | ⬜ |
-| 3.23 | Frontend: Credit balance display (dashboard sidebar/header) | ⬜ |
+| 3.21 | Frontend: Pricing + checkout (Razorpay Checkout.js, order, confirmation) | ✅ |
+| 3.22 | Frontend: Resume management (`app/(dashboard)/resumes/page.tsx`) | ✅ |
+| 3.23 | Frontend: Credit balance display (dashboard sidebar/header) | ✅ |
 
 ### Implementation Notes (Tasks 3.1–3.8, 3.9–3.20)
 
@@ -221,14 +222,25 @@
 - **Worker tasks**: `resume:parse_and_score` (parse + general ATS, cache-aware), `email:send` (Resend integration)
 - **DI wiring**: Asynq client in API server, full AI provider chain in worker, S3 resume store with auto-bucket in dev
 
+### Implementation Notes (Tasks 3.21–3.23)
+
+- **Razorpay Checkout.js**: Dynamic script loader (`lib/razorpay.ts`) with TypeScript declarations, no npm package needed
+- **Pricing page**: Upgraded from static to interactive — authenticated users see buy buttons, Razorpay modal opens on click, payment confirmation updates credits + premium status
+- **Product flow**: Non-premium users buy Starter Pack; premium users can buy a la carte credits (resume_upload, ats_bundle, rebuy_pack)
+- **Resume management page**: Slot-based UI (3 slots), drag-and-drop PDF upload, status badges (ready/processing/failed), ATS score + parsed skills display, set default / archive / download actions
+- **Credit balance**: Sidebar widget shows total + per-type breakdown for premium users; collapsed mode shows compact badge
+- **Sidebar**: Added "Resumes" nav link (FileText icon) between Applications and Companies
+- **Hooks**: `use-payments.ts` (credit balance, transactions, order creation, payment confirmation), `use-resumes.ts` (list, upload, set default, archive, download URL)
+- **API types**: Added PaymentOrder, CreditBalances, CreditTransaction, ResumeListItem, ResumeDetail, ParsedSummary types
+
 ### Definition of Done
 
 | Criterion | Status |
 |-----------|:------:|
-| User can purchase Starter Pack via Razorpay (test mode) | ⬜ |
+| User can purchase Starter Pack via Razorpay (test mode) | ✅ |
 | Webhook correctly allocates credits and sets `premium_since` | ✅ |
-| À la carte purchases work (resume upload credit, ATS bundle) | ⬜ |
-| Credit balance shown in UI, deducted on premium actions | ⬜ |
+| À la carte purchases work (resume upload credit, ATS bundle) | ✅ |
+| Credit balance shown in UI, deducted on premium actions | ✅ |
 | User can upload PDF resume (validated, stored in S3/MinIO) | ✅ |
 | Resume parse + general ATS runs async, results stored in DB | ✅ |
 | SSE notifies user when resume processing completes | ⬜ |

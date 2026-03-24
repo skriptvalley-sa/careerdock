@@ -170,3 +170,72 @@ export interface DashboardCounts {
   withdrawn: number;
   total: number;
 }
+
+// --- Payments & Credits (Sprint 3) ---
+
+export interface PaymentOrder {
+  payment_id: string;
+  razorpay_order_id: string;
+  razorpay_key_id: string;
+  amount_paise: number;
+  currency: string;
+  product_type: string;
+}
+
+export interface PaymentRecord extends PaymentOrder {
+  razorpay_payment_id?: string;
+}
+
+export interface CreditBalances {
+  resume_upload: number;
+  ats_check: number;
+  curated_list: number;
+  cv_generation: number;
+}
+
+export interface CreditTransaction {
+  id: string;
+  credit_type: string;
+  amount: number;
+  balance_after: number;
+  reason: string;
+  reference_id?: string;
+  created_at: string;
+}
+
+// --- Resumes (Sprint 3) ---
+
+export type ResumeStatus = 'parsing' | 'ready' | 'failed';
+
+export interface ParsedSummary {
+  years_of_experience: number;
+  role_level: string;
+  top_skills: string[];
+  domains: string[];
+}
+
+export interface ResumeListItem {
+  id: string;
+  slot_number: number;
+  file_name: string;
+  file_size_bytes: number;
+  status: ResumeStatus;
+  is_default: boolean;
+  ats_general_score?: number;
+  parsed_data_summary?: ParsedSummary;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ResumeDetail {
+  id: string;
+  slot_number: number;
+  file_name: string;
+  file_size_bytes: number;
+  status: ResumeStatus;
+  is_default: boolean;
+  parsed_data?: Record<string, unknown>;
+  ats_general?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
