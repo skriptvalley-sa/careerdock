@@ -14,6 +14,8 @@ import {
   LogIn,
   DollarSign,
   FileText,
+  ScanSearch,
+  Sparkles,
   X,
 } from 'lucide-react';
 import { CreditBalance } from '@/components/credit-balance';
@@ -30,6 +32,8 @@ const authedNavItems = [
   { href: '/lists', label: 'My Lists', icon: List },
   { href: '/applications', label: 'Applications', icon: Briefcase },
   { href: '/resumes', label: 'Resumes', icon: FileText },
+  { href: '/ats', label: 'ATS Check', icon: ScanSearch },
+  { href: '/curated-lists', label: 'Curated Lists', icon: Sparkles },
   { href: '/companies', label: 'Companies', icon: Building2 },
   { href: '/pricing', label: 'Pricing', icon: DollarSign },
   { href: '/settings', label: 'Settings', icon: Settings },

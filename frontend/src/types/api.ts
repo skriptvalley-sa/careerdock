@@ -203,6 +203,53 @@ export interface CreditTransaction {
   created_at: string;
 }
 
+// --- ATS Checks (Sprint 4) ---
+
+export interface ATSScoreDetail {
+  score: number;
+  feedback: string;
+}
+
+export interface ATSResult {
+  score: number;
+  breakdown: Record<string, ATSScoreDetail>;
+  suggestions: string[];
+  generated_at: string;
+}
+
+export type ATSCheckType = 'company' | 'job';
+
+export interface ATSCheck {
+  id: string;
+  check_type: ATSCheckType;
+  resume_id: string;
+  company_id?: string;
+  result: ATSResult | Record<string, never>;
+  created_at: string;
+}
+
+// --- Curated Lists (Sprint 4) ---
+
+export interface RankedCompany {
+  company_id: string;
+  name: string;
+  match_score: number;
+  match_reasons: string[];
+  recommendation: string;
+}
+
+export interface CuratedListResult {
+  companies: RankedCompany[];
+  generated_at: string;
+}
+
+export interface CuratedList {
+  id: string;
+  resume_id: string;
+  result: CuratedListResult | Record<string, never>;
+  created_at: string;
+}
+
 // --- Resumes (Sprint 3) ---
 
 export type ResumeStatus = 'parsing' | 'ready' | 'failed';

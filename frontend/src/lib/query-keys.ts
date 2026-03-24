@@ -27,6 +27,11 @@ export const queryKeys = {
     list: () => ['ats', 'list'] as const,
     detail: (id: string) => ['ats', 'detail', id] as const,
   },
+  curatedLists: {
+    all: ['curated-lists'] as const,
+    list: () => ['curated-lists', 'list'] as const,
+    detail: (id: string) => ['curated-lists', 'detail', id] as const,
+  },
   credits: {
     balance: ['credits', 'balance'] as const,
   },
@@ -43,7 +48,8 @@ export const staleTimes = {
   companyDetail: 10 * 60 * 1000,
   userLists: 30 * 1000,
   resumes: 60 * 1000,
-  atsResults: Infinity, // Immutable
+  atsResults: Infinity, // Immutable once complete
+  curatedLists: Infinity, // Immutable once complete
   credits: 30 * 1000,
   notifications: 0, // Always fresh
 } as const;

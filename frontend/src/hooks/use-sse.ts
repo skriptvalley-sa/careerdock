@@ -17,6 +17,9 @@ const INITIAL_RETRY_DELAY = 1_000; // 1 second
  *
  * Currently handled events:
  * - resume_ready: invalidates resumes list + credits
+ * - ats_company_complete: invalidates ATS checks list
+ * - ats_job_complete: invalidates ATS checks list
+ * - curated_list_complete: invalidates curated lists
  */
 export function useSSE() {
   const { isAuthenticated } = useAuthStore();
@@ -46,6 +49,18 @@ export function useSSE() {
       // Resume processing complete — refresh resume list and credits
       qc.invalidateQueries({ queryKey: queryKeys.resumes.all });
       qc.invalidateQueries({ queryKey: queryKeys.credits.balance });
+    });
+
+    es.addEventListener('ats_company_complete', () => {
+      qc.invalidateQueries({ queryKey: queryKeys.ats.all });
+    });
+
+    es.addEventListener('ats_job_complete', () => {
+      qc.invalidateQueries({ queryKey: queryKeys.ats.all });
+    });
+
+    es.addEventListener('curated_list_complete', () => {
+      qc.invalidateQueries({ queryKey: queryKeys.curatedLists.all });
     });
 
     es.onerror = () => {
