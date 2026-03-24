@@ -1,6 +1,6 @@
 # Project Status
 
-> **Last updated:** 2026-03-23
+> **Last updated:** 2026-03-24
 
 ## Design Phases (Complete)
 - Phase 1: ✅ Complete (PRD.md)
@@ -18,7 +18,7 @@
 - Sprint 0 (Foundation): ✅ Complete — PR #13 (merged)
 - Sprint 1 (Company Directory): ✅ Complete — PR #15 (merged), CI ✅
 - Sprint 2 (Lists & Tracking): ✅ Complete — PR #17 (merged), PR #18 (merged)
-- Sprint 3 (Payments & Resume): 🔨 In progress (tasks 3.1–3.23 complete)
+- Sprint 3 (Payments & Resume): ✅ Complete — PR #19, #20, #21, #22, #23, #24, #25, #26 (all merged)
 - Sprint 4 (AI Features): ⬜ Not started
 - Sprint 5 (Admin & Polish): ⬜ Not started
 - Sprint 6 (Launch Prep): ⬜ Not started
@@ -175,7 +175,8 @@
 
 **Branch 1:** `feature/sprint-3-payments` — PR #19 (merged)
 **Branch 2:** `feature/sprint-3-resume-and-ai` — PR #20 (merged)
-**Branch 3:** `feature/sprint-3-frontend` — PR TBD
+**Branch 3:** `feature/sprint-3-frontend` — PR #21 (merged)
+**SSE & Hotfixes:** PR #22 (SSE wiring), #23 (Flusher unwrap), #24 (reconnect backoff), #25 (logger Unwrap), #26 (WriteTimeout fix) — all merged
 **CI:** ✅ All jobs passing
 **Est. hours:** ~95
 
@@ -247,3 +248,54 @@
 | SSE notifies user when resume processing completes | ✅ |
 | AI fallback: if Claude fails, OpenAI is used | ✅ |
 | AI result cache: repeated requests return cached result | ✅ |
+
+### Post-Sprint Hotfixes (PRs #22–#26)
+
+- **PR #22**: Wired SSE real-time updates — worker publishes `resume_ready` via Redis pub/sub, frontend `useSSE` hook invalidates queries
+- **PR #23**: Fixed SSE 500 — added `getFlusher()` with unwrapper interface to reach `http.Flusher` through Chi middleware
+- **PR #24**: Fixed SSE reconnect — replaced one-shot error handler with exponential backoff (1s → 30s cap)
+- **PR #25**: Added `Unwrap()` to logger middleware's `statusWriter` so `getFlusher()` and `ResponseController` can reach the base writer
+- **PR #26**: Used `http.ResponseController.SetWriteDeadline()` to extend WriteTimeout before each SSE write, preventing 30s connection drops
+
+---
+
+## Sprint 4 — AI Features (Tasks 4.1–4.17)
+
+**Branch:** TBD
+**PR:** TBD
+**Est. hours:** ~78
+
+### Task Checklist
+
+| # | Task | Status |
+|:-:|------|:------:|
+| 4.1 | ATS check repository (`repository/ats_repo.go` — create, get, list by user/resume) | ⬜ |
+| 4.2 | ATS service (`service/ats_service.go` — company check, job check, credit deduction) | ⬜ |
+| 4.3 | ATS handlers (`handler/ats.go` — POST /ats/company, POST /ats/job, GET /ats/:id, GET /ats/) | ⬜ |
+| 4.4 | Worker: company ATS task (`worker/task_ats_company.go` — download PDF, score with AI, store result) | ⬜ |
+| 4.5 | Worker: job ATS task (`worker/task_ats_job.go` — download PDF, score with AI + JD, store result) | ⬜ |
+| 4.6 | Curated list repository (`repository/curated_list_repo.go` — create, get, list) | ⬜ |
+| 4.7 | Curated list service (`service/curated_list_service.go` — trigger generation, credit deduction) | ⬜ |
+| 4.8 | Curated list handler (`handler/curated_list.go` — POST /curated-lists, GET /curated-lists/:id) | ⬜ |
+| 4.9 | Worker: curate company list task (`worker/task_curate_list.go` — build profile, query companies, AI curation) | ⬜ |
+| 4.10 | AI prompt templates (remaining) — Company ATS, Job ATS, Curated List prompts | ⬜ |
+| 4.11 | Output validation (`ai/validation.go` — schema validation for AI responses, score bounds, retry) | ⬜ |
+| 4.12 | Frontend: ATS check page (`app/(dashboard)/ats/page.tsx` — select resume, choose company/paste JD) | ⬜ |
+| 4.13 | Frontend: ATS result page (`app/(dashboard)/ats/[id]/page.tsx` — score display, breakdown, recommendations) | ⬜ |
+| 4.14 | Frontend: Curated lists page (`app/(dashboard)/curated-lists/page.tsx` — generate new, view results) | ⬜ |
+| 4.15 | Frontend: Premium dashboard (resume health, credit tracker, recent ATS scores, quick actions) | ⬜ |
+| 4.16 | Frontend: SSE integration for ATS/curated list completion events | ⬜ |
+| 4.17 | Asynq scheduler setup (periodic tasks — user hard-delete cleanup) | ⬜ |
+
+### Definition of Done
+
+| Criterion | Status |
+|-----------|:------:|
+| Company ATS check: user selects resume + company, gets score with breakdown | ⬜ |
+| Job ATS check: user selects resume + pastes JD, gets score with breakdown | ⬜ |
+| Curated list: AI-curated company list based on resume profile | ⬜ |
+| All AI operations async — loading state → SSE notification on completion | ⬜ |
+| Credit deduction works correctly for each operation | ⬜ |
+| Results are cached — repeat requests return instantly | ⬜ |
+| AI fallback works end-to-end (Claude → OpenAI) | ⬜ |
+| Premium dashboard shows resume health, credits, recent activity | ⬜ |
