@@ -16,6 +16,7 @@ import {
   FileText,
   ScanSearch,
   Sparkles,
+  ShieldCheck,
   X,
 } from 'lucide-react';
 import { CreditBalance } from '@/components/credit-balance';
@@ -48,7 +49,12 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
   const pathname = usePathname();
   const { isAuthenticated, user } = useAuthStore();
 
-  const navItems = isAuthenticated ? authedNavItems : publicNavItems;
+  const isAdmin = user?.role === 'admin';
+  const navItems = isAuthenticated
+    ? isAdmin
+      ? [...authedNavItems, { href: '/admin', label: 'Admin', icon: ShieldCheck }]
+      : authedNavItems
+    : publicNavItems;
 
   const sidebarContent = (
     <div className="flex h-full flex-col">

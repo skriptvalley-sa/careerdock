@@ -250,6 +250,54 @@ export interface CuratedList {
   created_at: string;
 }
 
+// --- Admin (Sprint 5) ---
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  role: 'user' | 'moderator' | 'admin';
+  premium_since: string | null;
+  email_verified: boolean;
+  deleted_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminListResponse<T> {
+  data: T[];
+  total: number;
+}
+
+export interface AdminPayment {
+  id: string;
+  user_id: string;
+  razorpay_order_id: string;
+  razorpay_payment_id: string | null;
+  amount_paise: number;
+  currency: string;
+  product_type: string;
+  status: string;
+  receipt_number: string | null;
+  refund_reason: string | null;
+  refunded_at: string | null;
+  refunded_by: string | null;
+  webhook_received_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminCreditTransaction {
+  id: string;
+  user_id: string;
+  credit_type: string;
+  amount: number;
+  balance_after: number;
+  reason: string;
+  reference_id: string | null;
+  created_at: string;
+}
+
 // --- Resumes (Sprint 3) ---
 
 export type ResumeStatus = 'parsing' | 'ready' | 'failed';

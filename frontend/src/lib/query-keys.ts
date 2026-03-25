@@ -40,6 +40,15 @@ export const queryKeys = {
     list: () => ['notifications', 'list'] as const,
     unreadCount: () => ['notifications', 'unread-count'] as const,
   },
+  admin: {
+    all: ['admin'] as const,
+    users: (params?: Record<string, string>) =>
+      ['admin', 'users', params] as const,
+    payments: (params?: Record<string, string>) =>
+      ['admin', 'payments', params] as const,
+    creditTransactions: (params?: Record<string, string>) =>
+      ['admin', 'credit-transactions', params] as const,
+  },
 } as const;
 
 // Stale time constants (milliseconds)
