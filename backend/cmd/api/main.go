@@ -142,8 +142,8 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.CORS(cfg.AllowedOrigins))
 
-	// Rate limiting: 100 req/min per IP (unauthenticated), 300 req/min per user (authenticated)
-	rateLimiter := middleware.NewRateLimiter(redisClient, 100, 300, time.Minute)
+	// Rate limiting: 300 req/min per IP (unauthenticated), 600 req/min per user (authenticated)
+	rateLimiter := middleware.NewRateLimiter(redisClient, 300, 600, time.Minute)
 	r.Use(rateLimiter.Middleware)
 
 	auth := middleware.NewAuth(authSvc)
