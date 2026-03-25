@@ -11,7 +11,10 @@ import type {
 } from '@/types/api';
 
 /** Fetch a paginated, filtered list of companies with infinite scroll support. */
-export function useCompanyList(params: CompanyFilterParams = {}) {
+export function useCompanyList(
+  params: CompanyFilterParams = {},
+  options: { staleTime?: number } = {},
+) {
   // Build clean params (omit empty strings)
   const cleanParams: Record<string, string> = {};
   for (const [key, value] of Object.entries(params)) {
@@ -31,7 +34,7 @@ export function useCompanyList(params: CompanyFilterParams = {}) {
     initialPageParam: '' as string,
     getNextPageParam: (lastPage: PaginatedResponse<CompanyListItem>) =>
       lastPage.pagination.has_more ? lastPage.pagination.next_cursor : undefined,
-    staleTime: staleTimes.companyList,
+    staleTime: options.staleTime ?? staleTimes.companyList,
   });
 }
 

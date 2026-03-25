@@ -506,10 +506,108 @@ cmd_start() {
 
   # ── Database Migrations ──
   echo -e "${BOLD}Running database migrations...${NC}"
-  if make -C "$PROJECT_ROOT" migrate 2>&1 | tail -1; then
+  # Use `if` so set -e doesn't abort on non-zero exit before we can inspect it.
+  # Output streams live so the terminal doesn't appear frozen during Go compile.
+  if make -C "$PROJECT_ROOT" migrate; then
     success "Migrations complete"
   else
-    warn "Migration command returned non-zero (may already be up to date)"
+    # Check whether the failure is a dirty-state — a previous run was interrupted.
+    _ver_out=$(cd "$PROJECT_ROOT/backend" && go run ./cmd/migrate/ version 2>&1) || true
+    if printf '%s' "$_ver_out" | grep -q "Dirty: true"; then
+      _dirty_ver=$(printf '%s' "$_ver_out" | grep -oE 'Version: [0-9]+' | grep -oE '[0-9]+')
+      warn "Dirty migration at version ${_dirty_ver} — auto-recovering..."
+      if (cd "$PROJECT_ROOT/backend" && go run ./cmd/migrate/ force "$_dirty_ver") && \
+         make -C "$PROJECT_ROOT" migrate; then
+        success "Migrations complete (recovered)"
+      else
+        warn "Migration failed after recovery — run: make migrate"
+      fi
+    else
+      warn "Migration returned non-zero (may already be up to date)"
+    fi
+  fi
+
+  # ── Auto-seed companies (only if table is empty) ──
+  _company_count=$(docker compose -f "$PROJECT_ROOT/docker-compose.yml" exec -T postgres \
+    psql -U careerdock -d careerdock -t -c "SELECT COUNT(*) FROM companies;" 2>/dev/null | tr -d ' \n')
+  if [ "${_company_count:-0}" = "0" ]; then
+    echo -e "${BOLD}Seeding initial company data...${NC}"
+    if make -C "$PROJECT_ROOT" seed; then
+      success "Seed complete"
+    else
+      warn "Seed failed — run: make seed"
+    fi
+  else
+    info "Companies already seeded (${_company_count} records — skipping)"
+  fi
+
+  # ── Ensure admin user exists ──
+  # Credentials are read from .env (ADMIN_EMAIL / ADMIN_NAME / ADMIN_PASSWORD).
+  # The password is bcrypt-hashed at runtime using a throwaway //go:build ignore
+  # Go file so the project's existing golang.org/x/crypto/bcrypt dep is reused
+  # — no extra tooling required.
+  _admin_email=$(grep -E '^ADMIN_EMAIL='    "$PROJECT_ROOT/.env" 2>/dev/null | cut -d= -f2- | tr -d '"'"'" | xargs)
+  _admin_name=$(grep  -E '^ADMIN_NAME='     "$PROJECT_ROOT/.env" 2>/dev/null | cut -d= -f2- | tr -d '"'"'" | xargs)
+  _admin_pass=$(grep  -E '^ADMIN_PASSWORD=' "$PROJECT_ROOT/.env" 2>/dev/null | cut -d= -f2- | tr -d '"'"'" | xargs)
+
+  if [ -z "$_admin_email" ] || [ -z "$_admin_pass" ]; then
+    warn "ADMIN_EMAIL / ADMIN_PASSWORD not set in .env — skipping admin seed"
+  else
+    _admin_name="${_admin_name:-Root Admin}"
+    _admin_exists=$(docker compose -f "$PROJECT_ROOT/docker-compose.yml" exec -T postgres \
+      psql -U careerdock -d careerdock -t -c \
+      "SELECT COUNT(*) FROM users WHERE email='$_admin_email';" 2>/dev/null | tr -d ' \n')
+
+    if [ "${_admin_exists:-0}" = "0" ]; then
+      # Hash the plaintext password from .env using Go's bcrypt package.
+      _bcrypt_src=$(mktemp /tmp/bcrypt_XXXXXX.go)
+      cat > "$_bcrypt_src" << 'GOEOF'
+//go:build ignore
+
+package main
+
+import (
+	"fmt"
+	"os"
+
+	"golang.org/x/crypto/bcrypt"
+)
+
+func main() {
+	h, err := bcrypt.GenerateFromPassword([]byte(os.Args[1]), 12)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Print(string(h))
+}
+GOEOF
+      _admin_hash=$(cd "$PROJECT_ROOT/backend" && go run "$_bcrypt_src" "$_admin_pass" 2>/dev/null)
+      rm -f "$_bcrypt_src"
+
+      if [ -n "$_admin_hash" ]; then
+        # Pipe the SQL through stdin so the bcrypt $ signs are never touched by the
+        # shell (printf %s inserts them as-is; SQL single-quoted strings allow $).
+        printf "INSERT INTO users (email, password_hash, name, role, email_verified)\nVALUES ('%s', '%s', '%s', 'admin', true)\nON CONFLICT (email) DO NOTHING;\n" \
+          "$_admin_email" "$_admin_hash" "$_admin_name" | \
+          docker compose -f "$PROJECT_ROOT/docker-compose.yml" exec -T postgres \
+          psql -U careerdock -d careerdock 2>/dev/null
+
+        echo ""
+        echo -e "  ${BOLD}${YELLOW}╔══════════════════════════════════════════════════╗${NC}"
+        echo -e "  ${BOLD}${YELLOW}║       DEV ADMIN CREDENTIALS (first run)         ║${NC}"
+        echo -e "  ${BOLD}${YELLOW}╠══════════════════════════════════════════════════╣${NC}"
+        printf   "  ${BOLD}${YELLOW}║  Email:    %-38s ║${NC}\n" "$_admin_email"
+        printf   "  ${BOLD}${YELLOW}║  Password: %-38s ║${NC}\n" "$_admin_pass"
+        echo -e "  ${BOLD}${YELLOW}╠══════════════════════════════════════════════════╣${NC}"
+        echo -e "  ${BOLD}${YELLOW}║  Source:   .env  (ADMIN_EMAIL / ADMIN_PASSWORD) ║${NC}"
+        echo -e "  ${BOLD}${YELLOW}╚══════════════════════════════════════════════════╝${NC}"
+      else
+        warn "Could not hash admin password — is Go installed?"
+      fi
+    else
+      info "Dev admin user already exists ($_admin_email)"
+    fi
   fi
   echo ""
 

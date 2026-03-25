@@ -82,7 +82,13 @@ export function useUpdateApplication() {
       date_applied?: string;
       notes?: string;
     }) => apiClient.put<Application>(`/api/applications/${id}`, data),
-    onSuccess: () => {
+    onSuccess: (updatedApp) => {
+      // Immediately patch every cached applications list so the status badge
+      // updates without waiting for a background refetch.
+      qc.setQueriesData<Application[]>(
+        { queryKey: queryKeys.applications.all },
+        (old) => old?.map((a) => (a.id === updatedApp.id ? updatedApp : a)),
+      );
       qc.invalidateQueries({ queryKey: queryKeys.applications.all });
       qc.invalidateQueries({ queryKey: ['dashboard'] });
     },

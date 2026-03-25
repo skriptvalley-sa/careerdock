@@ -16,13 +16,14 @@ import (
 
 // ListHandler handles list and entry HTTP endpoints.
 type ListHandler struct {
-	lists     *service.ListService
-	companies *service.CompanyService
+	lists        *service.ListService
+	companies    *service.CompanyService
+	applications *service.ApplicationService
 }
 
 // NewListHandler creates a new ListHandler.
-func NewListHandler(lists *service.ListService, companies *service.CompanyService) *ListHandler {
-	return &ListHandler{lists: lists, companies: companies}
+func NewListHandler(lists *service.ListService, companies *service.CompanyService, applications *service.ApplicationService) *ListHandler {
+	return &ListHandler{lists: lists, companies: companies, applications: applications}
 }
 
 // --- Request DTOs ---
@@ -61,15 +62,16 @@ type listResponse struct {
 }
 
 type entryResponse struct {
-	ID            string `json:"id"`
-	ListID        string `json:"list_id"`
-	CompanyID     string `json:"company_id"`
-	CompanyName   string `json:"company_name"`
-	CompanySlug   string `json:"company_slug,omitempty"`
-	CompanyStatus string `json:"company_status"`
-	Position      int    `json:"position"`
-	CreatedAt     string `json:"created_at"`
-	UpdatedAt     string `json:"updated_at"`
+	ID               string `json:"id"`
+	ListID           string `json:"list_id"`
+	CompanyID        string `json:"company_id"`
+	CompanyName      string `json:"company_name"`
+	CompanySlug      string `json:"company_slug,omitempty"`
+	CompanyStatus    string `json:"company_status"`
+	ApplicationCount int    `json:"application_count"`
+	Position         int    `json:"position"`
+	CreatedAt        string `json:"created_at"`
+	UpdatedAt        string `json:"updated_at"`
 }
 
 // --- Converters ---
@@ -177,7 +179,7 @@ func (h *ListHandler) GetList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Batch-resolve company names and slugs for all entries
+	// Batch-resolve company names, slugs, and application counts for all entries
 	companyIDs := make([]uuid.UUID, 0, len(entries))
 	seen := make(map[uuid.UUID]bool)
 	for _, e := range entries {
@@ -190,6 +192,10 @@ func (h *ListHandler) GetList(w http.ResponseWriter, r *http.Request) {
 	if companyInfo == nil {
 		companyInfo = map[uuid.UUID]domain.CompanyNameSlug{}
 	}
+	appCounts, _ := h.applications.CountByCompanies(r.Context(), userID, companyIDs)
+	if appCounts == nil {
+		appCounts = map[uuid.UUID]int{}
+	}
 
 	entryItems := make([]entryResponse, len(entries))
 	for i, e := range entries {
@@ -198,6 +204,7 @@ func (h *ListHandler) GetList(w http.ResponseWriter, r *http.Request) {
 			resp.CompanyName = info.Name
 			resp.CompanySlug = info.Slug
 		}
+		resp.ApplicationCount = appCounts[e.CompanyID]
 		entryItems[i] = resp
 	}
 

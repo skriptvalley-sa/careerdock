@@ -321,3 +321,8 @@ func (s *ApplicationService) GetDashboardCounts(ctx context.Context, userID uuid
 
 	return counts, nil
 }
+
+// CountByCompanies returns application counts per company for the given user and company IDs.
+func (s *ApplicationService) CountByCompanies(ctx context.Context, userID uuid.UUID, companyIDs []uuid.UUID) (map[uuid.UUID]int, error) {
+	return s.apps.CountByCompanies(ctx, userID, companyIDs)
+}

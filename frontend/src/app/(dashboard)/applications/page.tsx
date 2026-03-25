@@ -2,17 +2,20 @@
 
 import { useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Plus } from 'lucide-react';
 import { useApplications, useUpdateApplication } from '@/hooks/use-applications';
 import { StatusBadge, ALL_STATUSES, getStatusLabel } from '@/components/lists/status-badge';
+import { AddApplicationModal } from '@/components/lists/add-application-modal';
 import type { Application, ApplicationStatus } from '@/types/api';
 
 export default function ApplicationsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialStatus = searchParams.get('status') || '';
+  const initialCompany = searchParams.get('company') || '';
   const [statusFilter, setStatusFilter] = useState(initialStatus);
-  const [companyFilter, setCompanyFilter] = useState('');
+  const [companyFilter, setCompanyFilter] = useState(initialCompany);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
 
   const { data: applications, isLoading } = useApplications(statusFilter || undefined);
@@ -55,11 +58,21 @@ export default function ApplicationsPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-100">All Applications</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Track all your applications across every company in one place.
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-100">All Applications</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Track all your applications across every company in one place.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowAddModal(true)}
+          className="btn-neon inline-flex shrink-0 items-center gap-2 rounded-md px-4 py-2 text-sm font-medium"
+        >
+          <Plus className="h-4 w-4" />
+          Add Application
+        </button>
       </div>
 
       {/* Filters row: status chips + company dropdown */}
@@ -206,6 +219,11 @@ export default function ApplicationsPage() {
             ? ` at ${uniqueCompanies.find((c) => c.id === companyFilter)?.name ?? 'selected company'}`
             : ''}
         </div>
+      )}
+
+      {/* Add Application Modal */}
+      {showAddModal && (
+        <AddApplicationModal onClose={() => setShowAddModal(false)} />
       )}
     </div>
   );

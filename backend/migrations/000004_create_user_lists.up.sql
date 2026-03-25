@@ -1,4 +1,4 @@
-CREATE TABLE user_lists (
+CREATE TABLE IF NOT EXISTS user_lists (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name        VARCHAR(255) NOT NULL,
@@ -9,4 +9,4 @@ CREATE TABLE user_lists (
 );
 
 -- User's lists ordered by position
-CREATE INDEX idx_user_lists_user ON user_lists (user_id, position ASC);
+CREATE INDEX IF NOT EXISTS idx_user_lists_user ON user_lists (user_id, position ASC);

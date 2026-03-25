@@ -210,6 +210,42 @@ func (r *ApplicationRepo) CountByStatus(ctx context.Context, userID uuid.UUID) (
 	return counts, nil
 }
 
+// CountByCompanies returns the total number of applications per company for a
+// given user and a specific set of company IDs. Only companies with at least
+// one application appear in the result map.
+func (r *ApplicationRepo) CountByCompanies(ctx context.Context, userID uuid.UUID, companyIDs []uuid.UUID) (map[uuid.UUID]int, error) {
+	if len(companyIDs) == 0 {
+		return map[uuid.UUID]int{}, nil
+	}
+	q := getDBTX(ctx, r.pool)
+
+	rows, err := q.Query(ctx, `
+		SELECT company_id, COUNT(*)::int
+		FROM applications
+		WHERE user_id = $1 AND company_id = ANY($2)
+		GROUP BY company_id`,
+		userID, companyIDs,
+	)
+	if err != nil {
+		return nil, domain.InternalError(err)
+	}
+	defer rows.Close()
+
+	counts := make(map[uuid.UUID]int)
+	for rows.Next() {
+		var companyID uuid.UUID
+		var count int
+		if err := rows.Scan(&companyID, &count); err != nil {
+			return nil, domain.InternalError(err)
+		}
+		counts[companyID] = count
+	}
+	if err := rows.Err(); err != nil {
+		return nil, domain.InternalError(err)
+	}
+	return counts, nil
+}
+
 // --- Status History ---
 
 // CreateStatusHistory inserts a new status history record.

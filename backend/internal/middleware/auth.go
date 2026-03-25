@@ -79,13 +79,31 @@ func (a *Auth) RequirePremium(next http.Handler) http.Handler {
 
 // RequireRole ensures the user has one of the allowed roles.
 // Must be used after RequireAuthenticated.
+//
+// The role is re-fetched from the database on every call so that role
+// changes (e.g. promoting a user to admin) take effect immediately
+// without requiring the user to log out and back in.
 func (a *Auth) RequireRole(roles ...domain.Role) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			role := RoleFromContext(r.Context())
+			userID := UserIDFromContext(r.Context())
+
+			// Re-fetch the user's current role from DB so changes take effect
+			// immediately (the JWT role can be stale if the role was changed
+			// after the token was issued).
+			user, err := a.authService.GetUserByID(r.Context(), userID)
+			if err != nil {
+				respondForbidden(w, "insufficient permissions")
+				return
+			}
+
+			// Refresh role in context so downstream handlers always see the
+			// live value.
+			ctx := context.WithValue(r.Context(), ctxRole, user.Role)
+
 			for _, allowed := range roles {
-				if role == allowed {
-					next.ServeHTTP(w, r)
+				if user.Role == allowed {
+					next.ServeHTTP(w, r.WithContext(ctx))
 					return
 				}
 			}

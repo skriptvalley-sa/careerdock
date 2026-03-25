@@ -1,4 +1,4 @@
-CREATE TABLE feature_flags (
+CREATE TABLE IF NOT EXISTS feature_flags (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     key         VARCHAR(100) NOT NULL,
     enabled     BOOLEAN      NOT NULL DEFAULT FALSE,

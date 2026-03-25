@@ -122,6 +122,7 @@ export interface ListEntry {
   company_name: string;
   company_slug?: string;
   company_status: CompanyTrackingStatus;
+  application_count: number;
   position: number;
   created_at: string;
   updated_at: string;

@@ -305,14 +305,19 @@ func (s *ListService) UpdateEntry(ctx context.Context, input UpdateEntryInput) (
 	}
 
 	if input.CompanyStatus != nil {
+		// Sync status across ALL of the user's lists that contain this company
+		// so the status remains consistent regardless of which list is viewed.
+		if err := s.lists.UpdateCompanyStatusForUser(ctx, input.UserID, entry.CompanyID, *input.CompanyStatus); err != nil {
+			return nil, err
+		}
 		entry.CompanyStatus = *input.CompanyStatus
 	}
+
 	if input.Position != nil {
 		entry.Position = *input.Position
-	}
-
-	if err := s.lists.UpdateEntry(ctx, entry); err != nil {
-		return nil, err
+		if err := s.lists.UpdateEntry(ctx, entry); err != nil {
+			return nil, err
+		}
 	}
 
 	return entry, nil

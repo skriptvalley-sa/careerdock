@@ -1,4 +1,4 @@
-CREATE TABLE resumes (
+CREATE TABLE IF NOT EXISTS resumes (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     slot_number     SMALLINT     NOT NULL CHECK (slot_number BETWEEN 1 AND 3),
@@ -27,12 +27,12 @@ CREATE TABLE resumes (
 );
 
 -- User's resumes
-CREATE INDEX idx_resumes_user ON resumes (user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_resumes_user ON resumes (user_id, created_at DESC);
 
 -- Active slot uniqueness: only one non-archived resume per user per slot
-CREATE UNIQUE INDEX idx_resumes_active_slot ON resumes (user_id, slot_number)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_resumes_active_slot ON resumes (user_id, slot_number)
     WHERE NOT is_archived;
 
 -- At most one default resume per user (among active resumes)
-CREATE UNIQUE INDEX idx_resumes_default ON resumes (user_id)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_resumes_default ON resumes (user_id)
     WHERE is_default = TRUE AND NOT is_archived;

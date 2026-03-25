@@ -37,7 +37,7 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 			r.Get("/auth/me", NewAuthHandler(svc.Auth, svc.IsProduction).Me)
 
 			// --- Lists (Sprint 2) ---
-			listH := NewListHandler(svc.List, svc.Company)
+			listH := NewListHandler(svc.List, svc.Company, svc.Application)
 			r.Route("/lists", func(r chi.Router) {
 				r.Get("/", listH.ListLists)
 				r.Post("/", listH.CreateList)

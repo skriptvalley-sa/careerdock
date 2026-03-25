@@ -4,31 +4,44 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useCreateApplication } from '@/hooks/use-applications';
 import { ALL_STATUSES, getStatusLabel } from '@/components/lists/status-badge';
-import type { ApplicationStatus, ListEntry } from '@/types/api';
+import { CompanyCombobox } from '@/components/companies/company-combobox';
+import type { ApplicationStatus } from '@/types/api';
+
+interface PreselectedCompany {
+  id: string;
+  name: string;
+}
 
 interface AddApplicationModalProps {
-  entry: ListEntry;
+  /** Pre-selected company (from a list entry). When absent, a company combobox is shown. */
+  company?: PreselectedCompany;
   onClose: () => void;
 }
 
-export function AddApplicationModal({ entry, onClose }: AddApplicationModalProps) {
+export function AddApplicationModal({ company, onClose }: AddApplicationModalProps) {
+  const [selectedCompany, setSelectedCompany] = useState<PreselectedCompany | null>(
+    company ?? null,
+  );
   const [roleTitle, setRoleTitle] = useState('');
   const [status, setStatus] = useState<ApplicationStatus>('applied');
   const [dateApplied, setDateApplied] = useState('');
+  const [notes, setNotes] = useState('');
   const createApp = useCreateApplication();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedCompany) return;
     await createApp.mutateAsync({
-      company_id: entry.company_id,
+      company_id: selectedCompany.id,
       role_title: roleTitle || undefined,
       status,
       date_applied: dateApplied || undefined,
+      notes: notes || undefined,
     });
     onClose();
   };
 
-  // Filter out not_applied from status options — this is an application form
+  // Filter out not_applied — this is an application creation form
   const statusOptions = ALL_STATUSES.filter((s) => s !== 'not_applied');
 
   return (
@@ -38,7 +51,9 @@ export function AddApplicationModal({ entry, onClose }: AddApplicationModalProps
         <div className="flex items-center justify-between border-b border-edge px-5 py-4">
           <div>
             <h3 className="text-sm font-semibold text-slate-100">Add Application</h3>
-            <p className="mt-0.5 text-xs text-slate-500">{entry.company_name}</p>
+            {company && (
+              <p className="mt-0.5 text-xs text-slate-500">{company.name}</p>
+            )}
           </div>
           <button
             type="button"
@@ -51,6 +66,22 @@ export function AddApplicationModal({ entry, onClose }: AddApplicationModalProps
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 px-5 py-4">
+          {/* Company selector — only shown when no company is pre-selected */}
+          {!company && (
+            <div>
+              <label className="block text-sm font-medium text-slate-300">
+                Company <span className="text-red-400">*</span>
+              </label>
+              <div className="mt-1">
+                <CompanyCombobox
+                  value={selectedCompany}
+                  onChange={setSelectedCompany}
+                  placeholder="Search companies..."
+                />
+              </div>
+            </div>
+          )}
+
           <div>
             <label htmlFor="roleTitle" className="block text-sm font-medium text-slate-300">
               Role Title
@@ -96,6 +127,20 @@ export function AddApplicationModal({ entry, onClose }: AddApplicationModalProps
             />
           </div>
 
+          <div>
+            <label htmlFor="notes" className="block text-sm font-medium text-slate-300">
+              Notes
+            </label>
+            <textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Any notes about this application..."
+              rows={3}
+              className="mt-1 block w-full resize-none rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+            />
+          </div>
+
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
@@ -106,7 +151,7 @@ export function AddApplicationModal({ entry, onClose }: AddApplicationModalProps
             </button>
             <button
               type="submit"
-              disabled={createApp.isPending}
+              disabled={createApp.isPending || !selectedCompany}
               className="btn-neon rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
             >
               {createApp.isPending ? 'Saving...' : 'Save Application'}

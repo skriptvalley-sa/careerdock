@@ -11,33 +11,8 @@ import type {
   CompanyDetail,
 } from '@/types/api';
 
-// We use apiRaw-style fetch for admin list endpoints that return {data: [], total: N}
-// instead of the standard {data: T} envelope. We use apiClient.get which unwraps .data,
-// but admin list endpoints return {data: T[], total: N} at top level without an envelope.
-// So we need to fetch raw. We'll use a small helper.
-
-async function adminGet<T>(
-  path: string,
-  params?: Record<string, string>,
-): Promise<T> {
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-  let url = `${API_BASE}${path}`;
-  if (params) {
-    const cleaned: Record<string, string> = {};
-    for (const [k, v] of Object.entries(params)) {
-      if (v) cleaned[k] = v;
-    }
-    if (Object.keys(cleaned).length > 0) {
-      url += `?${new URLSearchParams(cleaned).toString()}`;
-    }
-  }
-  const resp = await fetch(url, { credentials: 'include' });
-  if (!resp.ok) {
-    const json = await resp.json();
-    throw new Error(json.error?.message || 'Request failed');
-  }
-  return resp.json() as Promise<T>;
-}
+// Admin list endpoints return {data: T[], total: N} — not the standard {data: T} envelope.
+// Use apiClient.getRaw which reuses the same 401 auto-refresh logic as all other calls.
 
 // --- Admin Users ---
 
@@ -58,7 +33,7 @@ export function useAdminUsers(filter: AdminUserFilter = {}) {
   return useQuery({
     queryKey: queryKeys.admin.users(params),
     queryFn: () =>
-      adminGet<AdminListResponse<AdminUser>>('/api/admin/users', params),
+      apiClient.getRaw<AdminListResponse<AdminUser>>('/api/admin/users', params),
     staleTime: 15_000,
   });
 }
@@ -164,7 +139,7 @@ export function useAdminPayments(filter: AdminPaymentFilter = {}) {
   return useQuery({
     queryKey: queryKeys.admin.payments(params),
     queryFn: () =>
-      adminGet<AdminListResponse<AdminPayment>>('/api/admin/payments', params),
+      apiClient.getRaw<AdminListResponse<AdminPayment>>('/api/admin/payments', params),
     staleTime: 15_000,
   });
 }
@@ -190,7 +165,7 @@ export function useAdminCreditTransactions(
   return useQuery({
     queryKey: queryKeys.admin.creditTransactions(params),
     queryFn: () =>
-      adminGet<AdminListResponse<AdminCreditTransaction>>(
+      apiClient.getRaw<AdminListResponse<AdminCreditTransaction>>(
         '/api/admin/credits/transactions',
         params,
       ),

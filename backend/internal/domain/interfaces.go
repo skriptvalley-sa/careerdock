@@ -69,6 +69,9 @@ type ListRepository interface {
 	ListsWithCompanyFlag(ctx context.Context, userID, companyID uuid.UUID) ([]ListCompanyFlag, error)
 	CompanyListCounts(ctx context.Context, userID uuid.UUID) (map[uuid.UUID]int, error)
 	UpdateEntry(ctx context.Context, entry *ListEntry) error
+	// UpdateCompanyStatusForUser syncs the company_status across all list entries
+	// for a given user+company pair, ensuring status is consistent across lists.
+	UpdateCompanyStatusForUser(ctx context.Context, userID, companyID uuid.UUID, status CompanyTrackingStatus) error
 	DeleteEntry(ctx context.Context, id uuid.UUID) error
 	DeleteEntryByCompany(ctx context.Context, listID, companyID uuid.UUID) error
 }
@@ -83,6 +86,8 @@ type ApplicationRepository interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 	// CountByStatus returns application counts grouped by status for a user's dashboard.
 	CountByStatus(ctx context.Context, userID uuid.UUID) (map[ApplicationStatus]int, error)
+	// CountByCompanies returns the number of applications per company for a given set of company IDs.
+	CountByCompanies(ctx context.Context, userID uuid.UUID, companyIDs []uuid.UUID) (map[uuid.UUID]int, error)
 
 	CreateStatusHistory(ctx context.Context, h *StatusHistory) error
 	ListStatusHistory(ctx context.Context, applicationID uuid.UUID) ([]StatusHistory, error)

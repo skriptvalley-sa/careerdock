@@ -1,4 +1,4 @@
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id             UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     razorpay_order_id   VARCHAR(255) NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE payments (
 );
 
 -- User's payment history
-CREATE INDEX idx_payments_user ON payments (user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payments_user ON payments (user_id, created_at DESC);
 
 -- Admin: filter by status
-CREATE INDEX idx_payments_status ON payments (status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payments_status ON payments (status, created_at DESC);

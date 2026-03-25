@@ -1,4 +1,4 @@
-CREATE TABLE admin_audit_log (
+CREATE TABLE IF NOT EXISTS admin_audit_log (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     admin_id    UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     action      VARCHAR(255) NOT NULL,
@@ -10,10 +10,10 @@ CREATE TABLE admin_audit_log (
 );
 
 -- Audit log by admin
-CREATE INDEX idx_audit_log_admin ON admin_audit_log (admin_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_admin ON admin_audit_log (admin_id, created_at DESC);
 
 -- Audit log by entity
-CREATE INDEX idx_audit_log_entity ON admin_audit_log (entity_type, entity_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_entity ON admin_audit_log (entity_type, entity_id, created_at DESC);
 
 -- Time-range queries for admin dashboard
-CREATE INDEX idx_audit_log_created ON admin_audit_log (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_created ON admin_audit_log (created_at DESC);

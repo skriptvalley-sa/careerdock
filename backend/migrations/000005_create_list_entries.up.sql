@@ -1,4 +1,4 @@
-CREATE TABLE list_entries (
+CREATE TABLE IF NOT EXISTS list_entries (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     list_id     UUID         NOT NULL REFERENCES user_lists(id) ON DELETE CASCADE,
     company_id  UUID         NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
@@ -16,7 +16,7 @@ CREATE TABLE list_entries (
 );
 
 -- Entries in a list, ordered
-CREATE INDEX idx_list_entries_list ON list_entries (list_id, position ASC);
+CREATE INDEX IF NOT EXISTS idx_list_entries_list ON list_entries (list_id, position ASC);
 
 -- Find all entries for a company across lists
-CREATE INDEX idx_list_entries_company ON list_entries (company_id);
+CREATE INDEX IF NOT EXISTS idx_list_entries_company ON list_entries (company_id);

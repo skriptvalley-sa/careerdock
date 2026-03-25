@@ -1,4 +1,4 @@
-CREATE TABLE user_credits (
+CREATE TABLE IF NOT EXISTS user_credits (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     credit_type VARCHAR(20) NOT NULL
@@ -11,7 +11,7 @@ CREATE TABLE user_credits (
     CONSTRAINT uq_user_credits UNIQUE (user_id, credit_type)
 );
 
-CREATE TABLE credit_transactions (
+CREATE TABLE IF NOT EXISTS credit_transactions (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id       UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     credit_type   VARCHAR(20)  NOT NULL
@@ -26,7 +26,7 @@ CREATE TABLE credit_transactions (
 );
 
 -- User's transaction history
-CREATE INDEX idx_credit_txns_user ON credit_transactions (user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_credit_txns_user ON credit_transactions (user_id, created_at DESC);
 
 -- Transactions by type for analytics
-CREATE INDEX idx_credit_txns_type ON credit_transactions (credit_type, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_credit_txns_type ON credit_transactions (credit_type, created_at DESC);

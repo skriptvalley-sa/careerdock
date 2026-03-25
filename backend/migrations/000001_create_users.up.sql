@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email           VARCHAR(255) NOT NULL,
     password_hash   VARCHAR(255) NOT NULL,
@@ -31,11 +31,11 @@ CREATE TABLE users (
 );
 
 -- Login lookup
-CREATE UNIQUE INDEX idx_users_email ON users (email);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users (email);
 
 -- Admin user management (filter by role, sort by creation)
-CREATE INDEX idx_users_role_created ON users (role, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_users_role_created ON users (role, created_at DESC);
 
 -- Scheduled cleanup of soft-deleted users
-CREATE INDEX idx_users_deleted_at ON users (deleted_at)
+CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON users (deleted_at)
     WHERE deleted_at IS NOT NULL;

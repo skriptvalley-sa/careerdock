@@ -1,4 +1,4 @@
-CREATE TABLE email_verification_tokens (
+CREATE TABLE IF NOT EXISTS email_verification_tokens (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     token       VARCHAR(255) NOT NULL,
@@ -10,10 +10,10 @@ CREATE TABLE email_verification_tokens (
 );
 
 -- Cleanup expired tokens
-CREATE INDEX idx_email_tokens_expires ON email_verification_tokens (expires_at)
+CREATE INDEX IF NOT EXISTS idx_email_tokens_expires ON email_verification_tokens (expires_at)
     WHERE used_at IS NULL;
 
-CREATE TABLE password_reset_tokens (
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     token       VARCHAR(255) NOT NULL,
@@ -25,5 +25,5 @@ CREATE TABLE password_reset_tokens (
 );
 
 -- Cleanup expired tokens
-CREATE INDEX idx_password_tokens_expires ON password_reset_tokens (expires_at)
+CREATE INDEX IF NOT EXISTS idx_password_tokens_expires ON password_reset_tokens (expires_at)
     WHERE used_at IS NULL;

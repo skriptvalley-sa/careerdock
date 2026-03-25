@@ -1,4 +1,4 @@
-CREATE TABLE company_edits (
+CREATE TABLE IF NOT EXISTS company_edits (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     company_id      UUID         NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
     submitted_by    UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -12,11 +12,11 @@ CREATE TABLE company_edits (
 );
 
 -- Admin moderation queue: pending edits sorted by submission time
-CREATE INDEX idx_company_edits_pending ON company_edits (created_at ASC)
+CREATE INDEX IF NOT EXISTS idx_company_edits_pending ON company_edits (created_at ASC)
     WHERE status = 'pending';
 
 -- Edits for a specific company
-CREATE INDEX idx_company_edits_company ON company_edits (company_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_company_edits_company ON company_edits (company_id, created_at DESC);
 
 -- Edits by a specific moderator
-CREATE INDEX idx_company_edits_submitter ON company_edits (submitted_by, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_company_edits_submitter ON company_edits (submitted_by, created_at DESC);

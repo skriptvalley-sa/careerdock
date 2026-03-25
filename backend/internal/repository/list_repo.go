@@ -366,6 +366,27 @@ func (r *ListRepo) UpdateEntry(ctx context.Context, entry *domain.ListEntry) err
 	return nil
 }
 
+// UpdateCompanyStatusForUser updates company_status for ALL list entries belonging
+// to the given user and company. This keeps the status in sync across all lists.
+func (r *ListRepo) UpdateCompanyStatusForUser(ctx context.Context, userID, companyID uuid.UUID, status domain.CompanyTrackingStatus) error {
+	q := getDBTX(ctx, r.pool)
+	now := time.Now().UTC()
+
+	_, err := q.Exec(ctx, `
+		UPDATE list_entries le
+		SET company_status = $3, updated_at = $4
+		FROM user_lists ul
+		WHERE le.list_id = ul.id
+		  AND ul.user_id   = $1
+		  AND le.company_id = $2`,
+		userID, companyID, string(status), now,
+	)
+	if err != nil {
+		return domain.InternalError(err)
+	}
+	return nil
+}
+
 // DeleteEntry removes a list entry. Status history and interview rounds cascade.
 func (r *ListRepo) DeleteEntry(ctx context.Context, id uuid.UUID) error {
 	q := getDBTX(ctx, r.pool)

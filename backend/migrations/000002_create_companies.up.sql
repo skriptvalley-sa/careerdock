@@ -1,4 +1,4 @@
-CREATE TABLE companies (
+CREATE TABLE IF NOT EXISTS companies (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     slug                VARCHAR(255) NOT NULL,
     name                VARCHAR(255) NOT NULL,
@@ -52,22 +52,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_companies_search_vector ON companies;
 CREATE TRIGGER trg_companies_search_vector
     BEFORE INSERT OR UPDATE ON companies
     FOR EACH ROW
     EXECUTE FUNCTION companies_search_vector_update();
 
 -- Full-text search
-CREATE INDEX idx_companies_search ON companies USING GIN (search_vector);
+CREATE INDEX IF NOT EXISTS idx_companies_search ON companies USING GIN (search_vector);
 
 -- Array containment filters
-CREATE INDEX idx_companies_tech_stack ON companies USING GIN (tech_stack);
-CREATE INDEX idx_companies_domains ON companies USING GIN (domains);
+CREATE INDEX IF NOT EXISTS idx_companies_tech_stack ON companies USING GIN (tech_stack);
+CREATE INDEX IF NOT EXISTS idx_companies_domains ON companies USING GIN (domains);
 
 -- Common filter columns
-CREATE INDEX idx_companies_hiring_status ON companies (hiring_status);
-CREATE INDEX idx_companies_compensation_tier ON companies (compensation_tier);
-CREATE INDEX idx_companies_size ON companies (size);
+CREATE INDEX IF NOT EXISTS idx_companies_hiring_status ON companies (hiring_status);
+CREATE INDEX IF NOT EXISTS idx_companies_compensation_tier ON companies (compensation_tier);
+CREATE INDEX IF NOT EXISTS idx_companies_size ON companies (size);
 
 -- Sorting by update time
-CREATE INDEX idx_companies_updated_at ON companies (updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_companies_updated_at ON companies (updated_at DESC);

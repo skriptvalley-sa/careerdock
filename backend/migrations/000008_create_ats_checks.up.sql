@@ -1,4 +1,4 @@
-CREATE TABLE ats_checks (
+CREATE TABLE IF NOT EXISTS ats_checks (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     resume_id       UUID         NOT NULL REFERENCES resumes(id) ON DELETE CASCADE,
@@ -18,11 +18,11 @@ CREATE TABLE ats_checks (
 );
 
 -- User's ATS check history
-CREATE INDEX idx_ats_checks_user ON ats_checks (user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ats_checks_user ON ats_checks (user_id, created_at DESC);
 
 -- Cache key lookup
-CREATE INDEX idx_ats_checks_cache_key ON ats_checks (cache_key);
+CREATE INDEX IF NOT EXISTS idx_ats_checks_cache_key ON ats_checks (cache_key);
 
 -- Company ATS checks for analytics
-CREATE INDEX idx_ats_checks_company ON ats_checks (company_id, created_at DESC)
+CREATE INDEX IF NOT EXISTS idx_ats_checks_company ON ats_checks (company_id, created_at DESC)
     WHERE company_id IS NOT NULL;

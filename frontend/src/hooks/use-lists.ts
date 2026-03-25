@@ -11,6 +11,12 @@ import type {
   CompanyTrackingStatus,
 } from '@/types/api';
 
+// Helper: patch a single entry in a cached ListDetail without a full refetch.
+function patchEntry(old: ListDetail | undefined, updated: ListEntry): ListDetail | undefined {
+  if (!old) return old;
+  return { ...old, entries: old.entries.map((e) => (e.id === updated.id ? updated : e)) };
+}
+
 // --- Queries ---
 
 export function useLists() {
@@ -129,8 +135,16 @@ export function useUpdateEntry() {
         `/api/lists/${listId}/entries/${entryId}`,
         data,
       ),
-    onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: queryKeys.lists.detail(vars.listId) });
+    onSuccess: (updatedEntry, vars) => {
+      // Immediately patch the current list's cache so the UI updates without
+      // waiting for a round-trip refetch.
+      qc.setQueryData<ListDetail>(
+        queryKeys.lists.detail(vars.listId),
+        (old) => patchEntry(old, updatedEntry),
+      );
+      // Company status is synced across ALL lists for this user+company, so
+      // invalidate every list detail to reflect the change everywhere.
+      qc.invalidateQueries({ queryKey: queryKeys.lists.all });
     },
   });
 }

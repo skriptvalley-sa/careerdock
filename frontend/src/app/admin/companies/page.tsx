@@ -18,10 +18,10 @@ export default function AdminCompaniesPage() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const { data, isLoading } = useCompanyList({
-    q: debouncedSearch || undefined,
-    limit: '50',
-  });
+  const { data, isLoading } = useCompanyList(
+    { q: debouncedSearch || undefined, limit: '50' },
+    { staleTime: 0 }, // Admin always wants fresh data
+  );
 
   const companies = data?.pages.flatMap((page) => page.data) ?? [];
 

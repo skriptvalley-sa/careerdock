@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import { Plus, ExternalLink } from 'lucide-react';
 import {
   useListDetail,
   useUpdateEntry,
@@ -26,7 +26,7 @@ export default function ListDetailPage() {
 
   const [showBrowser, setShowBrowser] = useState(false);
   const [editingCompanyStatus, setEditingCompanyStatus] = useState<string | null>(null);
-  const [applicationModalEntry, setApplicationModalEntry] = useState<ListEntry | null>(null);
+  const [applicationModalCompany, setApplicationModalCompany] = useState<{ id: string; name: string } | null>(null);
 
   // Track unsaved changes from CompanyBrowserPanel
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -226,77 +226,100 @@ export default function ListDetailPage() {
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
                   Status
                 </th>
-                <th className="hidden px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-500 sm:table-cell">
-                  Application
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Applications
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-500">
+                  Add
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-edge">
               {list.entries.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-surface">
-                    {/* Company name linked to profile */}
-                    <td className="whitespace-nowrap px-4 py-3">
-                      {entry.company_slug ? (
-                        <Link
-                          href={`/companies/${entry.company_slug}`}
-                          className="text-sm font-medium text-[#00f0ff] hover:text-[#00f0ff]/80 hover:underline"
-                        >
-                          {entry.company_name || entry.company_id.slice(0, 8) + '...'}
-                        </Link>
-                      ) : (
-                        <div className="text-sm font-medium text-slate-100">
-                          {entry.company_name || entry.company_id.slice(0, 8) + '...'}
-                        </div>
-                      )}
-                    </td>
-
-                    {/* Company tracking status (inline editable) */}
-                    <td className="whitespace-nowrap px-4 py-3">
-                      {editingCompanyStatus === entry.id ? (
-                        <select
-                          value={entry.company_status}
-                          onChange={(e) =>
-                            handleCompanyStatusChange(entry, e.target.value as CompanyTrackingStatus)
-                          }
-                          onBlur={() => setEditingCompanyStatus(null)}
-                          autoFocus
-                          className="rounded-md border border-edge-input bg-input px-2 py-1 text-xs text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none"
-                        >
-                          {ALL_COMPANY_STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {getCompanyStatusLabel(s)}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <button onClick={() => setEditingCompanyStatus(entry.id)}>
-                          <CompanyStatusBadge status={entry.company_status} />
-                        </button>
-                      )}
-                    </td>
-
-                    {/* + Add Application button */}
-                    <td className="hidden whitespace-nowrap px-4 py-3 text-center sm:table-cell">
-                      <button
-                        onClick={() => setApplicationModalEntry(entry)}
-                        className="inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1 text-xs font-medium text-slate-400 hover:border-[#00f0ff]/30 hover:bg-surface hover:text-[#00f0ff] transition-colors"
+                <tr key={entry.id} className="hover:bg-surface">
+                  {/* Company name linked to profile */}
+                  <td className="whitespace-nowrap px-4 py-3">
+                    {entry.company_slug ? (
+                      <Link
+                        href={`/companies/${entry.company_slug}`}
+                        className="text-sm font-medium text-[#00f0ff] hover:text-[#00f0ff]/80 hover:underline"
                       >
-                        <Plus className="h-3 w-3" />
-                        Add
+                        {entry.company_name || entry.company_id.slice(0, 8) + '...'}
+                      </Link>
+                    ) : (
+                      <div className="text-sm font-medium text-slate-100">
+                        {entry.company_name || entry.company_id.slice(0, 8) + '...'}
+                      </div>
+                    )}
+                  </td>
+
+                  {/* Company tracking status (inline editable, syncs across all lists) */}
+                  <td className="whitespace-nowrap px-4 py-3">
+                    {editingCompanyStatus === entry.id ? (
+                      <select
+                        value={entry.company_status}
+                        onChange={(e) =>
+                          handleCompanyStatusChange(entry, e.target.value as CompanyTrackingStatus)
+                        }
+                        onBlur={() => setEditingCompanyStatus(null)}
+                        autoFocus
+                        className="rounded-md border border-edge-input bg-input px-2 py-1 text-xs text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none"
+                      >
+                        {ALL_COMPANY_STATUSES.map((s) => (
+                          <option key={s} value={s}>
+                            {getCompanyStatusLabel(s)}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <button onClick={() => setEditingCompanyStatus(entry.id)}>
+                        <CompanyStatusBadge status={entry.company_status} />
                       </button>
-                    </td>
-                  </tr>
-                ))}
+                    )}
+                  </td>
+
+                  {/* Application count chip — links to applications page filtered by company */}
+                  <td className="whitespace-nowrap px-4 py-3 text-center">
+                    {entry.application_count > 0 ? (
+                      <Link
+                        href={`/applications?company=${entry.company_id}`}
+                        className="inline-flex items-center gap-1 rounded-full bg-[#00f0ff]/10 px-2.5 py-0.5 text-xs font-medium text-[#00f0ff] hover:bg-[#00f0ff]/20 transition-colors"
+                      >
+                        {entry.application_count}
+                        <ExternalLink className="h-3 w-3" />
+                      </Link>
+                    ) : (
+                      <span className="text-xs text-slate-600">—</span>
+                    )}
+                  </td>
+
+                  {/* + Add Application button */}
+                  <td className="whitespace-nowrap px-4 py-3 text-center">
+                    <button
+                      onClick={() =>
+                        setApplicationModalCompany({
+                          id: entry.company_id,
+                          name: entry.company_name,
+                        })
+                      }
+                      className="inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1 text-xs font-medium text-slate-400 hover:border-[#00f0ff]/30 hover:bg-surface hover:text-[#00f0ff] transition-colors"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Add
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       ) : null}
 
       {/* Add Application Modal */}
-      {applicationModalEntry && (
+      {applicationModalCompany && (
         <AddApplicationModal
-          entry={applicationModalEntry}
-          onClose={() => setApplicationModalEntry(null)}
+          company={applicationModalCompany}
+          onClose={() => setApplicationModalCompany(null)}
         />
       )}
 

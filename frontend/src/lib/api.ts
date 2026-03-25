@@ -213,6 +213,15 @@ export const apiClient = {
     return apiRaw<PaginatedResponse<T>>(path, { method: 'GET', params });
   },
 
+  /**
+   * Fetch raw JSON without unwrapping — for endpoints that return non-standard
+   * envelopes (e.g. admin list endpoints: {data: T[], total: N}).
+   * Includes the same 401 auto-refresh logic as all other methods.
+   */
+  getRaw<T>(path: string, params?: Record<string, string>): Promise<T> {
+    return apiRaw<T>(path, { method: 'GET', params });
+  },
+
   upload<T>(path: string, formData: FormData): Promise<T> {
     return api<T>(path, {
       method: 'POST',
