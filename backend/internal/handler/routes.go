@@ -90,6 +90,14 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 			sseH := NewSSEHandler(svc.Redis)
 			r.Get("/events", sseH.Events)
 
+			// --- Notifications (Sprint 5) ---
+			notifH := NewNotificationHandler(svc.Notification)
+			r.Route("/notifications", func(r chi.Router) {
+				r.Get("/", notifH.ListNotifications)
+				r.Get("/unread-count", notifH.UnreadCount)
+				r.Put("/{id}/read", notifH.MarkRead)
+			})
+
 			// --- Payments (Sprint 3) ---
 			paymentH := NewPaymentHandler(svc.Payment, svc.Credit, svc.RazorpayKeyID)
 			r.Route("/payments", func(r chi.Router) {

@@ -89,6 +89,10 @@ func main() {
 	openaiProvider := ai.NewOpenAIProvider(cfg.OpenAIAPIKey, "", 0)
 	aiProvider = ai.NewFallbackProvider(claudeProvider, openaiProvider)
 
+	// Asynq client for enqueueing sub-tasks (e.g., company refresh → enrich)
+	asynqClient := asynq.NewClient(asynq.RedisClientOpt{Addr: cfg.RedisURL})
+	defer func() { _ = asynqClient.Close() }()
+
 	// AI result cache
 	aiCache := ai.NewResultCache(redisClient)
 
@@ -135,8 +139,12 @@ func main() {
 	userCleanupHandler := worker.NewUserCleanupHandler(userRepo)
 	mux.HandleFunc(TaskUserCleanup, userCleanupHandler.Handle)
 
-	// TODO (Sprint 5): mux.HandleFunc(TaskCompanyEnrich, worker.HandleCompanyEnrich)
-	// TODO (Sprint 5): mux.HandleFunc(TaskCompanyRefresh, worker.HandleCompanyRefresh)
+	// Sprint 5: Company enrichment workers
+	companyEnrichHandler := worker.NewCompanyEnrichHandler(companyRepo, aiProvider)
+	mux.HandleFunc(TaskCompanyEnrich, companyEnrichHandler.Handle)
+
+	companyRefreshHandler := worker.NewCompanyRefreshHandler(companyRepo, asynqClient)
+	mux.HandleFunc(TaskCompanyRefresh, companyRefreshHandler.Handle)
 
 	// 6. Set up Asynq scheduler for periodic tasks
 	scheduler := asynq.NewScheduler(
@@ -151,6 +159,14 @@ func main() {
 		asynq.Queue("low"),
 	); err != nil {
 		logger.Error("failed to register scheduler task", "task", TaskUserCleanup, "error", err)
+		return
+	}
+
+	// Run company refresh weekly on Sundays at 03:00 UTC.
+	if _, err := scheduler.Register("0 3 * * 0", asynq.NewTask(TaskCompanyRefresh, nil),
+		asynq.Queue("low"),
+	); err != nil {
+		logger.Error("failed to register scheduler task", "task", TaskCompanyRefresh, "error", err)
 		return
 	}
 

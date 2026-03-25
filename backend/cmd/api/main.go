@@ -129,7 +129,9 @@ func main() {
 	atsSvc := service.NewATSService(atsCheckRepo, resumeRepo, companyRepo, creditRepo, txr, asynqClient)
 	curatedListSvc := service.NewCuratedListService(curatedListRepo, resumeRepo, creditRepo, txr, asynqClient)
 	adminSvc := service.NewAdminService(companyRepo, userRepo, creditRepo, paymentRepo, auditLogRepo, logoStore, txr)
-	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, paymentSvc, creditSvc, resumeSvc, atsSvc, curatedListSvc, adminSvc, db, redisClient, version, cfg.IsProduction(), cfg.RazorpayKeyID, razorpayGateway.VerifyWebhookSignature)
+	notificationRepo := repository.NewNotificationRepo(db)
+	notificationSvc := service.NewNotificationService(notificationRepo)
+	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, paymentSvc, creditSvc, resumeSvc, atsSvc, curatedListSvc, adminSvc, notificationSvc, db, redisClient, version, cfg.IsProduction(), cfg.RazorpayKeyID, razorpayGateway.VerifyWebhookSignature)
 
 	// 6. Build handler layer + mount routes
 	r := chi.NewRouter()
@@ -139,6 +141,10 @@ func main() {
 	r.Use(middleware.Logger(logger))
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.CORS(cfg.AllowedOrigins))
+
+	// Rate limiting: 100 req/min per IP (unauthenticated), 300 req/min per user (authenticated)
+	rateLimiter := middleware.NewRateLimiter(redisClient, 100, 300, time.Minute)
+	r.Use(rateLimiter.Middleware)
 
 	auth := middleware.NewAuth(authSvc)
 	handler.MountRoutes(r, svc, auth)

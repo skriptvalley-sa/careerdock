@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth-store';
 import { useAuth } from '@/hooks/use-auth';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { LogOut, Menu } from 'lucide-react';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 
 /** Routes where the mobile hamburger should be hidden (auth pages). */
 const NO_HAMBURGER_PREFIXES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
@@ -41,15 +42,18 @@ export function Header() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {isAuthenticated ? (
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 rounded-md border border-edge px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-card hover:text-slate-100"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Sign out</span>
-            </button>
+            <>
+              <NotificationBell />
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 rounded-md border border-edge px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-card hover:text-slate-100"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Sign out</span>
+              </button>
+            </>
           ) : (
             <>
               <Link

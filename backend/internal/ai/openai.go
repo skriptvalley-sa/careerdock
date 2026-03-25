@@ -182,6 +182,25 @@ func (o *OpenAIProvider) CurateCompanyList(ctx context.Context, req *CurateListR
 	return result, err
 }
 
+// EnrichCompany infers company attributes using OpenAI.
+func (o *OpenAIProvider) EnrichCompany(ctx context.Context, req *EnrichCompanyRequest) (*EnrichedCompany, error) {
+	systemPrompt := prompts.BuildSystemPrompt(prompts.CompanyEnrichSystem())
+	userMessage := prompts.CompanyEnrichUser(req.Name, req.CareersPageURL, req.LinkedinURL)
+
+	raw, tokens, err := o.call(ctx, systemPrompt, userMessage)
+	if err != nil {
+		return nil, fmt.Errorf("openai enrich company: %w", err)
+	}
+
+	var result EnrichedCompany
+	if err := json.Unmarshal(raw, &result); err != nil {
+		return nil, fmt.Errorf("openai enrich company JSON: %w (raw: %s)", err, truncate(raw, 200))
+	}
+
+	result.TokensUsed = tokens
+	return &result, nil
+}
+
 // --- Internal HTTP methods ---
 
 type openAIRequest struct {

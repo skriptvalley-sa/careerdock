@@ -210,6 +210,25 @@ func (c *ClaudeProvider) CurateCompanyList(ctx context.Context, req *CurateListR
 	return result, err
 }
 
+// EnrichCompany infers company attributes using Claude.
+func (c *ClaudeProvider) EnrichCompany(ctx context.Context, req *EnrichCompanyRequest) (*EnrichedCompany, error) {
+	systemPrompt := prompts.BuildSystemPrompt(prompts.CompanyEnrichSystem())
+	userMessage := prompts.CompanyEnrichUser(req.Name, req.CareersPageURL, req.LinkedinURL)
+
+	raw, tokens, err := c.callText(ctx, systemPrompt, userMessage)
+	if err != nil {
+		return nil, fmt.Errorf("claude enrich company: %w", err)
+	}
+
+	var result EnrichedCompany
+	if err := json.Unmarshal(raw, &result); err != nil {
+		return nil, fmt.Errorf("claude enrich company JSON: %w (raw: %s)", err, truncate(raw, 200))
+	}
+
+	result.TokensUsed = tokens
+	return &result, nil
+}
+
 // --- Internal HTTP methods ---
 
 // claudeRequest is the request body for the Claude Messages API.

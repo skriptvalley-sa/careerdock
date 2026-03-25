@@ -109,6 +109,27 @@ func (f *FallbackProvider) CurateCompanyList(ctx context.Context, req *CurateLis
 	return result, nil
 }
 
+// EnrichCompany tries primary, falls back to secondary.
+func (f *FallbackProvider) EnrichCompany(ctx context.Context, req *EnrichCompanyRequest) (*EnrichedCompany, error) {
+	result, err := f.primary.EnrichCompany(ctx, req)
+	if err == nil {
+		return result, nil
+	}
+
+	slog.Warn("primary provider failed, trying fallback",
+		"operation", "enrich_company",
+		"primary", f.primary.Name(),
+		"primary_error", err.Error(),
+	)
+
+	result, err = f.secondary.EnrichCompany(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("all providers failed: primary=%s, fallback=%s: %w",
+			f.primary.Name(), f.secondary.Name(), err)
+	}
+	return result, nil
+}
+
 // ScoreATSGeneral tries primary, falls back to secondary.
 func (f *FallbackProvider) ScoreATSGeneral(ctx context.Context, req *ATSGeneralRequest) (*ATSResult, error) {
 	result, err := f.primary.ScoreATSGeneral(ctx, req)

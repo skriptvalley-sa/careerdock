@@ -33,6 +33,9 @@ type LLMProvider interface {
 	// CurateCompanyList ranks companies by fit for a candidate profile.
 	CurateCompanyList(ctx context.Context, req *CurateListRequest) (*CuratedListResult, error)
 
+	// EnrichCompany infers company attributes from its name and website.
+	EnrichCompany(ctx context.Context, req *EnrichCompanyRequest) (*EnrichedCompany, error)
+
 	// Name returns the provider name (e.g., "claude", "openai").
 	Name() string
 }
@@ -172,6 +175,23 @@ type RankedCompany struct {
 	MatchScore     int       `json:"match_score"`
 	MatchReasons   []string  `json:"match_reasons"`
 	Recommendation string    `json:"recommendation"`
+}
+
+// EnrichCompanyRequest holds company info for AI enrichment.
+type EnrichCompanyRequest struct {
+	Name           string `json:"name"`
+	CareersPageURL string `json:"careers_page_url,omitempty"`
+	LinkedinURL    string `json:"linkedin_url,omitempty"`
+}
+
+// EnrichedCompany holds AI-inferred company attributes.
+type EnrichedCompany struct {
+	TechStack    []string   `json:"tech_stack"`
+	Domains      []string   `json:"domains"`
+	Size         string     `json:"size"`
+	HiringStatus string     `json:"hiring_status"`
+	Description  string     `json:"description"`
+	TokensUsed   TokenUsage `json:"tokens_used"`
 }
 
 // MarshalCuratedListResult serialises a CuratedListResult to JSON for storage.
