@@ -25,7 +25,7 @@ func (r *AuditLogRepo) Create(ctx context.Context, entry *domain.AuditLogEntry) 
 	q := getDBTX(ctx, r.pool)
 
 	err := q.QueryRow(ctx, `
-		INSERT INTO audit_log (
+		INSERT INTO admin_audit_log (
 			id, admin_id, action, entity_type, entity_id,
 			details, ip_address, created_at
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -87,7 +87,7 @@ func (r *AuditLogRepo) List(ctx context.Context, filter domain.AuditLogFilter) (
 	query := fmt.Sprintf(`
 		SELECT id, admin_id, action, entity_type, entity_id,
 		       details, ip_address, created_at
-		FROM audit_log
+		FROM admin_audit_log
 		%s
 		ORDER BY created_at DESC
 		LIMIT %s OFFSET %s`, where, limitParam, offsetParam)
