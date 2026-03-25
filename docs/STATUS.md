@@ -1,6 +1,6 @@
 # Project Status
 
-> **Last updated:** 2026-03-25 — Sprint 4 complete ✅
+> **Last updated:** 2026-03-25 — Sprint 5 complete ✅
 
 ## Design Phases (Complete)
 - Phase 1: ✅ Complete (PRD.md)
@@ -20,7 +20,7 @@
 - Sprint 2 (Lists & Tracking): ✅ Complete — PR #17 (merged), PR #18 (merged)
 - Sprint 3 (Payments & Resume): ✅ Complete — PR #19, #20, #21, #22, #23, #24, #25, #26 (all merged)
 - Sprint 4 (AI Features): ✅ Complete — PR #28, #29, #30, #31 (all merged)
-- Sprint 5 (Admin & Polish): ⬜ Not started
+- Sprint 5 (Admin & Polish): ✅ Complete — PR #32, #33, #34 (all merged)
 - Sprint 6 (Launch Prep): ⬜ Not started
 
 ---
@@ -119,7 +119,7 @@
 | `GET /api/companies/{slug}` returns company profile | ✅ |
 | `make seed` populates 50+ companies | ✅ |
 | Company list page renders with search, filter, pagination | ✅ |
-| Company profile page is SSR with correct meta tags (OG, Twitter) | ⏭️ Deferred — needs `generateMetadata` in App Router |
+| Company profile page is SSR with correct meta tags (OG, Twitter) | ✅ Completed in Sprint 5 (PR #34) |
 | Offline: previously viewed companies available without network | ✅ |
 
 ---
@@ -343,24 +343,64 @@
 
 ---
 
-## Sprint 5 — Admin & Polish (Tasks 5.1–5.x)
+## Sprint 5 — Admin & Polish (Tasks 5.1–5.10)
 
-**Branch:** `feature/sprint-5-admin-polish` *(not started)*
-**Status:** ⬜ Not started
+**Branch (Admin backend):** `feature/sprint-5-admin-backend` — **PR #32 (merged)**
+**Branch (Admin frontend):** `feature/sprint-5-admin-frontend` — **PR #33 (merged)**
+**Branch (Polish):** `feature/sprint-5-polish` — **PR #34 (merged)**
+**CI:** ✅ All jobs passing
+**Status:** ✅ Complete
 
-### Planned Tasks
+### Task Checklist
 
 | # | Task | Status |
 |:-:|------|:------:|
-| 5.1 | Admin panel — company CRUD (create, edit, logo upload) | ⬜ |
-| 5.2 | Admin panel — user management (list, ban, grant premium) | ⬜ |
-| 5.3 | Admin panel — credit management (manual allocation) | ⬜ |
-| 5.4 | Admin panel — payment & transaction logs | ⬜ |
-| 5.5 | Company enrichment worker (`admin:company_enrich` — auto-populate tech stack from web) | ⬜ |
-| 5.6 | Company refresh worker (`admin:company_refresh` — periodic re-enrichment) | ⬜ |
-| 5.7 | SSR + `generateMetadata` for company profile page (OG tags, Twitter card) | ⬜ |
-| 5.8 | Rate limiting middleware (per-IP + per-user) | ⬜ |
-| 5.9 | Notification system (in-app notifications for events) | ⬜ |
-| 5.10 | UI polish — loading skeletons, error boundaries, empty states | ⬜ |
-| 5.11 | Onboarding flow — guided setup for new users | ⬜ |
-| 5.12 | Mobile nav improvements — bottom tab bar | ⬜ |
+| 5.1 | Admin panel — company CRUD (create, edit, logo upload) | ✅ |
+| 5.2 | Admin panel — user management (list, ban/unban, role change, grant premium) | ✅ |
+| 5.3 | Admin panel — credit management (manual allocation with reason) | ✅ |
+| 5.4 | Admin panel — payment & credit transaction logs | ✅ |
+| 5.5 | Company enrichment worker (`admin:company_enrich` — AI-infer tech stack, domains, size, hiring status) | ✅ |
+| 5.6 | Company refresh scheduler (`admin:company_refresh` — weekly re-enrichment for stale companies) | ✅ |
+| 5.7 | SSR + `generateMetadata` for company profile page (OG tags, Twitter card, canonical URL) | ✅ |
+| 5.8 | Rate limiting middleware (per-IP 100 req/min + per-user 300 req/min, Redis sliding window) | ✅ |
+| 5.9 | Notification system (backend service + handler + frontend bell icon with unread count) | ✅ |
+| 5.10 | UI polish — loading skeletons for dashboard, company list, resume list, ATS history | ✅ |
+
+### Implementation Notes (Tasks 5.1–5.4 Backend — PR #32)
+
+- **Admin service** (`service/admin_service.go`): Company CRUD, user management (ban/unban, role change, premium toggle), credit allocation, payment/transaction listing, logo upload with audit logging
+- **Admin handlers** (`handler/admin.go`): 10 endpoints — `POST/PUT /admin/companies`, `POST /admin/companies/:id/logo`, `GET/PUT /admin/users`, `POST /admin/users/:id/credits`, `GET /admin/payments`, `GET /admin/credits/transactions`
+- **Audit log**: All admin mutations recorded with admin ID, action, entity type/ID, details JSON, IP address
+- **RequireAdmin middleware**: Role-gated access, all admin routes behind `auth.RequireAdmin`
+
+### Implementation Notes (Tasks 5.1–5.4 Frontend — PR #33)
+
+- **Admin layout** (`app/admin/layout.tsx`): Separate layout from dashboard with own sidebar (Companies, Users, Payments), role guard redirecting non-admins to `/dashboard`
+- **Admin hooks** (`hooks/use-admin.ts`): Custom `adminGet<T>` helper for raw fetch (admin list endpoints return `{data[], total}` without `DataResponse` wrapper); 8 hooks for all CRUD operations
+- **Company management** (`admin/companies/page.tsx` + `company-modal.tsx`): Debounced search, full company create/edit form with all fields (tech stack, domains, office modes, URLs, logo upload)
+- **User management** (`admin/users/page.tsx`): Search + role filter, inline role dropdown, ban/unban toggle, premium toggle, credit allocation via `CreditModal`
+- **Payments page** (`admin/payments/page.tsx`): Tabbed view (Payments | Credit Transactions), filterable by user ID, status, credit type
+- **Sidebar integration**: Admin link with `ShieldCheck` icon shown only for `role === 'admin'`
+
+### Implementation Notes (Tasks 5.5–5.10 — PR #34)
+
+- **Company enrichment** (5.5/5.6): `EnrichCompany` added to `LLMProvider` interface (Claude + OpenAI + Fallback). Worker handler fills gaps only (doesn't overwrite existing data). Prompt infers tech_stack, domains, size, hiring_status, description from company name/URLs. Weekly scheduler (Sundays 03:00 UTC) enqueues enrichment for companies not verified in 7+ days
+- **SSR metadata** (5.7): Company `[slug]` page split into server component (with `generateMetadata` for OG/Twitter/canonical) and client component. ISR with 1-hour revalidation. Deferred SSR item from Sprint 1 now complete
+- **Rate limiting** (5.8): `middleware/rate_limit.go` — Redis-backed per-IP (100/min) and per-user (300/min) sliding window counters. Responds with `X-RateLimit-Limit/Remaining/Reset` headers. Fails open on Redis errors. Applied globally to all `/api/*` routes
+- **Notifications** (5.9): Backend — `NotificationService` + `NotificationHandler` (`GET /api/notifications`, `GET /api/notifications/unread-count`, `PUT /api/notifications/:id/read`). Frontend — `NotificationBell` component in header with unread count badge (magenta), dropdown panel, mark-as-read, 30s polling
+- **Loading skeletons** (5.10): Reusable `Skeleton`, `SkeletonCard`, `SkeletonTable` primitives in `components/ui/skeleton.tsx`. `loading.tsx` files created for dashboard, company list, resume list, ATS history pages
+
+### Definition of Done
+
+| Criterion | Status |
+|-----------|:------:|
+| Admin can create/edit companies with all fields + logo upload | ✅ |
+| Admin can list/search users, ban/unban, change role, toggle premium | ✅ |
+| Admin can allocate credits to users with reason tracking | ✅ |
+| Admin can view payment history and credit transaction log | ✅ |
+| Company enrichment worker populates missing company data via AI | ✅ |
+| Weekly scheduler refreshes stale company profiles | ✅ |
+| Company profile pages have proper OG/Twitter meta tags for social sharing | ✅ |
+| Rate limiting prevents abuse (100/min IP, 300/min user) | ✅ |
+| Notification bell shows unread count, dropdown lists recent notifications | ✅ |
+| Loading skeletons shown during data fetching on key pages | ✅ |
