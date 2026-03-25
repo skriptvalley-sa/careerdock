@@ -154,19 +154,15 @@ func (s *ListService) DeleteList(ctx context.Context, listID, userID uuid.UUID) 
 
 // --- Entry operations ---
 
-// CreateEntryInput holds input for creating a list entry.
+// CreateEntryInput holds input for adding a company to a list.
 type CreateEntryInput struct {
 	ListID        uuid.UUID
 	UserID        uuid.UUID
 	CompanyID     uuid.UUID
 	CompanyStatus domain.CompanyTrackingStatus
-	RoleTitle     *string
-	Status        domain.ApplicationStatus
-	DateApplied   *time.Time
-	Notes         *string
 }
 
-// CreateEntry adds a company+role to a list, verifying ownership.
+// CreateEntry adds a company to a list, verifying ownership.
 func (s *ListService) CreateEntry(ctx context.Context, input CreateEntryInput) (*domain.ListEntry, error) {
 	// Verify list ownership
 	list, err := s.lists.GetListByID(ctx, input.ListID)
@@ -179,9 +175,6 @@ func (s *ListService) CreateEntry(ctx context.Context, input CreateEntryInput) (
 
 	if input.CompanyStatus == "" {
 		input.CompanyStatus = domain.CompanyStatusMarked
-	}
-	if input.Status == "" {
-		input.Status = domain.StatusNotApplied
 	}
 
 	// Get current entry count for position
@@ -196,31 +189,12 @@ func (s *ListService) CreateEntry(ctx context.Context, input CreateEntryInput) (
 		ListID:        input.ListID,
 		CompanyID:     input.CompanyID,
 		CompanyStatus: input.CompanyStatus,
-		RoleTitle:     input.RoleTitle,
-		Status:        input.Status,
-		DateApplied:   input.DateApplied,
-		Notes:         input.Notes,
 		Position:      len(entries),
 		CreatedAt:     now,
 		UpdatedAt:     now,
 	}
 
-	err = s.tx.WithTx(ctx, func(txCtx context.Context) error {
-		if err := s.lists.CreateEntry(txCtx, entry); err != nil {
-			return err
-		}
-
-		// Record initial status in history
-		history := &domain.StatusHistory{
-			ID:          uuid.Must(uuid.NewV7()),
-			ListEntryID: entry.ID,
-			FromStatus:  nil,
-			ToStatus:    entry.Status,
-			ChangedAt:   now,
-		}
-		return s.lists.CreateStatusHistory(txCtx, history)
-	})
-	if err != nil {
+	if err := s.lists.CreateEntry(ctx, entry); err != nil {
 		return nil, err
 	}
 
@@ -272,7 +246,6 @@ func (s *ListService) BatchCreateEntries(ctx context.Context, input BatchCreateE
 				ListID:        input.ListID,
 				CompanyID:     companyID,
 				CompanyStatus: domain.CompanyStatusMarked,
-				Status:        domain.StatusNotApplied,
 				Position:      position,
 				CreatedAt:     now,
 				UpdatedAt:     now,
@@ -280,18 +253,6 @@ func (s *ListService) BatchCreateEntries(ctx context.Context, input BatchCreateE
 			position++
 
 			if err := s.lists.CreateEntry(txCtx, entry); err != nil {
-				return err
-			}
-
-			// Record initial status
-			history := &domain.StatusHistory{
-				ID:          uuid.Must(uuid.NewV7()),
-				ListEntryID: entry.ID,
-				FromStatus:  nil,
-				ToStatus:    entry.Status,
-				ChangedAt:   now,
-			}
-			if err := s.lists.CreateStatusHistory(txCtx, history); err != nil {
 				return err
 			}
 
@@ -319,19 +280,15 @@ func (s *ListService) ListEntries(ctx context.Context, listID, userID uuid.UUID)
 	return s.lists.ListEntries(ctx, listID)
 }
 
-// UpdateEntryInput holds input for updating a list entry.
+// UpdateEntryInput holds input for updating a list entry (company_status and position only).
 type UpdateEntryInput struct {
 	EntryID       uuid.UUID
 	UserID        uuid.UUID
 	CompanyStatus *domain.CompanyTrackingStatus
-	Status        *domain.ApplicationStatus
-	RoleTitle     *string
-	Notes         *string
-	DateApplied   *time.Time
 	Position      *int
 }
 
-// UpdateEntry updates a list entry, tracking status changes.
+// UpdateEntry updates a list entry's company status or position.
 func (s *ListService) UpdateEntry(ctx context.Context, input UpdateEntryInput) (*domain.ListEntry, error) {
 	entry, err := s.lists.GetEntryByID(ctx, input.EntryID)
 	if err != nil {
@@ -347,46 +304,14 @@ func (s *ListService) UpdateEntry(ctx context.Context, input UpdateEntryInput) (
 		return nil, domain.Forbidden("you do not own this list")
 	}
 
-	oldStatus := entry.Status
-
 	if input.CompanyStatus != nil {
 		entry.CompanyStatus = *input.CompanyStatus
-	}
-	if input.Status != nil {
-		entry.Status = *input.Status
-	}
-	if input.RoleTitle != nil {
-		entry.RoleTitle = input.RoleTitle
-	}
-	if input.Notes != nil {
-		entry.Notes = input.Notes
-	}
-	if input.DateApplied != nil {
-		entry.DateApplied = input.DateApplied
 	}
 	if input.Position != nil {
 		entry.Position = *input.Position
 	}
 
-	err = s.tx.WithTx(ctx, func(txCtx context.Context) error {
-		if err := s.lists.UpdateEntry(txCtx, entry); err != nil {
-			return err
-		}
-
-		// Track status change
-		if input.Status != nil && oldStatus != *input.Status {
-			history := &domain.StatusHistory{
-				ID:          uuid.Must(uuid.NewV7()),
-				ListEntryID: entry.ID,
-				FromStatus:  &oldStatus,
-				ToStatus:    *input.Status,
-				ChangedAt:   time.Now().UTC(),
-			}
-			return s.lists.CreateStatusHistory(txCtx, history)
-		}
-		return nil
-	})
-	if err != nil {
+	if err := s.lists.UpdateEntry(ctx, entry); err != nil {
 		return nil, err
 	}
 
@@ -411,154 +336,10 @@ func (s *ListService) DeleteEntry(ctx context.Context, entryID, userID uuid.UUID
 	return s.lists.DeleteEntry(ctx, entryID)
 }
 
-// GetEntryHistory returns status change history for an entry.
-func (s *ListService) GetEntryHistory(ctx context.Context, entryID, userID uuid.UUID) ([]domain.StatusHistory, error) {
-	entry, err := s.lists.GetEntryByID(ctx, entryID)
-	if err != nil {
-		return nil, err
-	}
-
-	list, err := s.lists.GetListByID(ctx, entry.ListID)
-	if err != nil {
-		return nil, err
-	}
-	if list.UserID != userID {
-		return nil, domain.Forbidden("you do not own this list")
-	}
-
-	return s.lists.ListStatusHistory(ctx, entryID)
-}
-
-// --- Interview Round operations ---
-
-// CreateRoundInput holds input for creating an interview round.
-type CreateRoundInput struct {
-	EntryID       uuid.UUID
-	UserID        uuid.UUID
-	RoundNumber   int
-	RoundType     string
-	ScheduledDate *time.Time
-	Outcome       domain.InterviewOutcome
-	Notes         *string
-}
-
-// CreateRound adds an interview round, verifying ownership.
-func (s *ListService) CreateRound(ctx context.Context, input CreateRoundInput) (*domain.InterviewRound, error) {
-	entry, err := s.lists.GetEntryByID(ctx, input.EntryID)
-	if err != nil {
-		return nil, err
-	}
-
-	list, err := s.lists.GetListByID(ctx, entry.ListID)
-	if err != nil {
-		return nil, err
-	}
-	if list.UserID != input.UserID {
-		return nil, domain.Forbidden("you do not own this list")
-	}
-
-	if input.Outcome == "" {
-		input.Outcome = domain.OutcomePending
-	}
-
-	now := time.Now().UTC()
-	round := &domain.InterviewRound{
-		ID:            uuid.Must(uuid.NewV7()),
-		ListEntryID:   input.EntryID,
-		RoundNumber:   input.RoundNumber,
-		RoundType:     input.RoundType,
-		ScheduledDate: input.ScheduledDate,
-		Outcome:       input.Outcome,
-		Notes:         input.Notes,
-		CreatedAt:     now,
-		UpdatedAt:     now,
-	}
-
-	if err := s.lists.CreateInterviewRound(ctx, round); err != nil {
-		return nil, err
-	}
-	return round, nil
-}
-
-// UpdateRoundInput holds input for updating an interview round.
-type UpdateRoundInput struct {
-	RoundID       uuid.UUID
-	UserID        uuid.UUID
-	Outcome       *domain.InterviewOutcome
-	Notes         *string
-	ScheduledDate *time.Time
-}
-
-// UpdateRound updates an interview round, verifying ownership.
-func (s *ListService) UpdateRound(ctx context.Context, input UpdateRoundInput) (*domain.InterviewRound, error) {
-	round, err := s.lists.GetInterviewRoundByID(ctx, input.RoundID)
-	if err != nil {
-		return nil, err
-	}
-
-	entry, err := s.lists.GetEntryByID(ctx, round.ListEntryID)
-	if err != nil {
-		return nil, err
-	}
-
-	list, err := s.lists.GetListByID(ctx, entry.ListID)
-	if err != nil {
-		return nil, err
-	}
-	if list.UserID != input.UserID {
-		return nil, domain.Forbidden("you do not own this list")
-	}
-
-	if input.Outcome != nil {
-		round.Outcome = *input.Outcome
-	}
-	if input.Notes != nil {
-		round.Notes = input.Notes
-	}
-	if input.ScheduledDate != nil {
-		round.ScheduledDate = input.ScheduledDate
-	}
-
-	if err := s.lists.UpdateInterviewRound(ctx, round); err != nil {
-		return nil, err
-	}
-	return round, nil
-}
-
-// DeleteRound removes an interview round, verifying ownership.
-func (s *ListService) DeleteRound(ctx context.Context, roundID, userID uuid.UUID) error {
-	round, err := s.lists.GetInterviewRoundByID(ctx, roundID)
-	if err != nil {
-		return err
-	}
-
-	entry, err := s.lists.GetEntryByID(ctx, round.ListEntryID)
-	if err != nil {
-		return err
-	}
-
-	list, err := s.lists.GetListByID(ctx, entry.ListID)
-	if err != nil {
-		return err
-	}
-	if list.UserID != userID {
-		return domain.Forbidden("you do not own this list")
-	}
-
-	return s.lists.DeleteInterviewRound(ctx, roundID)
-}
-
 // ListEntriesByCompanyID returns entries for a specific company across all
-// of a user's lists. Used to show "your applications" on company pages.
+// of a user's lists. Used to show which lists contain a given company.
 func (s *ListService) ListEntriesByCompanyID(ctx context.Context, userID, companyID uuid.UUID) ([]domain.ListEntryWithList, error) {
 	return s.lists.ListEntriesByCompanyID(ctx, userID, companyID)
-}
-
-// ListAllEntries returns all entries across all user lists, optionally filtered by status.
-// When excludeNotApplied is true and no status filter is set, entries with status
-// "not_applied" are excluded. Used for the "All Applications" page.
-func (s *ListService) ListAllEntries(ctx context.Context, userID uuid.UUID, statusFilter *domain.ApplicationStatus, excludeNotApplied bool) ([]domain.ListEntryFull, error) {
-	return s.lists.ListAllEntries(ctx, userID, statusFilter, excludeNotApplied)
 }
 
 // SyncListEntriesInput holds input for syncing a list's company set.
@@ -631,7 +412,6 @@ func (s *ListService) SyncListEntries(ctx context.Context, input SyncListEntries
 				ListID:        input.ListID,
 				CompanyID:     cid,
 				CompanyStatus: domain.CompanyStatusMarked,
-				Status:        domain.StatusNotApplied,
 				Position:      position,
 				CreatedAt:     now,
 				UpdatedAt:     now,
@@ -639,18 +419,6 @@ func (s *ListService) SyncListEntries(ctx context.Context, input SyncListEntries
 			position++
 
 			if err := s.lists.CreateEntry(txCtx, entry); err != nil {
-				return err
-			}
-
-			// Record initial status
-			history := &domain.StatusHistory{
-				ID:          uuid.Must(uuid.NewV7()),
-				ListEntryID: entry.ID,
-				FromStatus:  nil,
-				ToStatus:    entry.Status,
-				ChangedAt:   now,
-			}
-			if err := s.lists.CreateStatusHistory(txCtx, history); err != nil {
 				return err
 			}
 
@@ -687,58 +455,4 @@ func (s *ListService) DeleteEntryByCompany(ctx context.Context, listID, companyI
 		return domain.Forbidden("you do not own this list")
 	}
 	return s.lists.DeleteEntryByCompany(ctx, listID, companyID)
-}
-
-// --- Dashboard helpers ---
-
-// StatusCounts holds counts per application status for dashboard funnel.
-type StatusCounts struct {
-	NotApplied  int `json:"not_applied"`
-	Applied     int `json:"applied"`
-	PhoneScreen int `json:"phone_screen"`
-	Interview   int `json:"interview"`
-	Offer       int `json:"offer"`
-	Rejected    int `json:"rejected"`
-	Accepted    int `json:"accepted"`
-	Withdrawn   int `json:"withdrawn"`
-	Total       int `json:"total"`
-}
-
-// GetDashboardCounts returns aggregated status counts across all user lists.
-func (s *ListService) GetDashboardCounts(ctx context.Context, userID uuid.UUID) (*StatusCounts, error) {
-	lists, err := s.lists.ListByUser(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-
-	counts := &StatusCounts{}
-	for _, list := range lists {
-		entries, err := s.lists.ListEntries(ctx, list.ID)
-		if err != nil {
-			return nil, err
-		}
-		for _, e := range entries {
-			counts.Total++
-			switch e.Status {
-			case domain.StatusNotApplied:
-				counts.NotApplied++
-			case domain.StatusApplied:
-				counts.Applied++
-			case domain.StatusPhoneScreen:
-				counts.PhoneScreen++
-			case domain.StatusInterview:
-				counts.Interview++
-			case domain.StatusOffer:
-				counts.Offer++
-			case domain.StatusRejected:
-				counts.Rejected++
-			case domain.StatusAccepted:
-				counts.Accepted++
-			case domain.StatusWithdrawn:
-				counts.Withdrawn++
-			}
-		}
-	}
-
-	return counts, nil
 }

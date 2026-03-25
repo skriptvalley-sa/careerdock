@@ -49,3 +49,24 @@ export function useGenerateCuratedList() {
     },
   });
 }
+
+export function useRenameCuratedList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      apiClient.put(`/api/curated-lists/${id}`, { name }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.curatedLists.all });
+    },
+  });
+}
+
+export function useDeleteCuratedList() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiClient.delete(`/api/curated-lists/${id}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.curatedLists.all });
+    },
+  });
+}

@@ -11,7 +11,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth-store';
-import { useDashboardCounts, useLists } from '@/hooks/use-lists';
+import { useLists } from '@/hooks/use-lists';
+import { useDashboardCounts } from '@/hooks/use-applications';
 import { useResumes } from '@/hooks/use-resumes';
 import { useCreditBalance } from '@/hooks/use-payments';
 import { useATSChecks, isATSComplete } from '@/hooks/use-ats';

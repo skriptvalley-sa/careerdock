@@ -2,29 +2,25 @@
 
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import { useUpdateEntry } from '@/hooks/use-lists';
+import { useCreateApplication } from '@/hooks/use-applications';
 import { ALL_STATUSES, getStatusLabel } from '@/components/lists/status-badge';
 import type { ApplicationStatus, ListEntry } from '@/types/api';
 
 interface AddApplicationModalProps {
   entry: ListEntry;
-  listId: string;
   onClose: () => void;
 }
 
-export function AddApplicationModal({ entry, listId, onClose }: AddApplicationModalProps) {
-  const [roleTitle, setRoleTitle] = useState(entry.role_title || '');
-  const [status, setStatus] = useState<ApplicationStatus>(
-    entry.status === 'not_applied' ? 'applied' : entry.status,
-  );
-  const [dateApplied, setDateApplied] = useState(entry.date_applied || '');
-  const updateEntry = useUpdateEntry();
+export function AddApplicationModal({ entry, onClose }: AddApplicationModalProps) {
+  const [roleTitle, setRoleTitle] = useState('');
+  const [status, setStatus] = useState<ApplicationStatus>('applied');
+  const [dateApplied, setDateApplied] = useState('');
+  const createApp = useCreateApplication();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateEntry.mutateAsync({
-      listId,
-      entryId: entry.id,
+    await createApp.mutateAsync({
+      company_id: entry.company_id,
       role_title: roleTitle || undefined,
       status,
       date_applied: dateApplied || undefined,
@@ -110,10 +106,10 @@ export function AddApplicationModal({ entry, listId, onClose }: AddApplicationMo
             </button>
             <button
               type="submit"
-              disabled={updateEntry.isPending}
+              disabled={createApp.isPending}
               className="btn-neon rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
             >
-              {updateEntry.isPending ? 'Saving...' : 'Save Application'}
+              {createApp.isPending ? 'Saving...' : 'Save Application'}
             </button>
           </div>
         </form>

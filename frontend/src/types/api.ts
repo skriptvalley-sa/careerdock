@@ -122,11 +122,20 @@ export interface ListEntry {
   company_name: string;
   company_slug?: string;
   company_status: CompanyTrackingStatus;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Application {
+  id: string;
+  user_id: string;
+  company_id: string;
+  company_name?: string;
   role_title: string | null;
   status: ApplicationStatus;
   date_applied: string | null;
   notes: string | null;
-  position: number;
   created_at: string;
   updated_at: string;
 }
@@ -217,13 +226,14 @@ export interface ATSResult {
   generated_at: string;
 }
 
-export type ATSCheckType = 'company' | 'job';
+export type ATSCheckType = 'company' | 'job' | 'resume';
 
 export interface ATSCheck {
   id: string;
   check_type: ATSCheckType;
   resume_id: string;
   company_id?: string;
+  company_name?: string;
   result: ATSResult | Record<string, never>;
   created_at: string;
 }
@@ -246,8 +256,10 @@ export interface CuratedListResult {
 export interface CuratedList {
   id: string;
   resume_id: string;
+  name?: string;
   result: CuratedListResult | Record<string, never>;
   created_at: string;
+  updated_at?: string;
 }
 
 // --- Notifications (Sprint 5) ---

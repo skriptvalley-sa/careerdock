@@ -18,6 +18,7 @@ import (
 const (
 	taskATSCompanyCheck = "ats:company_check"
 	taskATSJobCheck     = "ats:job_check"
+	taskATSResumeCheck  = "ats:resume_check"
 
 	minJobDescriptionLength = 100
 	maxJobDescriptionLength = 10000
@@ -200,6 +201,68 @@ func (s *ATSService) CheckJob(ctx context.Context, userID, resumeID uuid.UUID, j
 
 	if err := s.enqueueTask(taskATSJobCheck, checkID); err != nil {
 		slog.Error("failed to enqueue ATS job check task",
+			"check_id", checkID, "error", err)
+	}
+
+	return check, nil
+}
+
+// CheckResume creates a resume-only ATS check (no company or job description).
+func (s *ATSService) CheckResume(ctx context.Context, userID, resumeID uuid.UUID) (*domain.ATSCheck, error) {
+	resume, err := s.resumeRepo.GetByID(ctx, resumeID)
+	if err != nil {
+		return nil, err
+	}
+	if resume.UserID != userID {
+		return nil, domain.NotFound("resume", resumeID)
+	}
+	if resume.Status != domain.ResumeStatusReady {
+		return nil, domain.ValidationError("Resume is not ready for ATS scoring", map[string]any{
+			"resume_id": resumeID,
+			"status":    resume.Status,
+		})
+	}
+
+	cacheKey := hashCacheKey(resumeID.String() + ":resume")
+
+	existing, err := s.atsRepo.GetByCacheKey(ctx, cacheKey)
+	if err != nil {
+		return nil, domain.InternalError(fmt.Errorf("cache key lookup: %w", err))
+	}
+	if existing != nil {
+		slog.Info("returning cached ATS resume check", "check_id", existing.ID)
+		return existing, nil
+	}
+
+	balance, err := s.creditRepo.GetBalance(ctx, userID, domain.CreditATSCheck)
+	if err != nil {
+		return nil, domain.InternalError(fmt.Errorf("check credit balance: %w", err))
+	}
+	if balance < 1 {
+		return nil, domain.InsufficientCredits(domain.CreditATSCheck)
+	}
+
+	checkID := uuid.Must(uuid.NewV7())
+	check := &domain.ATSCheck{
+		ID:        checkID,
+		UserID:    userID,
+		ResumeID:  resumeID,
+		CheckType: domain.ATSCheckResume,
+		Result:    json.RawMessage("{}"),
+		CacheKey:  cacheKey,
+	}
+
+	if err := s.atsRepo.Create(ctx, check); err != nil {
+		return nil, err
+	}
+
+	if err := s.deductATSCredit(ctx, userID, checkID, "ATS check — resume"); err != nil {
+		slog.Error("failed to deduct ATS credit after check creation",
+			"user_id", userID, "check_id", checkID, "error", err)
+	}
+
+	if err := s.enqueueTask(taskATSResumeCheck, checkID); err != nil {
+		slog.Error("failed to enqueue ATS resume check task",
 			"check_id", checkID, "error", err)
 	}
 

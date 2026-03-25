@@ -32,6 +32,7 @@ const (
 	TaskResumeParseAndScore = "resume:parse_and_score"
 	TaskATSCompanyCheck     = "ats:company_check"
 	TaskATSJobCheck         = "ats:job_check"
+	TaskATSResumeCheck      = "ats:resume_check"
 	TaskCurateCompanyList   = "ai:curate_company_list"
 	TaskUserCleanup         = "admin:user_cleanup"
 	TaskCompanyEnrich       = "admin:company_enrich"
@@ -129,6 +130,9 @@ func main() {
 
 	atsJobHandler := worker.NewATSJobHandler(atsCheckRepo, resumeRepo, resumeStore, aiProvider, aiCache, redisClient)
 	mux.HandleFunc(TaskATSJobCheck, atsJobHandler.Handle)
+
+	atsResumeHandler := worker.NewATSResumeHandler(atsCheckRepo, resumeRepo, resumeStore, aiProvider, aiCache, redisClient)
+	mux.HandleFunc(TaskATSResumeCheck, atsResumeHandler.Handle)
 
 	// Sprint 4: Curated company list worker
 	curateListHandler := worker.NewCurateListHandler(curatedListRepo, resumeRepo, companyRepo, aiProvider, aiCache, redisClient)

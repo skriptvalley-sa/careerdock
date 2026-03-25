@@ -8,10 +8,6 @@ import type {
   ListDetail,
   ListEntry,
   ListCompanyFlag,
-  StatusHistoryItem,
-  InterviewRound,
-  DashboardCounts,
-  ApplicationStatus,
   CompanyTrackingStatus,
 } from '@/types/api';
 
@@ -31,25 +27,6 @@ export function useListDetail(id: string) {
     queryFn: () => apiClient.get<ListDetail>(`/api/lists/${id}`),
     staleTime: staleTimes.userLists,
     enabled: !!id,
-  });
-}
-
-export function useEntryHistory(listId: string, entryId: string) {
-  return useQuery({
-    queryKey: ['lists', 'history', entryId] as const,
-    queryFn: () =>
-      apiClient.get<StatusHistoryItem[]>(
-        `/api/lists/${listId}/entries/${entryId}/history`,
-      ),
-    enabled: !!entryId,
-  });
-}
-
-export function useDashboardCounts() {
-  return useQuery({
-    queryKey: ['dashboard', 'counts'] as const,
-    queryFn: () => apiClient.get<DashboardCounts>('/api/dashboard'),
-    staleTime: staleTimes.userLists,
   });
 }
 
@@ -105,15 +82,10 @@ export function useCreateEntry() {
       listId: string;
       company_id: string;
       company_status?: CompanyTrackingStatus;
-      role_title?: string;
-      status?: ApplicationStatus;
-      date_applied?: string;
-      notes?: string;
     }) => apiClient.post<ListEntry>(`/api/lists/${listId}/entries`, data),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: queryKeys.lists.detail(vars.listId) });
       qc.invalidateQueries({ queryKey: queryKeys.lists.list() });
-      qc.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 }
@@ -151,10 +123,7 @@ export function useUpdateEntry() {
       listId: string;
       entryId: string;
       company_status?: CompanyTrackingStatus;
-      status?: ApplicationStatus;
-      role_title?: string;
-      notes?: string;
-      date_applied?: string;
+      position?: number;
     }) =>
       apiClient.put<ListEntry>(
         `/api/lists/${listId}/entries/${entryId}`,
@@ -162,7 +131,6 @@ export function useUpdateEntry() {
       ),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: queryKeys.lists.detail(vars.listId) });
-      qc.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });
 }
@@ -261,61 +229,6 @@ export function useRemoveCompanyFromList() {
       qc.invalidateQueries({ queryKey: ['lists', 'company-counts'] });
       qc.invalidateQueries({ queryKey: ['dashboard'] });
     },
-  });
-}
-
-export function useCreateRound() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      listId,
-      entryId,
-      ...data
-    }: {
-      listId: string;
-      entryId: string;
-      round_number: number;
-      round_type: string;
-      scheduled_date?: string;
-      outcome?: string;
-      notes?: string;
-    }) =>
-      apiClient.post<InterviewRound>(
-        `/api/lists/${listId}/entries/${entryId}/rounds`,
-        data,
-      ),
-    onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: queryKeys.lists.detail(vars.listId) });
-    },
-  });
-}
-
-// --- Cross-list entry lookup ---
-
-/** Fetch entries for a specific company across all the user's lists. */
-export function useEntriesByCompany(companyId: string | undefined) {
-  return useQuery({
-    queryKey: ['entries', 'by-company', companyId] as const,
-    queryFn: () =>
-      apiClient.get<
-        (ListEntry & { list_name: string })[]
-      >('/api/entries', { company_id: companyId! }),
-    enabled: !!companyId,
-    staleTime: staleTimes.userLists,
-  });
-}
-
-/** Fetch all entries across all lists, optionally filtered by status. */
-export function useAllEntries(status?: string) {
-  const params: Record<string, string> = {};
-  if (status) params.status = status;
-  return useQuery({
-    queryKey: ['entries', 'all', status ?? ''] as const,
-    queryFn: () =>
-      apiClient.get<
-        (ListEntry & { list_name: string; company_name: string })[]
-      >('/api/entries', params),
-    staleTime: staleTimes.userLists,
   });
 }
 

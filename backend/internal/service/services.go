@@ -23,6 +23,8 @@ type Services struct {
 	CuratedList  *CuratedListService
 	Admin        *AdminService
 	Notification *NotificationService
+	Moderator    *ModeratorService
+	Application  *ApplicationService
 
 	// Infrastructure references for health checks and SSE
 	db    *pgxpool.Pool
@@ -51,6 +53,8 @@ func NewServices(
 	curatedList *CuratedListService,
 	admin *AdminService,
 	notification *NotificationService,
+	moderator *ModeratorService,
+	application *ApplicationService,
 	db *pgxpool.Pool,
 	redisClient *redis.Client,
 	version string,
@@ -71,6 +75,8 @@ func NewServices(
 		CuratedList:            curatedList,
 		Admin:                  admin,
 		Notification:           notification,
+		Moderator:              moderator,
+		Application:            application,
 		db:                     db,
 		Redis:                  redisClient,
 		Version:                version,

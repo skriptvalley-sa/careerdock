@@ -6,6 +6,7 @@ import {
   ScanSearch,
   Building2,
   FileText,
+  FileScan,
   Loader2,
   AlertCircle,
   CheckCircle2,
@@ -14,11 +15,11 @@ import {
 } from 'lucide-react';
 import { useResumes } from '@/hooks/use-resumes';
 import { useCreditBalance } from '@/hooks/use-payments';
-import { useATSChecks, useCheckCompany, useCheckJob, isATSComplete } from '@/hooks/use-ats';
+import { useATSChecks, useCheckCompany, useCheckJob, useCheckResume, isATSComplete } from '@/hooks/use-ats';
 import { CompanyCombobox } from '@/components/companies/company-combobox';
 import type { ATSCheck } from '@/types/api';
 
-type CheckMode = 'company' | 'job';
+type CheckMode = 'company' | 'job' | 'resume';
 
 function scoreColor(score: number) {
   if (score >= 80) return 'text-[#39ff14]';
@@ -32,6 +33,22 @@ function scoreBg(score: number) {
   return 'bg-red-500/10 border-red-500/30';
 }
 
+function checkLabel(check: ATSCheck) {
+  if (check.check_type === 'company') {
+    return check.company_name ? `Company Check — ${check.company_name}` : 'Company Check';
+  }
+  if (check.check_type === 'job') {
+    return 'Job Description Check';
+  }
+  return 'Resume Check';
+}
+
+function checkIcon(type: ATSCheck['check_type']) {
+  if (type === 'company') return <Building2 className="h-4 w-4 text-[#00f0ff]" />;
+  if (type === 'job') return <FileText className="h-4 w-4 text-[#e040fb]" />;
+  return <FileScan className="h-4 w-4 text-[#39ff14]" />;
+}
+
 function ATSCheckRow({ check }: { check: ATSCheck }) {
   const router = useRouter();
   const complete = isATSComplete(check.result);
@@ -42,24 +59,20 @@ function ATSCheckRow({ check }: { check: ATSCheck }) {
       className="flex w-full items-center gap-4 rounded-lg border border-edge bg-card p-4 text-left transition-all card-neon-hover"
     >
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-edge">
-        {check.check_type === 'company' ? (
-          <Building2 className="h-4 w-4 text-[#00f0ff]" />
-        ) : (
-          <FileText className="h-4 w-4 text-[#e040fb]" />
-        )}
+        {checkIcon(check.check_type)}
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-200">
-            {check.check_type === 'company' ? 'Company Check' : 'Job Check'}
+          <span className="text-sm font-medium text-slate-200 truncate">
+            {checkLabel(check)}
           </span>
           {complete ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#39ff14]/10 px-2 py-0.5 text-[10px] font-medium text-[#39ff14]">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#39ff14]/10 px-2 py-0.5 text-[10px] font-medium text-[#39ff14]">
               <CheckCircle2 className="h-3 w-3" /> Done
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#ffb800]/10 px-2 py-0.5 text-[10px] font-medium text-[#ffb800]">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#ffb800]/10 px-2 py-0.5 text-[10px] font-medium text-[#ffb800]">
               <Clock className="h-3 w-3 animate-spin" /> Processing
             </span>
           )}
@@ -91,6 +104,7 @@ export default function ATSPage() {
   const { data: checks, isLoading: checksLoading } = useATSChecks();
   const checkCompany = useCheckCompany();
   const checkJob = useCheckJob();
+  const checkResume = useCheckResume();
 
   const [mode, setMode] = useState<CheckMode>('company');
   const [resumeId, setResumeId] = useState('');
@@ -99,7 +113,7 @@ export default function ATSPage() {
   const [error, setError] = useState<string | null>(null);
 
   const readyResumes = resumes?.filter((r) => r.status === 'ready') ?? [];
-  const isPending = checkCompany.isPending || checkJob.isPending;
+  const isPending = checkCompany.isPending || checkJob.isPending || checkResume.isPending;
   const jdLength = jobDescription.length;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -119,7 +133,7 @@ export default function ATSPage() {
           return;
         }
         result = await checkCompany.mutateAsync({ resumeId, companyId: company.id });
-      } else {
+      } else if (mode === 'job') {
         if (jdLength < 100) {
           setError('Job description must be at least 100 characters');
           return;
@@ -129,11 +143,23 @@ export default function ATSPage() {
           return;
         }
         result = await checkJob.mutateAsync({ resumeId, jobDescription });
+      } else {
+        result = await checkResume.mutateAsync({ resumeId });
       }
       router.push(`/ats/${result.id}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Request failed');
     }
+  };
+
+  const modeButtonClass = (m: CheckMode, active: boolean) => {
+    const base = 'flex flex-1 items-center justify-center gap-2 py-2 text-sm font-medium transition-all';
+    if (active) {
+      if (m === 'company') return `${base} bg-[#00f0ff]/10 text-[#00f0ff]`;
+      if (m === 'job') return `${base} bg-[#e040fb]/10 text-[#e040fb]`;
+      return `${base} bg-[#39ff14]/10 text-[#39ff14]`;
+    }
+    return `${base} text-slate-400 hover:text-slate-200`;
   };
 
   return (
@@ -142,7 +168,7 @@ export default function ATSPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-100">ATS Check</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Score your resume against a company or job description.
+            Score your resume against a company, job description, or on its own.
           </p>
         </div>
         {credits && (
@@ -196,7 +222,7 @@ export default function ATSPage() {
           )}
         </div>
 
-        {/* Mode toggle */}
+        {/* Mode toggle — 3 modes */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
             Check type
@@ -205,37 +231,38 @@ export default function ATSPage() {
             <button
               type="button"
               onClick={() => setMode('company')}
-              className={`flex flex-1 items-center justify-center gap-2 py-2 text-sm font-medium transition-all ${
-                mode === 'company'
-                  ? 'bg-[#00f0ff]/10 text-[#00f0ff]'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className={modeButtonClass('company', mode === 'company')}
             >
               <Building2 className="h-4 w-4" /> vs Company
             </button>
             <button
               type="button"
               onClick={() => setMode('job')}
-              className={`flex flex-1 items-center justify-center gap-2 py-2 text-sm font-medium transition-all border-l border-edge ${
-                mode === 'job'
-                  ? 'bg-[#e040fb]/10 text-[#e040fb]'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className={`${modeButtonClass('job', mode === 'job')} border-l border-edge`}
             >
               <FileText className="h-4 w-4" /> vs Job Description
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('resume')}
+              className={`${modeButtonClass('resume', mode === 'resume')} border-l border-edge`}
+            >
+              <FileScan className="h-4 w-4" /> Resume Only
             </button>
           </div>
         </div>
 
-        {/* Company or JD input */}
-        {mode === 'company' ? (
+        {/* Company or JD input — hidden for resume-only mode */}
+        {mode === 'company' && (
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
               Company
             </label>
             <CompanyCombobox value={company} onChange={setCompany} />
           </div>
-        ) : (
+        )}
+
+        {mode === 'job' && (
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
               Job Description
@@ -257,6 +284,15 @@ export default function ATSPage() {
               }`}
             >
               {jdLength.toLocaleString()} / 10,000
+            </p>
+          </div>
+        )}
+
+        {mode === 'resume' && (
+          <div className="rounded-md border border-edge bg-surface/50 px-4 py-3">
+            <p className="text-sm text-slate-400">
+              Resume-only mode evaluates your resume&apos;s general ATS compatibility — formatting,
+              keyword density, structure, and readability — without targeting a specific company or role.
             </p>
           </div>
         )}

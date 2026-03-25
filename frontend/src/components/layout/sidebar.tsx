@@ -17,6 +17,7 @@ import {
   ScanSearch,
   Sparkles,
   ShieldCheck,
+  Shield,
   X,
 } from 'lucide-react';
 import { CreditBalance } from '@/components/credit-balance';
@@ -50,10 +51,14 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
   const { isAuthenticated, user } = useAuthStore();
 
   const isAdmin = user?.role === 'admin';
+  const isModerator = user?.role === 'moderator' || user?.role === 'admin';
   const navItems = isAuthenticated
-    ? isAdmin
-      ? [...authedNavItems, { href: '/admin', label: 'Admin', icon: ShieldCheck }]
-      : authedNavItems
+    ? (() => {
+        const items = [...authedNavItems];
+        if (isModerator) items.push({ href: '/moderator', label: 'Moderator', icon: Shield });
+        if (isAdmin) items.push({ href: '/admin', label: 'Admin', icon: ShieldCheck });
+        return items;
+      })()
     : publicNavItems;
 
   const sidebarContent = (
@@ -119,9 +124,20 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-slate-100">
-                  {user.name}
-                </p>
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate text-sm font-medium text-slate-100">
+                    {user.name}
+                  </p>
+                  {(user.role === 'moderator' || user.role === 'admin') && (
+                    <span className={`shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold uppercase ${
+                      user.role === 'admin'
+                        ? 'bg-amber-500/15 text-amber-400'
+                        : 'bg-[#00f0ff]/10 text-[#00f0ff]'
+                    }`}>
+                      {user.role === 'admin' ? 'Admin' : 'Mod'}
+                    </span>
+                  )}
+                </div>
                 <p className="truncate text-xs text-slate-500">{user.email}</p>
               </div>
             )}

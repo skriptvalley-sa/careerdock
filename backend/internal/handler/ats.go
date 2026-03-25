@@ -35,15 +35,20 @@ type checkJobRequest struct {
 	JobDescription string    `json:"job_description"`
 }
 
+type checkResumeRequest struct {
+	ResumeID uuid.UUID `json:"resume_id"`
+}
+
 // --- Response DTO ---
 
 type atsCheckResponse struct {
-	ID        uuid.UUID           `json:"id"`
-	CheckType domain.ATSCheckType `json:"check_type"`
-	ResumeID  uuid.UUID           `json:"resume_id"`
-	CompanyID *uuid.UUID          `json:"company_id,omitempty"`
-	Result    json.RawMessage     `json:"result"`
-	CreatedAt time.Time           `json:"created_at"`
+	ID          uuid.UUID           `json:"id"`
+	CheckType   domain.ATSCheckType `json:"check_type"`
+	ResumeID    uuid.UUID           `json:"resume_id"`
+	CompanyID   *uuid.UUID          `json:"company_id,omitempty"`
+	CompanyName *string             `json:"company_name,omitempty"`
+	Result      json.RawMessage     `json:"result"`
+	CreatedAt   time.Time           `json:"created_at"`
 }
 
 // --- Handlers ---
@@ -102,6 +107,29 @@ func (h *ATSHandler) CheckJob(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusAccepted, map[string]any{"data": toATSCheckResponse(check)})
 }
 
+// CheckResume handles POST /api/ats/resume.
+func (h *ATSHandler) CheckResume(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.UserIDFromContext(r.Context())
+
+	var req checkResumeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, r, domain.ValidationError("Invalid request body", nil))
+		return
+	}
+	if req.ResumeID == uuid.Nil {
+		respondError(w, r, domain.ValidationError("resume_id is required", nil))
+		return
+	}
+
+	check, err := h.atsSvc.CheckResume(r.Context(), userID, req.ResumeID)
+	if err != nil {
+		respondError(w, r, err)
+		return
+	}
+
+	respondJSON(w, http.StatusAccepted, map[string]any{"data": toATSCheckResponse(check)})
+}
+
 // GetCheck handles GET /api/ats/{id}.
 func (h *ATSHandler) GetCheck(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.UserIDFromContext(r.Context())
@@ -142,11 +170,12 @@ func (h *ATSHandler) ListChecks(w http.ResponseWriter, r *http.Request) {
 
 func toATSCheckResponse(c *domain.ATSCheck) atsCheckResponse {
 	return atsCheckResponse{
-		ID:        c.ID,
-		CheckType: c.CheckType,
-		ResumeID:  c.ResumeID,
-		CompanyID: c.CompanyID,
-		Result:    c.Result,
-		CreatedAt: c.CreatedAt,
+		ID:          c.ID,
+		CheckType:   c.CheckType,
+		ResumeID:    c.ResumeID,
+		CompanyID:   c.CompanyID,
+		CompanyName: c.CompanyName,
+		Result:      c.Result,
+		CreatedAt:   c.CreatedAt,
 	}
 }

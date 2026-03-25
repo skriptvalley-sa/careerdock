@@ -95,6 +95,7 @@ type ATSCheckType string
 const (
 	ATSCheckCompany ATSCheckType = "company"
 	ATSCheckJob     ATSCheckType = "job"
+	ATSCheckResume  ATSCheckType = "resume"
 )
 
 // CompanySize represents the scale of a company.

@@ -127,11 +127,6 @@ export default function ListDetailPage() {
     setEditingCompanyStatus(null);
   };
 
-  // Count applications for an entry (has actual application activity)
-  const getApplicationCount = (entry: ListEntry) => {
-    return entry.status !== 'not_applied' ? 1 : 0;
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -221,7 +216,7 @@ export default function ListDetailPage() {
           </p>
         </div>
       ) : list.entries.length > 0 ? (
-        <div className="mt-6 overflow-hidden rounded-lg border border-edge bg-card">
+        <div className="mt-6 overflow-x-auto rounded-lg border border-edge bg-card">
           <table className="min-w-full divide-y divide-edge">
             <thead className="bg-overlay">
               <tr>
@@ -232,17 +227,12 @@ export default function ListDetailPage() {
                   Status
                 </th>
                 <th className="hidden px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-500 sm:table-cell">
-                  Applications
-                </th>
-                <th className="hidden px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-500 md:table-cell">
-                  + Add Application
+                  Application
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-edge">
-              {list.entries.map((entry) => {
-                const appCount = getApplicationCount(entry);
-                return (
+              {list.entries.map((entry) => (
                   <tr key={entry.id} className="hover:bg-surface">
                     {/* Company name linked to profile */}
                     <td className="whitespace-nowrap px-4 py-3">
@@ -285,22 +275,8 @@ export default function ListDetailPage() {
                       )}
                     </td>
 
-                    {/* Applications count */}
-                    <td className="hidden whitespace-nowrap px-4 py-3 text-center sm:table-cell">
-                      {appCount > 0 ? (
-                        <Link
-                          href={`/applications?company_id=${entry.company_id}`}
-                          className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#00f0ff]/10 text-xs font-medium text-[#00f0ff] hover:bg-[#00f0ff]/20"
-                        >
-                          {appCount}
-                        </Link>
-                      ) : (
-                        <span className="text-sm text-slate-600">0</span>
-                      )}
-                    </td>
-
                     {/* + Add Application button */}
-                    <td className="hidden whitespace-nowrap px-4 py-3 text-center md:table-cell">
+                    <td className="hidden whitespace-nowrap px-4 py-3 text-center sm:table-cell">
                       <button
                         onClick={() => setApplicationModalEntry(entry)}
                         className="inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1 text-xs font-medium text-slate-400 hover:border-[#00f0ff]/30 hover:bg-surface hover:text-[#00f0ff] transition-colors"
@@ -310,8 +286,7 @@ export default function ListDetailPage() {
                       </button>
                     </td>
                   </tr>
-                );
-              })}
+                ))}
             </tbody>
           </table>
         </div>
@@ -321,7 +296,6 @@ export default function ListDetailPage() {
       {applicationModalEntry && (
         <AddApplicationModal
           entry={applicationModalEntry}
-          listId={listId}
           onClose={() => setApplicationModalEntry(null)}
         />
       )}

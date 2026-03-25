@@ -54,13 +54,6 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 						r.Route("/{entryId}", func(r chi.Router) {
 							r.Put("/", listH.UpdateEntry)
 							r.Delete("/", listH.DeleteEntry)
-							r.Get("/history", listH.GetEntryHistory)
-
-							r.Route("/rounds", func(r chi.Router) {
-								r.Post("/", listH.CreateRound)
-								r.Put("/{roundId}", listH.UpdateRound)
-								r.Delete("/{roundId}", listH.DeleteRound)
-							})
 						})
 					})
 				})
@@ -72,11 +65,30 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 			// --- Company list counts (Session 04) ---
 			r.Get("/lists/company-counts", listH.CompanyListCounts)
 
-			// --- Dashboard (Sprint 2) ---
-			r.Get("/dashboard", listH.GetDashboard)
-
 			// --- Cross-list entry lookup (Feedback batch 4+5) ---
 			r.Get("/entries", listH.ListEntriesAcrossLists)
+
+			// --- Applications (company-level) ---
+			appH := NewApplicationHandler(svc.Application)
+			r.Route("/applications", func(r chi.Router) {
+				r.Get("/", appH.ListApplications)
+				r.Post("/", appH.CreateApplication)
+				r.Get("/by-company/{companyId}", appH.ListByCompany)
+				r.Route("/{id}", func(r chi.Router) {
+					r.Get("/", appH.GetApplication)
+					r.Put("/", appH.UpdateApplication)
+					r.Delete("/", appH.DeleteApplication)
+
+					r.Route("/rounds", func(r chi.Router) {
+						r.Post("/", appH.CreateRound)
+						r.Put("/{roundId}", appH.UpdateRound)
+						r.Delete("/{roundId}", appH.DeleteRound)
+					})
+				})
+			})
+
+			// --- Dashboard (Sprint 2) ---
+			r.Get("/dashboard", appH.GetDashboard)
 
 			// --- User settings (Sprint 2) ---
 			userH := NewUserHandler(svc.User)
@@ -134,6 +146,7 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 					r.Get("/", atsH.ListChecks)
 					r.Post("/company", atsH.CheckCompany)
 					r.Post("/job", atsH.CheckJob)
+					r.Post("/resume", atsH.CheckResume)
 					r.Get("/{id}", atsH.GetCheck)
 				})
 
@@ -143,6 +156,25 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 					r.Get("/", curatedH.ListByUser)
 					r.Post("/", curatedH.GenerateList)
 					r.Get("/{id}", curatedH.GetList)
+					r.Put("/{id}", curatedH.RenameList)
+					r.Delete("/{id}", curatedH.DeleteList)
+				})
+			})
+
+			// --- Moderator routes ---
+			r.Group(func(r chi.Router) {
+				r.Use(auth.RequireModerator)
+
+				modH := NewModeratorHandler(svc.Moderator)
+				r.Route("/moderator", func(r chi.Router) {
+					r.Post("/companies/generate", modH.GenerateCompanyDraft)
+					r.Post("/companies", modH.SubmitCompanyDraft)
+					r.Route("/companies/{id}", func(r chi.Router) {
+						r.Get("/lock", modH.GetEditStatus)
+						r.Post("/lock", modH.AcquireLock)
+						r.Delete("/lock", modH.ReleaseLock)
+						r.Post("/edit", modH.SubmitEdit)
+					})
 				})
 			})
 

@@ -32,13 +32,14 @@ func (r *CuratedListRepo) Create(ctx context.Context, list *domain.CuratedList) 
 		result = json.RawMessage("{}")
 	}
 
+	now := time.Now()
 	err := q.QueryRow(ctx, `
 		INSERT INTO curated_lists (
-			id, user_id, resume_id, preferences_hash, result, created_at
-		) VALUES ($1, $2, $3, $4, $5, $6)
-		RETURNING created_at`,
-		list.ID, list.UserID, list.ResumeID, list.PreferencesHash, result, time.Now(),
-	).Scan(&list.CreatedAt)
+			id, user_id, resume_id, name, preferences_hash, result, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+		RETURNING created_at, updated_at`,
+		list.ID, list.UserID, list.ResumeID, list.Name, list.PreferencesHash, result, now,
+	).Scan(&list.CreatedAt, &list.UpdatedAt)
 	if err != nil {
 		return domain.InternalError(err)
 	}
@@ -54,12 +55,12 @@ func (r *CuratedListRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.Cu
 	var result []byte
 
 	err := q.QueryRow(ctx, `
-		SELECT id, user_id, resume_id, preferences_hash, result, created_at
+		SELECT id, user_id, resume_id, name, preferences_hash, result, created_at, updated_at
 		FROM curated_lists
 		WHERE id = $1`, id,
 	).Scan(
-		&list.ID, &list.UserID, &list.ResumeID,
-		&list.PreferencesHash, &result, &list.CreatedAt,
+		&list.ID, &list.UserID, &list.ResumeID, &list.Name,
+		&list.PreferencesHash, &result, &list.CreatedAt, &list.UpdatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, domain.NotFound("curated_list", id)
@@ -80,7 +81,7 @@ func (r *CuratedListRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]d
 	q := getDBTX(ctx, r.pool)
 
 	rows, err := q.Query(ctx, `
-		SELECT id, user_id, resume_id, preferences_hash, result, created_at
+		SELECT id, user_id, resume_id, name, preferences_hash, result, created_at, updated_at
 		FROM curated_lists
 		WHERE user_id = $1
 		ORDER BY created_at DESC`, userID,
@@ -96,8 +97,8 @@ func (r *CuratedListRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]d
 		var result []byte
 
 		if err := rows.Scan(
-			&list.ID, &list.UserID, &list.ResumeID,
-			&list.PreferencesHash, &result, &list.CreatedAt,
+			&list.ID, &list.UserID, &list.ResumeID, &list.Name,
+			&list.PreferencesHash, &result, &list.CreatedAt, &list.UpdatedAt,
 		); err != nil {
 			return nil, domain.InternalError(err)
 		}
@@ -121,14 +122,14 @@ func (r *CuratedListRepo) GetByPreferencesHash(ctx context.Context, hash string)
 	var result []byte
 
 	err := q.QueryRow(ctx, `
-		SELECT id, user_id, resume_id, preferences_hash, result, created_at
+		SELECT id, user_id, resume_id, name, preferences_hash, result, created_at, updated_at
 		FROM curated_lists
 		WHERE preferences_hash = $1
 		ORDER BY created_at DESC
 		LIMIT 1`, hash,
 	).Scan(
-		&list.ID, &list.UserID, &list.ResumeID,
-		&list.PreferencesHash, &result, &list.CreatedAt,
+		&list.ID, &list.UserID, &list.ResumeID, &list.Name,
+		&list.PreferencesHash, &result, &list.CreatedAt, &list.UpdatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil // cache miss — not an error
@@ -149,9 +150,42 @@ func (r *CuratedListRepo) UpdateResult(ctx context.Context, id uuid.UUID, result
 	q := getDBTX(ctx, r.pool)
 
 	tag, err := q.Exec(ctx, `
-		UPDATE curated_lists SET result = $2 WHERE id = $1`,
+		UPDATE curated_lists SET result = $2, updated_at = NOW() WHERE id = $1`,
 		id, result,
 	)
+	if err != nil {
+		return domain.InternalError(err)
+	}
+	if tag.RowsAffected() == 0 {
+		return domain.NotFound("curated_list", id)
+	}
+
+	return nil
+}
+
+// Rename updates the name of a curated list.
+func (r *CuratedListRepo) Rename(ctx context.Context, id uuid.UUID, name string) error {
+	q := getDBTX(ctx, r.pool)
+
+	tag, err := q.Exec(ctx, `
+		UPDATE curated_lists SET name = $2, updated_at = NOW() WHERE id = $1`,
+		id, name,
+	)
+	if err != nil {
+		return domain.InternalError(err)
+	}
+	if tag.RowsAffected() == 0 {
+		return domain.NotFound("curated_list", id)
+	}
+
+	return nil
+}
+
+// Delete removes a curated list.
+func (r *CuratedListRepo) Delete(ctx context.Context, id uuid.UUID) error {
+	q := getDBTX(ctx, r.pool)
+
+	tag, err := q.Exec(ctx, `DELETE FROM curated_lists WHERE id = $1`, id)
 	if err != nil {
 		return domain.InternalError(err)
 	}

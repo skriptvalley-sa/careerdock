@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Sparkles,
   Loader2,
@@ -9,6 +9,11 @@ import {
   ChevronDown,
   ChevronUp,
   Building2,
+  Pencil,
+  Trash2,
+  Check,
+  X,
+  Plus,
 } from 'lucide-react';
 import { useResumes } from '@/hooks/use-resumes';
 import { useCreditBalance } from '@/hooks/use-payments';
@@ -16,14 +21,74 @@ import {
   useCuratedLists,
   useCuratedList,
   useGenerateCuratedList,
+  useRenameCuratedList,
+  useDeleteCuratedList,
   isCuratedListComplete,
 } from '@/hooks/use-curated-lists';
+import { useLists, useCreateEntry } from '@/hooks/use-lists';
 import type { CuratedList, RankedCompany } from '@/types/api';
 
 function scoreColor(score: number) {
   if (score >= 80) return 'text-[#39ff14]';
   if (score >= 60) return 'text-[#ffb800]';
   return 'text-red-400';
+}
+
+function AddToListButton({ companyId, companyName }: { companyId: string; companyName: string }) {
+  const { data: lists } = useLists();
+  const createEntry = useCreateEntry();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
+
+  const handleAdd = async (listId: string) => {
+    try {
+      await createEntry.mutateAsync({ listId, company_id: companyId });
+      setOpen(false);
+    } catch {
+      // entry may already exist — ignore
+      setOpen(false);
+    }
+  };
+
+  if (!lists || lists.length === 0) return null;
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        title={`Add ${companyName} to a list`}
+        className="inline-flex items-center gap-1 rounded-md border border-edge px-2 py-1 text-xs font-medium text-slate-400 hover:border-[#00f0ff]/30 hover:bg-surface hover:text-[#00f0ff] transition-colors"
+      >
+        <Plus className="h-3 w-3" />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border border-edge bg-overlay shadow-lg">
+          <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+            Add to list
+          </p>
+          {lists.map((list) => (
+            <button
+              key={list.id}
+              onClick={() => handleAdd(list.id)}
+              disabled={createEntry.isPending}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-300 hover:bg-surface hover:text-[#00f0ff] transition-colors"
+            >
+              {list.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function RankedCompanyCard({ company, rank }: { company: RankedCompany; rank: number }) {
@@ -35,9 +100,12 @@ function RankedCompanyCard({ company, rank }: { company: RankedCompany; rank: nu
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-3">
           <h4 className="font-semibold text-slate-100">{company.name}</h4>
-          <span className={`shrink-0 text-sm font-bold ${scoreColor(company.match_score)}`}>
-            {company.match_score}%
-          </span>
+          <div className="flex items-center gap-2">
+            <span className={`shrink-0 text-sm font-bold ${scoreColor(company.match_score)}`}>
+              {company.match_score}%
+            </span>
+            <AddToListButton companyId={company.company_id} companyName={company.name} />
+          </div>
         </div>
         <p className="mt-1 text-sm text-slate-400">{company.recommendation}</p>
         {company.match_reasons.length > 0 && (
@@ -55,14 +123,84 @@ function RankedCompanyCard({ company, rank }: { company: RankedCompany; rank: nu
   );
 }
 
+function InlineNameEditor({ list }: { list: CuratedList }) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(list.name || 'Curated List');
+  const rename = useRenameCuratedList();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+
+  const handleSave = async () => {
+    const trimmed = name.trim();
+    if (trimmed && trimmed !== list.name) {
+      await rename.mutateAsync({ id: list.id, name: trimmed });
+    }
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <div className="flex items-center gap-1.5">
+        <input
+          ref={inputRef}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleSave();
+            if (e.key === 'Escape') {
+              setName(list.name || 'Curated List');
+              setEditing(false);
+            }
+          }}
+          className="rounded-md border border-edge-input bg-input px-2 py-0.5 text-sm font-semibold text-slate-100 focus:border-[#00f0ff]/50 focus:outline-none"
+        />
+        <button onClick={handleSave} className="text-[#39ff14] hover:text-[#39ff14]/80">
+          <Check className="h-3.5 w-3.5" />
+        </button>
+        <button
+          onClick={() => {
+            setName(list.name || 'Curated List');
+            setEditing(false);
+          }}
+          className="text-slate-500 hover:text-slate-300"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <p className="text-sm font-semibold text-slate-100">{list.name || 'Curated List'}</p>
+      <button
+        onClick={() => setEditing(true)}
+        className="text-slate-600 hover:text-slate-300 transition-colors"
+        title="Rename"
+      >
+        <Pencil className="h-3 w-3" />
+      </button>
+    </div>
+  );
+}
+
 function CuratedListCard({ list }: { list: CuratedList }) {
   const [expanded, setExpanded] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const deleteMutation = useDeleteCuratedList();
   const complete = isCuratedListComplete(list.result);
 
-  // When expanded + complete, use full result; otherwise limit to 5
   const companies = complete ? list.result.companies : [];
   const visible = expanded ? companies : companies.slice(0, 5);
   const hasMore = companies.length > 5;
+
+  const handleDelete = async () => {
+    await deleteMutation.mutateAsync(list.id);
+    setConfirmDelete(false);
+  };
 
   return (
     <div className="rounded-lg border border-edge bg-card">
@@ -73,9 +211,7 @@ function CuratedListCard({ list }: { list: CuratedList }) {
             <Sparkles className="h-4 w-4 text-[#00f0ff]" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-100">
-              Curated List
-            </p>
+            <InlineNameEditor list={list} />
             <p className="text-xs text-slate-500">
               {new Date(list.created_at).toLocaleDateString('en-IN', {
                 day: 'numeric',
@@ -85,15 +221,43 @@ function CuratedListCard({ list }: { list: CuratedList }) {
             </p>
           </div>
         </div>
-        {complete ? (
-          <span className="text-sm font-semibold text-[#00f0ff]">
-            {companies.length} companies
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ffb800]/10 px-2.5 py-1 text-xs font-medium text-[#ffb800]">
-            <Clock className="h-3 w-3 animate-spin" /> Generating…
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {complete ? (
+            <span className="text-sm font-semibold text-[#00f0ff]">
+              {companies.length} companies
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ffb800]/10 px-2.5 py-1 text-xs font-medium text-[#ffb800]">
+              <Clock className="h-3 w-3 animate-spin" /> Generating…
+            </span>
+          )}
+          {/* Delete button */}
+          {confirmDelete ? (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={handleDelete}
+                disabled={deleteMutation.isPending}
+                className="rounded-md bg-red-500/20 px-2 py-1 text-xs font-medium text-red-400 hover:bg-red-500/30"
+              >
+                {deleteMutation.isPending ? 'Deleting…' : 'Confirm'}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-xs text-slate-500 hover:text-slate-300"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="text-slate-600 hover:text-red-400 transition-colors"
+              title="Delete list"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Pending state */}
@@ -137,7 +301,6 @@ function CuratedListCard({ list }: { list: CuratedList }) {
 
 /** Wrapper that uses the polling hook for a single pending list. */
 function PendingListPoller({ list }: { list: CuratedList }) {
-  // Subscribe to the detail endpoint for polling/SSE-driven updates
   const { data: fresh } = useCuratedList(list.id);
   return <CuratedListCard list={fresh ?? list} />;
 }

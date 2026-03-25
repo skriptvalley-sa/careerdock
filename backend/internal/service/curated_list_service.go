@@ -132,6 +132,30 @@ func (s *CuratedListService) ListByUser(ctx context.Context, userID uuid.UUID) (
 	return s.curatedListRepo.ListByUser(ctx, userID)
 }
 
+// Rename updates the name of a curated list, verifying ownership.
+func (s *CuratedListService) Rename(ctx context.Context, userID, listID uuid.UUID, name string) error {
+	list, err := s.curatedListRepo.GetByID(ctx, listID)
+	if err != nil {
+		return err
+	}
+	if list.UserID != userID {
+		return domain.NotFound("curated_list", listID)
+	}
+	return s.curatedListRepo.Rename(ctx, listID, name)
+}
+
+// Delete removes a curated list, verifying ownership.
+func (s *CuratedListService) Delete(ctx context.Context, userID, listID uuid.UUID) error {
+	list, err := s.curatedListRepo.GetByID(ctx, listID)
+	if err != nil {
+		return err
+	}
+	if list.UserID != userID {
+		return domain.NotFound("curated_list", listID)
+	}
+	return s.curatedListRepo.Delete(ctx, listID)
+}
+
 // --- Internal helpers ---
 
 func (s *CuratedListService) deductCuratedListCredit(ctx context.Context, userID, listID uuid.UUID) error {

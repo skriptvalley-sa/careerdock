@@ -152,16 +152,15 @@ func (r *ListRepo) CountByUser(ctx context.Context, userID uuid.UUID) (int, erro
 
 // --- Entry CRUD ---
 
-// CreateEntry inserts a new list entry.
+// CreateEntry inserts a new list entry (company membership in a list).
 func (r *ListRepo) CreateEntry(ctx context.Context, entry *domain.ListEntry) error {
 	q := getDBTX(ctx, r.pool)
 
 	err := q.QueryRow(ctx, `
-		INSERT INTO list_entries (id, list_id, company_id, company_status, role_title, status, date_applied, notes, position, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		INSERT INTO list_entries (id, list_id, company_id, company_status, position, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id`,
 		entry.ID, entry.ListID, entry.CompanyID, string(entry.CompanyStatus),
-		entry.RoleTitle, string(entry.Status), entry.DateApplied, entry.Notes,
 		entry.Position, entry.CreatedAt, entry.UpdatedAt,
 	).Scan(&entry.ID)
 
@@ -180,11 +179,10 @@ func (r *ListRepo) GetEntryByID(ctx context.Context, id uuid.UUID) (*domain.List
 
 	entry := &domain.ListEntry{}
 	err := q.QueryRow(ctx, `
-		SELECT id, list_id, company_id, company_status, role_title, status, date_applied, notes, position, created_at, updated_at
+		SELECT id, list_id, company_id, company_status, position, created_at, updated_at
 		FROM list_entries
 		WHERE id = $1`, id,
 	).Scan(&entry.ID, &entry.ListID, &entry.CompanyID, &entry.CompanyStatus,
-		&entry.RoleTitle, &entry.Status, &entry.DateApplied, &entry.Notes,
 		&entry.Position, &entry.CreatedAt, &entry.UpdatedAt)
 
 	if err != nil {
@@ -201,7 +199,7 @@ func (r *ListRepo) ListEntries(ctx context.Context, listID uuid.UUID) ([]domain.
 	q := getDBTX(ctx, r.pool)
 
 	rows, err := q.Query(ctx, `
-		SELECT id, list_id, company_id, company_status, role_title, status, date_applied, notes, position, created_at, updated_at
+		SELECT id, list_id, company_id, company_status, position, created_at, updated_at
 		FROM list_entries
 		WHERE list_id = $1
 		ORDER BY position ASC`, listID)
@@ -214,7 +212,6 @@ func (r *ListRepo) ListEntries(ctx context.Context, listID uuid.UUID) ([]domain.
 	for rows.Next() {
 		var e domain.ListEntry
 		if err := rows.Scan(&e.ID, &e.ListID, &e.CompanyID, &e.CompanyStatus,
-			&e.RoleTitle, &e.Status, &e.DateApplied, &e.Notes,
 			&e.Position, &e.CreatedAt, &e.UpdatedAt); err != nil {
 			return nil, domain.InternalError(err)
 		}
@@ -228,13 +225,13 @@ func (r *ListRepo) ListEntries(ctx context.Context, listID uuid.UUID) ([]domain.
 }
 
 // ListEntriesByCompanyID returns all entries for a specific company across all
-// of a user's lists. Useful for showing "your applications" on a company page.
+// of a user's lists. Useful for showing which lists contain a given company.
 func (r *ListRepo) ListEntriesByCompanyID(ctx context.Context, userID, companyID uuid.UUID) ([]domain.ListEntryWithList, error) {
 	q := getDBTX(ctx, r.pool)
 
 	rows, err := q.Query(ctx, `
-		SELECT le.id, le.list_id, le.company_id, le.company_status, le.role_title, le.status,
-		       le.date_applied, le.notes, le.position, le.created_at, le.updated_at,
+		SELECT le.id, le.list_id, le.company_id, le.company_status,
+		       le.position, le.created_at, le.updated_at,
 		       ul.name AS list_name
 		FROM list_entries le
 		JOIN user_lists ul ON ul.id = le.list_id
@@ -249,7 +246,6 @@ func (r *ListRepo) ListEntriesByCompanyID(ctx context.Context, userID, companyID
 	for rows.Next() {
 		var e domain.ListEntryWithList
 		if err := rows.Scan(&e.ID, &e.ListID, &e.CompanyID, &e.CompanyStatus,
-			&e.RoleTitle, &e.Status, &e.DateApplied, &e.Notes,
 			&e.Position, &e.CreatedAt, &e.UpdatedAt, &e.ListName); err != nil {
 			return nil, domain.InternalError(err)
 		}
@@ -260,59 +256,6 @@ func (r *ListRepo) ListEntriesByCompanyID(ctx context.Context, userID, companyID
 	}
 	if entries == nil {
 		entries = []domain.ListEntryWithList{}
-	}
-	return entries, nil
-}
-
-// ListAllEntries returns all entries across all of a user's lists,
-// optionally filtered by application status. Includes list name and company name.
-// When excludeNotApplied is true and no statusFilter is set, entries with
-// status "not_applied" are excluded (used by the Applications page).
-func (r *ListRepo) ListAllEntries(ctx context.Context, userID uuid.UUID, statusFilter *domain.ApplicationStatus, excludeNotApplied bool) ([]domain.ListEntryFull, error) {
-	q := getDBTX(ctx, r.pool)
-
-	query := `
-		SELECT le.id, le.list_id, le.company_id, le.company_status, le.role_title, le.status,
-		       le.date_applied, le.notes, le.position, le.created_at, le.updated_at,
-		       ul.name AS list_name,
-		       COALESCE(c.name, '') AS company_name
-		FROM list_entries le
-		JOIN user_lists ul ON ul.id = le.list_id
-		LEFT JOIN companies c ON c.id = le.company_id
-		WHERE ul.user_id = $1`
-	args := []any{userID}
-
-	if statusFilter != nil {
-		query += ` AND le.status = $2`
-		args = append(args, string(*statusFilter))
-	} else if excludeNotApplied {
-		query += ` AND le.status != 'not_applied'`
-	}
-
-	query += ` ORDER BY le.updated_at DESC`
-
-	rows, err := q.Query(ctx, query, args...)
-	if err != nil {
-		return nil, domain.InternalError(err)
-	}
-	defer rows.Close()
-
-	var entries []domain.ListEntryFull
-	for rows.Next() {
-		var e domain.ListEntryFull
-		if err := rows.Scan(&e.ID, &e.ListID, &e.CompanyID, &e.CompanyStatus,
-			&e.RoleTitle, &e.Status, &e.DateApplied, &e.Notes,
-			&e.Position, &e.CreatedAt, &e.UpdatedAt,
-			&e.ListName, &e.CompanyName); err != nil {
-			return nil, domain.InternalError(err)
-		}
-		entries = append(entries, e)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, domain.InternalError(err)
-	}
-	if entries == nil {
-		entries = []domain.ListEntryFull{}
 	}
 	return entries, nil
 }
@@ -400,7 +343,7 @@ func (r *ListRepo) DeleteEntryByCompany(ctx context.Context, listID, companyID u
 	return nil
 }
 
-// UpdateEntry updates an existing list entry.
+// UpdateEntry updates an existing list entry (company_status and position).
 func (r *ListRepo) UpdateEntry(ctx context.Context, entry *domain.ListEntry) error {
 	q := getDBTX(ctx, r.pool)
 	entry.UpdatedAt = time.Now().UTC()
@@ -408,11 +351,10 @@ func (r *ListRepo) UpdateEntry(ctx context.Context, entry *domain.ListEntry) err
 	var returnedID uuid.UUID
 	err := q.QueryRow(ctx, `
 		UPDATE list_entries SET
-			company_status = $2, role_title = $3, status = $4, date_applied = $5, notes = $6, position = $7, updated_at = $8
+			company_status = $2, position = $3, updated_at = $4
 		WHERE id = $1
 		RETURNING id`,
-		entry.ID, string(entry.CompanyStatus), entry.RoleTitle, string(entry.Status),
-		entry.DateApplied, entry.Notes, entry.Position, entry.UpdatedAt,
+		entry.ID, string(entry.CompanyStatus), entry.Position, entry.UpdatedAt,
 	).Scan(&returnedID)
 
 	if err != nil {
@@ -433,135 +375,6 @@ func (r *ListRepo) DeleteEntry(ctx context.Context, id uuid.UUID) error {
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return domain.NotFound("list entry", id)
-		}
-		return domain.InternalError(err)
-	}
-	return nil
-}
-
-// --- Status History ---
-
-// CreateStatusHistory inserts a new status history record.
-func (r *ListRepo) CreateStatusHistory(ctx context.Context, h *domain.StatusHistory) error {
-	q := getDBTX(ctx, r.pool)
-
-	err := q.QueryRow(ctx, `
-		INSERT INTO application_status_history (id, list_entry_id, from_status, to_status, changed_at)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id`,
-		h.ID, h.ListEntryID, h.FromStatus, string(h.ToStatus), h.ChangedAt,
-	).Scan(&h.ID)
-
-	if err != nil {
-		return domain.InternalError(err)
-	}
-	return nil
-}
-
-// ListStatusHistory returns status changes for an entry, chronological.
-func (r *ListRepo) ListStatusHistory(ctx context.Context, entryID uuid.UUID) ([]domain.StatusHistory, error) {
-	q := getDBTX(ctx, r.pool)
-
-	rows, err := q.Query(ctx, `
-		SELECT id, list_entry_id, from_status, to_status, changed_at
-		FROM application_status_history
-		WHERE list_entry_id = $1
-		ORDER BY changed_at ASC`, entryID)
-	if err != nil {
-		return nil, domain.InternalError(err)
-	}
-	defer rows.Close()
-
-	var history []domain.StatusHistory
-	for rows.Next() {
-		var h domain.StatusHistory
-		if err := rows.Scan(&h.ID, &h.ListEntryID, &h.FromStatus, &h.ToStatus, &h.ChangedAt); err != nil {
-			return nil, domain.InternalError(err)
-		}
-		history = append(history, h)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, domain.InternalError(err)
-	}
-
-	return history, nil
-}
-
-// --- Interview Rounds ---
-
-// CreateInterviewRound inserts a new interview round.
-func (r *ListRepo) CreateInterviewRound(ctx context.Context, round *domain.InterviewRound) error {
-	q := getDBTX(ctx, r.pool)
-
-	err := q.QueryRow(ctx, `
-		INSERT INTO interview_rounds (id, list_entry_id, round_number, round_type, scheduled_date, outcome, notes, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-		RETURNING id`,
-		round.ID, round.ListEntryID, round.RoundNumber, round.RoundType,
-		round.ScheduledDate, string(round.Outcome), round.Notes,
-		round.CreatedAt, round.UpdatedAt,
-	).Scan(&round.ID)
-
-	if err != nil {
-		return domain.InternalError(err)
-	}
-	return nil
-}
-
-// GetInterviewRoundByID retrieves an interview round by ID.
-func (r *ListRepo) GetInterviewRoundByID(ctx context.Context, id uuid.UUID) (*domain.InterviewRound, error) {
-	q := getDBTX(ctx, r.pool)
-
-	round := &domain.InterviewRound{}
-	err := q.QueryRow(ctx, `
-		SELECT id, list_entry_id, round_number, round_type, scheduled_date, outcome, notes, created_at, updated_at
-		FROM interview_rounds
-		WHERE id = $1`, id,
-	).Scan(&round.ID, &round.ListEntryID, &round.RoundNumber, &round.RoundType,
-		&round.ScheduledDate, &round.Outcome, &round.Notes,
-		&round.CreatedAt, &round.UpdatedAt)
-
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, domain.NotFound("interview round", id)
-		}
-		return nil, domain.InternalError(err)
-	}
-	return round, nil
-}
-
-// UpdateInterviewRound updates an existing interview round.
-func (r *ListRepo) UpdateInterviewRound(ctx context.Context, round *domain.InterviewRound) error {
-	q := getDBTX(ctx, r.pool)
-	round.UpdatedAt = time.Now().UTC()
-
-	var returnedID uuid.UUID
-	err := q.QueryRow(ctx, `
-		UPDATE interview_rounds SET
-			outcome = $2, notes = $3, scheduled_date = $4, updated_at = $5
-		WHERE id = $1
-		RETURNING id`,
-		round.ID, string(round.Outcome), round.Notes, round.ScheduledDate, round.UpdatedAt,
-	).Scan(&returnedID)
-
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.NotFound("interview round", round.ID)
-		}
-		return domain.InternalError(err)
-	}
-	return nil
-}
-
-// DeleteInterviewRound removes an interview round.
-func (r *ListRepo) DeleteInterviewRound(ctx context.Context, id uuid.UUID) error {
-	q := getDBTX(ctx, r.pool)
-
-	var returnedID uuid.UUID
-	err := q.QueryRow(ctx, `DELETE FROM interview_rounds WHERE id = $1 RETURNING id`, id).Scan(&returnedID)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.NotFound("interview round", id)
 		}
 		return domain.InternalError(err)
 	}

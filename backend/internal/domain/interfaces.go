@@ -53,7 +53,7 @@ type ResumeRepository interface {
 	ClearDefaultForUser(ctx context.Context, userID uuid.UUID) error
 }
 
-// ListRepository defines data access for user lists and entries.
+// ListRepository defines data access for user lists and list entries (company membership).
 type ListRepository interface {
 	CreateList(ctx context.Context, list *UserList) error
 	GetListByID(ctx context.Context, id uuid.UUID) (*UserList, error)
@@ -66,15 +66,26 @@ type ListRepository interface {
 	GetEntryByID(ctx context.Context, id uuid.UUID) (*ListEntry, error)
 	ListEntries(ctx context.Context, listID uuid.UUID) ([]ListEntry, error)
 	ListEntriesByCompanyID(ctx context.Context, userID, companyID uuid.UUID) ([]ListEntryWithList, error)
-	ListAllEntries(ctx context.Context, userID uuid.UUID, statusFilter *ApplicationStatus, excludeNotApplied bool) ([]ListEntryFull, error)
 	ListsWithCompanyFlag(ctx context.Context, userID, companyID uuid.UUID) ([]ListCompanyFlag, error)
 	CompanyListCounts(ctx context.Context, userID uuid.UUID) (map[uuid.UUID]int, error)
 	UpdateEntry(ctx context.Context, entry *ListEntry) error
 	DeleteEntry(ctx context.Context, id uuid.UUID) error
 	DeleteEntryByCompany(ctx context.Context, listID, companyID uuid.UUID) error
+}
+
+// ApplicationRepository defines data access for job applications (company-level).
+type ApplicationRepository interface {
+	Create(ctx context.Context, app *Application) error
+	GetByID(ctx context.Context, id uuid.UUID) (*Application, error)
+	ListByUser(ctx context.Context, userID uuid.UUID, statusFilter *ApplicationStatus, excludeNotApplied bool) ([]ApplicationWithCompany, error)
+	ListByCompany(ctx context.Context, userID, companyID uuid.UUID) ([]Application, error)
+	Update(ctx context.Context, app *Application) error
+	Delete(ctx context.Context, id uuid.UUID) error
+	// CountByStatus returns application counts grouped by status for a user's dashboard.
+	CountByStatus(ctx context.Context, userID uuid.UUID) (map[ApplicationStatus]int, error)
 
 	CreateStatusHistory(ctx context.Context, h *StatusHistory) error
-	ListStatusHistory(ctx context.Context, entryID uuid.UUID) ([]StatusHistory, error)
+	ListStatusHistory(ctx context.Context, applicationID uuid.UUID) ([]StatusHistory, error)
 
 	CreateInterviewRound(ctx context.Context, round *InterviewRound) error
 	GetInterviewRoundByID(ctx context.Context, id uuid.UUID) (*InterviewRound, error)
@@ -101,6 +112,10 @@ type CuratedListRepository interface {
 	GetByPreferencesHash(ctx context.Context, hash string) (*CuratedList, error)
 	// UpdateResult stores the AI-generated ranking result for a completed curated list.
 	UpdateResult(ctx context.Context, id uuid.UUID, result json.RawMessage) error
+	// Rename updates the name of a curated list.
+	Rename(ctx context.Context, id uuid.UUID, name string) error
+	// Delete removes a curated list.
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 // PaymentRepository defines data access for payment records.
@@ -145,6 +160,20 @@ type FeatureFlagRepository interface {
 type AuditLogRepository interface {
 	Create(ctx context.Context, entry *AuditLogEntry) error
 	List(ctx context.Context, filter AuditLogFilter) ([]AuditLogEntry, error)
+}
+
+// CompanyEditLockRepository defines data access for company editing locks.
+type CompanyEditLockRepository interface {
+	// GetLock returns the current lock for a company, or nil if none.
+	GetLock(ctx context.Context, companyID uuid.UUID) (*CompanyEditLock, error)
+	// AcquireLock creates a lock for a company. Fails if already locked.
+	AcquireLock(ctx context.Context, lock *CompanyEditLock) error
+	// ReleaseLock removes a lock. Only the lock holder can release.
+	ReleaseLock(ctx context.Context, companyID, userID uuid.UUID) error
+	// CreateEdit records a moderator edit to a company.
+	CreateEdit(ctx context.Context, edit *CompanyEdit) error
+	// GetLatestEdit returns the most recent edit by a user on a company, or nil.
+	GetLatestEdit(ctx context.Context, companyID, userID uuid.UUID) (*CompanyEdit, error)
 }
 
 // --- Transaction support ---

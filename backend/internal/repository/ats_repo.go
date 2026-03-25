@@ -50,7 +50,7 @@ func (r *ATSCheckRepo) Create(ctx context.Context, check *domain.ATSCheck) error
 	return nil
 }
 
-// GetByID retrieves an ATS check by its primary key.
+// GetByID retrieves an ATS check by its primary key, with company name if applicable.
 func (r *ATSCheckRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.ATSCheck, error) {
 	q := getDBTX(ctx, r.pool)
 
@@ -58,13 +58,16 @@ func (r *ATSCheckRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.ATSCh
 	var result []byte
 
 	err := q.QueryRow(ctx, `
-		SELECT id, user_id, resume_id, check_type, company_id,
-		       job_description, result, cache_key, created_at
-		FROM ats_checks
-		WHERE id = $1`, id,
+		SELECT ac.id, ac.user_id, ac.resume_id, ac.check_type, ac.company_id,
+		       ac.job_description, ac.result, ac.cache_key, ac.created_at,
+		       c.name
+		FROM ats_checks ac
+		LEFT JOIN companies c ON c.id = ac.company_id
+		WHERE ac.id = $1`, id,
 	).Scan(
 		&check.ID, &check.UserID, &check.ResumeID, &check.CheckType, &check.CompanyID,
 		&check.JobDescription, &result, &check.CacheKey, &check.CreatedAt,
+		&check.CompanyName,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, domain.NotFound("ats_check", id)
@@ -80,16 +83,18 @@ func (r *ATSCheckRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.ATSCh
 	return &check, nil
 }
 
-// ListByUser returns all ATS checks for a user, newest first.
+// ListByUser returns all ATS checks for a user, newest first, with company names.
 func (r *ATSCheckRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]domain.ATSCheck, error) {
 	q := getDBTX(ctx, r.pool)
 
 	rows, err := q.Query(ctx, `
-		SELECT id, user_id, resume_id, check_type, company_id,
-		       job_description, result, cache_key, created_at
-		FROM ats_checks
-		WHERE user_id = $1
-		ORDER BY created_at DESC`, userID,
+		SELECT ac.id, ac.user_id, ac.resume_id, ac.check_type, ac.company_id,
+		       ac.job_description, ac.result, ac.cache_key, ac.created_at,
+		       c.name
+		FROM ats_checks ac
+		LEFT JOIN companies c ON c.id = ac.company_id
+		WHERE ac.user_id = $1
+		ORDER BY ac.created_at DESC`, userID,
 	)
 	if err != nil {
 		return nil, domain.InternalError(err)
@@ -104,6 +109,7 @@ func (r *ATSCheckRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]doma
 		if err := rows.Scan(
 			&check.ID, &check.UserID, &check.ResumeID, &check.CheckType, &check.CompanyID,
 			&check.JobDescription, &result, &check.CacheKey, &check.CreatedAt,
+			&check.CompanyName,
 		); err != nil {
 			return nil, domain.InternalError(err)
 		}

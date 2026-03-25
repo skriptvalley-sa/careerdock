@@ -71,3 +71,17 @@ export function useCheckJob() {
     },
   });
 }
+
+export function useCheckResume() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ resumeId }: { resumeId: string }) =>
+      apiClient.post<ATSCheck>('/api/ats/resume', {
+        resume_id: resumeId,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.ats.all });
+      qc.invalidateQueries({ queryKey: queryKeys.credits.balance });
+    },
+  });
+}

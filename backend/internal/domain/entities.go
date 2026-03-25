@@ -70,17 +70,13 @@ type Company struct {
 	UpdatedAt         time.Time       `json:"updated_at"`
 }
 
-// CompanyEdit represents a moderator-submitted edit to a company profile.
+// CompanyEdit represents a moderator edit to a company.
 type CompanyEdit struct {
-	ID          uuid.UUID         `json:"id"`
-	CompanyID   uuid.UUID         `json:"company_id"`
-	SubmittedBy uuid.UUID         `json:"submitted_by"`
-	ReviewedBy  *uuid.UUID        `json:"reviewed_by,omitempty"`
-	Status      CompanyEditStatus `json:"status"`
-	Changes     json.RawMessage   `json:"changes"`
-	ReviewNotes *string           `json:"review_notes,omitempty"`
-	ReviewedAt  *time.Time        `json:"reviewed_at,omitempty"`
-	CreatedAt   time.Time         `json:"created_at"`
+	ID        uuid.UUID       `json:"id"`
+	CompanyID uuid.UUID       `json:"company_id"`
+	UserID    uuid.UUID       `json:"user_id"`
+	Diff      json.RawMessage `json:"diff"`
+	CreatedAt time.Time       `json:"created_at"`
 }
 
 // UserList represents a user-created company tracking list.
@@ -95,16 +91,12 @@ type UserList struct {
 }
 
 // ListEntry tracks a company within a list with an overall company status.
-// Optionally carries inline application details (role, app status, date).
+// Application details (role, status, notes) live on the Application entity.
 type ListEntry struct {
 	ID            uuid.UUID             `json:"id"`
 	ListID        uuid.UUID             `json:"list_id"`
 	CompanyID     uuid.UUID             `json:"company_id"`
 	CompanyStatus CompanyTrackingStatus `json:"company_status"`
-	RoleTitle     *string               `json:"role_title,omitempty"`
-	Status        ApplicationStatus     `json:"status"`
-	DateApplied   *time.Time            `json:"date_applied,omitempty"`
-	Notes         *string               `json:"notes,omitempty"`
 	Position      int                   `json:"position"`
 	CreatedAt     time.Time             `json:"created_at"`
 	UpdatedAt     time.Time             `json:"updated_at"`
@@ -117,11 +109,23 @@ type ListEntryWithList struct {
 	ListName string `json:"list_name"`
 }
 
-// ListEntryFull extends ListEntry with both list name and company name.
-// Used in the cross-list "all applications" view.
-type ListEntryFull struct {
-	ListEntry
-	ListName    string `json:"list_name"`
+// Application tracks a job application at the company level (not per list).
+// A user can have multiple applications per company (different roles).
+type Application struct {
+	ID          uuid.UUID         `json:"id"`
+	UserID      uuid.UUID         `json:"user_id"`
+	CompanyID   uuid.UUID         `json:"company_id"`
+	RoleTitle   *string           `json:"role_title,omitempty"`
+	Status      ApplicationStatus `json:"status"`
+	DateApplied *time.Time        `json:"date_applied,omitempty"`
+	Notes       *string           `json:"notes,omitempty"`
+	CreatedAt   time.Time         `json:"created_at"`
+	UpdatedAt   time.Time         `json:"updated_at"`
+}
+
+// ApplicationWithCompany extends Application with the company name.
+type ApplicationWithCompany struct {
+	Application
 	CompanyName string `json:"company_name"`
 }
 
@@ -135,17 +139,17 @@ type ListCompanyFlag struct {
 
 // StatusHistory tracks every application status change.
 type StatusHistory struct {
-	ID          uuid.UUID          `json:"id"`
-	ListEntryID uuid.UUID          `json:"list_entry_id"`
-	FromStatus  *ApplicationStatus `json:"from_status,omitempty"`
-	ToStatus    ApplicationStatus  `json:"to_status"`
-	ChangedAt   time.Time          `json:"changed_at"`
+	ID            uuid.UUID          `json:"id"`
+	ApplicationID uuid.UUID          `json:"application_id"`
+	FromStatus    *ApplicationStatus `json:"from_status,omitempty"`
+	ToStatus      ApplicationStatus  `json:"to_status"`
+	ChangedAt     time.Time          `json:"changed_at"`
 }
 
 // InterviewRound tracks a single interview round within an application.
 type InterviewRound struct {
 	ID            uuid.UUID        `json:"id"`
-	ListEntryID   uuid.UUID        `json:"list_entry_id"`
+	ApplicationID uuid.UUID        `json:"application_id"`
 	RoundNumber   int              `json:"round_number"`
 	RoundType     string           `json:"round_type"`
 	ScheduledDate *time.Time       `json:"scheduled_date,omitempty"`
@@ -174,13 +178,14 @@ type Resume struct {
 	UpdatedAt     time.Time       `json:"updated_at"`
 }
 
-// ATSCheck represents an ATS scoring result (company or job).
+// ATSCheck represents an ATS scoring result (company, job, or resume-only).
 type ATSCheck struct {
 	ID             uuid.UUID       `json:"id"`
 	UserID         uuid.UUID       `json:"user_id"`
 	ResumeID       uuid.UUID       `json:"resume_id"`
 	CheckType      ATSCheckType    `json:"check_type"`
 	CompanyID      *uuid.UUID      `json:"company_id,omitempty"`
+	CompanyName    *string         `json:"company_name,omitempty"`
 	JobDescription *string         `json:"job_description,omitempty"`
 	Result         json.RawMessage `json:"result"`
 	CacheKey       string          `json:"-"`
@@ -192,9 +197,19 @@ type CuratedList struct {
 	ID              uuid.UUID       `json:"id"`
 	UserID          uuid.UUID       `json:"user_id"`
 	ResumeID        uuid.UUID       `json:"resume_id"`
+	Name            *string         `json:"name,omitempty"`
 	PreferencesHash string          `json:"-"`
 	Result          json.RawMessage `json:"result"`
 	CreatedAt       time.Time       `json:"created_at"`
+	UpdatedAt       time.Time       `json:"updated_at"`
+}
+
+// CompanyEditLock represents an active lock on a company for moderator editing.
+type CompanyEditLock struct {
+	CompanyID uuid.UUID `json:"company_id"`
+	LockedBy  uuid.UUID `json:"locked_by"`
+	LockedAt  time.Time `json:"locked_at"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 // Payment represents a Razorpay transaction.

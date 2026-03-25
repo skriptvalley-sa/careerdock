@@ -40,6 +40,16 @@ export const queryKeys = {
     list: () => ['notifications', 'list'] as const,
     unreadCount: () => ['notifications', 'unread-count'] as const,
   },
+  applications: {
+    all: ['applications'] as const,
+    list: (status?: string) => ['applications', 'list', status] as const,
+    byCompany: (companyId: string) => ['applications', 'by-company', companyId] as const,
+    detail: (id: string) => ['applications', 'detail', id] as const,
+  },
+  moderator: {
+    all: ['moderator'] as const,
+    editLock: (companyId: string) => ['moderator', 'edit-lock', companyId] as const,
+  },
   admin: {
     all: ['admin'] as const,
     users: (params?: Record<string, string>) =>

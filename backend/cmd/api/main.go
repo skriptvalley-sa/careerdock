@@ -26,6 +26,7 @@ import (
 
 	"github.com/hibiken/asynq"
 
+	"github.com/skriptvalley/careerdock/internal/ai"
 	"github.com/skriptvalley/careerdock/internal/config"
 	"github.com/skriptvalley/careerdock/internal/handler"
 	"github.com/skriptvalley/careerdock/internal/middleware"
@@ -131,7 +132,19 @@ func main() {
 	adminSvc := service.NewAdminService(companyRepo, userRepo, creditRepo, paymentRepo, auditLogRepo, logoStore, txr)
 	notificationRepo := repository.NewNotificationRepo(db)
 	notificationSvc := service.NewNotificationService(notificationRepo)
-	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, paymentSvc, creditSvc, resumeSvc, atsSvc, curatedListSvc, adminSvc, notificationSvc, db, redisClient, version, cfg.IsProduction(), cfg.RazorpayKeyID, razorpayGateway.VerifyWebhookSignature)
+
+	// AI provider for moderator company generation (fallback: Claude → OpenAI)
+	claudeProvider := ai.NewClaudeProvider(cfg.ClaudeAPIKey, "", 0)
+	openaiProvider := ai.NewOpenAIProvider(cfg.OpenAIAPIKey, "", 0)
+	aiProvider := ai.NewFallbackProvider(claudeProvider, openaiProvider)
+
+	editLockRepo := repository.NewCompanyEditLockRepo(db)
+	moderatorSvc := service.NewModeratorService(companyRepo, editLockRepo, aiProvider)
+
+	applicationRepo := repository.NewApplicationRepo(db)
+	applicationSvc := service.NewApplicationService(applicationRepo, txr)
+
+	svc := service.NewServices(authSvc, companySvc, listSvc, userSvc, featureFlagSvc, paymentSvc, creditSvc, resumeSvc, atsSvc, curatedListSvc, adminSvc, notificationSvc, moderatorSvc, applicationSvc, db, redisClient, version, cfg.IsProduction(), cfg.RazorpayKeyID, razorpayGateway.VerifyWebhookSignature)
 
 	// 6. Build handler layer + mount routes
 	r := chi.NewRouter()

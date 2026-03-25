@@ -3,9 +3,9 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
-import { useAllEntries, useUpdateEntry } from '@/hooks/use-lists';
+import { useApplications, useUpdateApplication } from '@/hooks/use-applications';
 import { StatusBadge, ALL_STATUSES, getStatusLabel } from '@/components/lists/status-badge';
-import type { ApplicationStatus, ListEntry } from '@/types/api';
+import type { Application, ApplicationStatus } from '@/types/api';
 
 export default function ApplicationsPage() {
   const searchParams = useSearchParams();
@@ -15,39 +15,32 @@ export default function ApplicationsPage() {
   const [companyFilter, setCompanyFilter] = useState('');
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
 
-  const { data: entries, isLoading } = useAllEntries(statusFilter || undefined);
-  const updateEntry = useUpdateEntry();
+  const { data: applications, isLoading } = useApplications(statusFilter || undefined);
+  const updateApp = useUpdateApplication();
 
-  // Extract unique companies from entries for the company filter dropdown
+  // Extract unique companies for the company filter dropdown
   const uniqueCompanies = useMemo(() => {
-    if (!entries) return [];
+    if (!applications) return [];
     const map = new Map<string, string>();
-    for (const e of entries) {
-      if (e.company_id && e.company_name && !map.has(e.company_id)) {
-        map.set(e.company_id, e.company_name);
+    for (const a of applications) {
+      if (a.company_id && a.company_name && !map.has(a.company_id)) {
+        map.set(a.company_id, a.company_name);
       }
     }
     return Array.from(map.entries())
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [entries]);
+  }, [applications]);
 
   // Apply client-side company filter
-  const filteredEntries = useMemo(() => {
-    if (!entries) return undefined;
-    if (!companyFilter) return entries;
-    return entries.filter((e) => e.company_id === companyFilter);
-  }, [entries, companyFilter]);
+  const filtered = useMemo(() => {
+    if (!applications) return undefined;
+    if (!companyFilter) return applications;
+    return applications.filter((a) => a.company_id === companyFilter);
+  }, [applications, companyFilter]);
 
-  const handleStatusChange = async (
-    entry: ListEntry & { list_name: string; company_name: string },
-    newStatus: ApplicationStatus,
-  ) => {
-    await updateEntry.mutateAsync({
-      listId: entry.list_id,
-      entryId: entry.id,
-      status: newStatus,
-    });
+  const handleStatusChange = async (app: Application, newStatus: ApplicationStatus) => {
+    await updateApp.mutateAsync({ id: app.id, status: newStatus });
     setEditingEntry(null);
   };
 
@@ -65,7 +58,7 @@ export default function ApplicationsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-100">All Applications</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Track all your applications across every list in one place.
+          Track all your applications across every company in one place.
         </p>
       </div>
 
@@ -126,18 +119,18 @@ export default function ApplicationsPage() {
         </div>
       )}
 
-      {!isLoading && filteredEntries && filteredEntries.length === 0 && (
+      {!isLoading && filtered && filtered.length === 0 && (
         <div className="rounded-lg border border-dashed border-edge p-12 text-center">
           <p className="text-sm text-slate-500">
             {statusFilter || companyFilter
               ? 'No applications match the selected filters.'
-              : 'No applications yet. Add entries to your lists to see them here.'}
+              : 'No applications yet. Add applications from a list detail page.'}
           </p>
         </div>
       )}
 
-      {filteredEntries && filteredEntries.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-edge bg-card">
+      {filtered && filtered.length > 0 && (
+        <div className="overflow-x-auto rounded-lg border border-edge bg-card">
           <table className="min-w-full divide-y divide-edge">
             <thead className="bg-overlay">
               <tr>
@@ -150,9 +143,6 @@ export default function ApplicationsPage() {
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
                   Status
                 </th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 sm:table-cell">
-                  List
-                </th>
                 <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 md:table-cell">
                   Date Applied
                 </th>
@@ -162,22 +152,22 @@ export default function ApplicationsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-edge">
-              {filteredEntries.map((entry) => (
-                <tr key={entry.id} className="hover:bg-surface">
+              {filtered.map((app) => (
+                <tr key={app.id} className="hover:bg-surface">
                   <td className="whitespace-nowrap px-4 py-3">
                     <div className="text-sm font-medium text-slate-100">
-                      {entry.company_name || entry.company_id.slice(0, 8) + '...'}
+                      {app.company_name || app.company_id.slice(0, 8) + '...'}
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
-                    <div className="text-sm text-slate-300">{entry.role_title || '-'}</div>
+                    <div className="text-sm text-slate-300">{app.role_title || '-'}</div>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
-                    {editingEntry === entry.id ? (
+                    {editingEntry === app.id ? (
                       <select
-                        value={entry.status}
+                        value={app.status}
                         onChange={(e) =>
-                          handleStatusChange(entry, e.target.value as ApplicationStatus)
+                          handleStatusChange(app, e.target.value as ApplicationStatus)
                         }
                         onBlur={() => setEditingEntry(null)}
                         autoFocus
@@ -190,19 +180,16 @@ export default function ApplicationsPage() {
                         ))}
                       </select>
                     ) : (
-                      <button onClick={() => setEditingEntry(entry.id)}>
-                        <StatusBadge status={entry.status} />
+                      <button onClick={() => setEditingEntry(app.id)}>
+                        <StatusBadge status={app.status} />
                       </button>
                     )}
                   </td>
-                  <td className="hidden whitespace-nowrap px-4 py-3 text-sm text-slate-500 sm:table-cell">
-                    {entry.list_name}
-                  </td>
                   <td className="hidden whitespace-nowrap px-4 py-3 text-sm text-slate-500 md:table-cell">
-                    {entry.date_applied || '-'}
+                    {app.date_applied || '-'}
                   </td>
                   <td className="hidden max-w-xs truncate px-4 py-3 text-sm text-slate-500 lg:table-cell">
-                    {entry.notes || '-'}
+                    {app.notes || '-'}
                   </td>
                 </tr>
               ))}
@@ -211,9 +198,9 @@ export default function ApplicationsPage() {
         </div>
       )}
 
-      {filteredEntries && filteredEntries.length > 0 && (
+      {filtered && filtered.length > 0 && (
         <div className="mt-4 text-xs text-slate-600">
-          {filteredEntries.length} application{filteredEntries.length !== 1 ? 's' : ''}
+          {filtered.length} application{filtered.length !== 1 ? 's' : ''}
           {statusFilter ? ` with status "${getStatusLabel(statusFilter as ApplicationStatus)}"` : ''}
           {companyFilter
             ? ` at ${uniqueCompanies.find((c) => c.id === companyFilter)?.name ?? 'selected company'}`

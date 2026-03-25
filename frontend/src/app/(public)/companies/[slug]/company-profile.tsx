@@ -5,12 +5,16 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, MapPin, Building2, Calendar, DollarSign, Briefcase, List } from 'lucide-react';
 import { useCompanyDetail } from '@/hooks/use-companies';
-import { useEntriesByCompany, useUpdateEntry } from '@/hooks/use-lists';
+import { useApplicationsByCompany, useUpdateApplication } from '@/hooks/use-applications';
 import { useAuthStore } from '@/store/auth-store';
 import { TechStackTags } from '@/components/companies/tech-stack-tags';
 import { StatusBadge, ALL_STATUSES, getStatusLabel } from '@/components/lists/status-badge';
 import { CompanyStatusBadge } from '@/components/lists/company-status-badge';
-import type { ApplicationStatus, CompanyTrackingStatus, ListEntry } from '@/types/api';
+import type { ApplicationStatus, Application, CompanyTrackingStatus } from '@/types/api';
+import { apiClient } from '@/lib/api';
+import { useQuery } from '@tanstack/react-query';
+import { staleTimes } from '@/lib/query-keys';
+import type { ListEntry } from '@/types/api';
 
 const sizeLabels: Record<string, string> = {
   startup: 'Startup',
@@ -44,6 +48,18 @@ const statusPriority: Record<CompanyTrackingStatus, number> = {
   rejected: -1,
 };
 
+function useEntriesByCompany(companyId: string | undefined) {
+  return useQuery({
+    queryKey: ['entries', 'by-company', companyId] as const,
+    queryFn: () =>
+      apiClient.get<
+        (ListEntry & { list_name: string })[]
+      >('/api/entries', { company_id: companyId! }),
+    enabled: !!companyId,
+    staleTime: staleTimes.userLists,
+  });
+}
+
 export default function CompanyProfile() {
   const { slug } = useParams<{ slug: string }>();
   const { data: company, isLoading, isError, error } = useCompanyDetail(slug);
@@ -51,7 +67,10 @@ export default function CompanyProfile() {
   const { data: userEntries } = useEntriesByCompany(
     isAuthenticated && company ? company.id : undefined,
   );
-  const updateEntry = useUpdateEntry();
+  const { data: applications } = useApplicationsByCompany(
+    isAuthenticated && company ? company.id : undefined,
+  );
+  const updateApp = useUpdateApplication();
   const [editingStatus, setEditingStatus] = useState<string | null>(null);
 
   // Derive overall company status (highest priority across all list entries)
@@ -81,21 +100,8 @@ export default function CompanyProfile() {
     return Array.from(seen.values());
   }, [userEntries]);
 
-  // Filter entries to only those with actual applications (not just list additions)
-  const appliedEntries = useMemo(() => {
-    if (!userEntries) return [];
-    return userEntries.filter((e) => e.status !== 'not_applied');
-  }, [userEntries]);
-
-  const handleStatusChange = async (
-    entry: ListEntry & { list_name: string },
-    newStatus: ApplicationStatus,
-  ) => {
-    await updateEntry.mutateAsync({
-      listId: entry.list_id,
-      entryId: entry.id,
-      status: newStatus,
-    });
+  const handleStatusChange = async (app: Application, newStatus: ApplicationStatus) => {
+    await updateApp.mutateAsync({ id: app.id, status: newStatus });
     setEditingStatus(null);
   };
 
@@ -342,14 +348,14 @@ export default function CompanyProfile() {
         </section>
       )}
 
-      {/* Your Applications — only show entries where user actually applied */}
-      {isAuthenticated && appliedEntries.length > 0 && (
+      {/* Your Applications — from the applications table */}
+      {isAuthenticated && applications && applications.length > 0 && (
         <section className="mb-8">
           <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-100">
             <Briefcase className="h-4 w-4" />
             Your Applications
           </h2>
-          <div className="overflow-hidden rounded-lg border border-edge bg-card">
+          <div className="overflow-x-auto rounded-lg border border-edge bg-card">
             <table className="min-w-full divide-y divide-edge">
               <thead className="bg-overlay">
                 <tr>
@@ -357,13 +363,7 @@ export default function CompanyProfile() {
                     Role
                   </th>
                   <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                    List
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                    Tracking
-                  </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                    App Status
+                    Status
                   </th>
                   <th className="hidden px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500 sm:table-cell">
                     Date Applied
@@ -371,28 +371,17 @@ export default function CompanyProfile() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-edge">
-                {appliedEntries.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-surface">
+                {applications.map((app) => (
+                  <tr key={app.id} className="hover:bg-surface">
                     <td className="whitespace-nowrap px-4 py-2.5 text-sm font-medium text-slate-200">
-                      {entry.role_title || '-'}
+                      {app.role_title || '-'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2.5">
-                      <Link
-                        href={`/lists/${entry.list_id}`}
-                        className="text-sm text-[#00f0ff] hover:text-[#00f0ff]/80 hover:underline"
-                      >
-                        {entry.list_name}
-                      </Link>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2.5">
-                      <CompanyStatusBadge status={entry.company_status} />
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-2.5">
-                      {editingStatus === entry.id ? (
+                      {editingStatus === app.id ? (
                         <select
-                          value={entry.status}
+                          value={app.status}
                           onChange={(e) =>
-                            handleStatusChange(entry, e.target.value as ApplicationStatus)
+                            handleStatusChange(app, e.target.value as ApplicationStatus)
                           }
                           onBlur={() => setEditingStatus(null)}
                           autoFocus
@@ -405,13 +394,13 @@ export default function CompanyProfile() {
                           ))}
                         </select>
                       ) : (
-                        <button onClick={() => setEditingStatus(entry.id)}>
-                          <StatusBadge status={entry.status} />
+                        <button onClick={() => setEditingStatus(app.id)}>
+                          <StatusBadge status={app.status} />
                         </button>
                       )}
                     </td>
                     <td className="hidden whitespace-nowrap px-4 py-2.5 text-sm text-slate-500 sm:table-cell">
-                      {entry.date_applied || '-'}
+                      {app.date_applied || '-'}
                     </td>
                   </tr>
                 ))}
