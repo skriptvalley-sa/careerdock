@@ -131,9 +131,24 @@ export default function DashboardPage() {
                     Manage resumes <ChevronRight className="h-3 w-3" />
                   </Link>
                 </div>
+              ) : resumes && resumes.length > 0 ? (
+                <div className="mt-3">
+                  <p className="text-sm text-[var(--color-text)]">
+                    {resumes.length} resume{resumes.length > 1 ? 's' : ''} uploaded
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                    Set a default to see health stats here.
+                  </p>
+                  <Link
+                    href="/resumes"
+                    className="mt-2 inline-flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
+                  >
+                    Set default <ChevronRight className="h-3 w-3" />
+                  </Link>
+                </div>
               ) : (
                 <div className="mt-3">
-                  <p className="text-sm text-[var(--color-text-muted)]">No default resume set.</p>
+                  <p className="text-sm text-[var(--color-text-muted)]">No resumes uploaded yet.</p>
                   <Link
                     href="/resumes"
                     className="mt-2 inline-flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"

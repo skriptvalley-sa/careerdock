@@ -31,7 +31,7 @@ function StatusBadge({ status }: { status: string }) {
   switch (status) {
     case 'ready':
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#39ff14]/10 px-2 py-0.5 text-xs font-medium text-[#39ff14]">
+        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-success)]/10 px-2 py-0.5 text-xs font-medium text-[var(--color-success)]">
           <CheckCircle2 className="h-3 w-3" /> Ready
         </span>
       );
@@ -119,7 +119,7 @@ function ResumeCard({
               <span
                 className={`text-sm font-bold ${
                   resume.ats_general_score >= 80
-                    ? 'text-[#39ff14]'
+                    ? 'text-[var(--color-success)]'
                     : resume.ats_general_score >= 60
                       ? 'text-[var(--color-warning)]'
                       : 'text-red-400'
