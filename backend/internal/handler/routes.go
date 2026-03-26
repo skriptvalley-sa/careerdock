@@ -114,6 +114,7 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 			paymentH := NewPaymentHandler(svc.Payment, svc.Credit, svc.RazorpayKeyID)
 			r.Route("/payments", func(r chi.Router) {
 				r.Post("/orders", paymentH.CreateOrder)
+				r.Post("/confirm", paymentH.ConfirmPayment)
 				r.Get("/", paymentH.ListPayments)
 			})
 

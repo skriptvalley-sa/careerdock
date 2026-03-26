@@ -115,6 +115,39 @@ func (h *PaymentHandler) HandleWebhook(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// confirmPaymentRequest is the body for POST /api/payments/confirm.
+type confirmPaymentRequest struct {
+	RazorpayPaymentID string `json:"razorpay_payment_id"`
+	RazorpayOrderID   string `json:"razorpay_order_id"`
+	RazorpaySignature string `json:"razorpay_signature"`
+}
+
+// ConfirmPayment handles POST /api/payments/confirm.
+// Verifies the client-side Razorpay signature and grants credits immediately.
+func (h *PaymentHandler) ConfirmPayment(w http.ResponseWriter, r *http.Request) {
+	var req confirmPaymentRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, r, domain.ValidationError("invalid request body", nil))
+		return
+	}
+
+	if req.RazorpayPaymentID == "" || req.RazorpayOrderID == "" || req.RazorpaySignature == "" {
+		respondError(w, r, domain.ValidationError("razorpay_payment_id, razorpay_order_id, and razorpay_signature are required", nil))
+		return
+	}
+
+	if err := h.payment.ConfirmPayment(r.Context(), service.ConfirmPaymentInput{
+		RazorpayOrderID:   req.RazorpayOrderID,
+		RazorpayPaymentID: req.RazorpayPaymentID,
+		RazorpaySignature: req.RazorpaySignature,
+	}); err != nil {
+		respondError(w, r, err)
+		return
+	}
+
+	respondMessage(w, http.StatusOK, "Payment confirmed. Credits have been added to your account.")
+}
+
 // ListPayments handles GET /api/payments.
 func (h *PaymentHandler) ListPayments(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.UserIDFromContext(r.Context())

@@ -285,6 +285,116 @@ func (s *PaymentService) HandleWebhook(ctx context.Context, body []byte) error {
 	return nil
 }
 
+// ConfirmPaymentInput holds client-side payment confirmation data from Razorpay checkout.
+type ConfirmPaymentInput struct {
+	RazorpayOrderID   string
+	RazorpayPaymentID string
+	RazorpaySignature string
+}
+
+// ConfirmPayment verifies a client-side Razorpay payment signature and processes
+// the payment if valid. It is idempotent — if the webhook already captured the
+// payment, it returns success immediately. This is the primary path for granting
+// credits; the webhook is a fallback for cases where the client cannot reach us.
+func (s *PaymentService) ConfirmPayment(ctx context.Context, input ConfirmPaymentInput) error {
+	// Look up payment record
+	payment, err := s.payments.GetByOrderID(ctx, input.RazorpayOrderID)
+	if err != nil {
+		return err
+	}
+
+	// Idempotency: webhook already captured this payment
+	if payment.Status == domain.PaymentStatusCaptured {
+		slog.Info("confirm: payment already captured",
+			"razorpay_order_id", input.RazorpayOrderID,
+			"payment_id", payment.ID,
+		)
+		return nil
+	}
+
+	// Verify Razorpay client-side signature
+	verification, err := s.gateway.VerifyPayment(ctx, &domain.VerifyPaymentRequest{
+		OrderID:   input.RazorpayOrderID,
+		PaymentID: input.RazorpayPaymentID,
+		Signature: input.RazorpaySignature,
+	})
+	if err != nil {
+		return err
+	}
+	if !verification.Verified {
+		return &domain.AppError{
+			Code:    domain.ErrCodeForbidden,
+			Message: "payment signature verification failed",
+		}
+	}
+
+	// Atomic: capture payment + allocate credits (same as webhook path)
+	product, ok := productCatalog[payment.ProductType]
+	if !ok {
+		return domain.InternalError(fmt.Errorf("unknown product type in payment: %s", payment.ProductType))
+	}
+
+	err = s.tx.WithTx(ctx, func(txCtx context.Context) error {
+		if err := s.payments.UpdateWebhookCapture(txCtx, payment.ID, input.RazorpayPaymentID, time.Now().UTC()); err != nil {
+			return err
+		}
+
+		for creditType, amount := range product.Credits {
+			if err := s.credits.Allocate(txCtx, payment.UserID, creditType, amount); err != nil {
+				return err
+			}
+
+			newBalance, err := s.credits.GetBalance(txCtx, payment.UserID, creditType)
+			if err != nil {
+				return err
+			}
+
+			txn := &domain.CreditTransaction{
+				ID:           uuid.Must(uuid.NewV7()),
+				UserID:       payment.UserID,
+				CreditType:   creditType,
+				Amount:       amount,
+				BalanceAfter: newBalance,
+				Reason:       fmt.Sprintf("purchase_%s", payment.ProductType),
+				ReferenceID:  &payment.ID,
+				CreatedAt:    time.Now().UTC(),
+			}
+			if err := s.credits.LogTransaction(txCtx, txn); err != nil {
+				return err
+			}
+		}
+
+		if product.SetsPremium {
+			user, err := s.users.GetByID(txCtx, payment.UserID)
+			if err != nil {
+				return err
+			}
+			if !user.IsPremium() {
+				now := time.Now().UTC()
+				user.PremiumSince = &now
+				if err := s.users.Update(txCtx, user); err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	slog.Info("payment_confirm_processed",
+		"user_id", payment.UserID,
+		"payment_id", payment.ID,
+		"razorpay_order_id", input.RazorpayOrderID,
+		"product_type", payment.ProductType,
+		"amount_paise", payment.AmountPaise,
+	)
+
+	return nil
+}
+
 // ListPayments returns all payments for a user.
 func (s *PaymentService) ListPayments(ctx context.Context, userID uuid.UUID) ([]domain.Payment, error) {
 	return s.payments.ListByUser(ctx, userID)
