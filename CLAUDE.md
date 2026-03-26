@@ -8,6 +8,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Current state:** All 9 design phases complete. Implementation begins with Sprint 0. See `docs/ai/SESSION-GUIDE.md` for session and branch management.
 
+## ⚠️ CRITICAL: Git Workflow Rule
+
+**NEVER push directly to `main`.** All changes must go through a typed feature branch and pull request, no exceptions.
+
+### Branch naming convention
+
+| Type | Pattern | When to use |
+|------|---------|-------------|
+| New functionality | `feat/short-description` | New endpoints, pages, components |
+| Bug fix (non-urgent) | `fix/short-description` | Incorrect behaviour, wrong logic |
+| Urgent production fix | `hotfix/short-description` | Breaking issue live on production |
+| Refactor / cleanup | `refactor/short-description` | No behaviour change, code quality |
+| Config / infra / tooling | `chore/short-description` | CI, Makefile, Docker, deps, env |
+| Documentation | `docs/short-description` | Markdown, comments, CLAUDE.md |
+
+```
+# Always:
+git checkout -b fix/payment-confirm-404
+git checkout -b feat/email-verification
+git checkout -b hotfix/webhook-secret-missing
+# ... make changes, commit ...
+git push origin <branch>
+gh pr create ...
+
+# NEVER:
+git push origin main  ← strictly forbidden
+```
+
+This applies to every change — single-line edits included. If the user asks to "just push it", still create a branch and PR.
+
 ## Working Agreements
 
 1. **Discussion-first**: For each design phase, present recommendations with trade-offs and wait for approval before proceeding.
