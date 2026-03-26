@@ -2,16 +2,16 @@
 
 /* ═══════════════════════════════════════════════════════
    BRAND PALETTE
-   Light (Combo 05):  Lemon Chiffon #FEFACD + Ultra Violet #5F4A8B
+   Light (Combo 05):  Lemon Chiffon #FFFACD + Ultra Violet #5F4A8B
    Dark  (Combo 03):  Charcoal      #233D4C + Pumpkin      #FD802E
    ═══════════════════════════════════════════════════════ */
 
 /* ── Light-mode tokens (default) ── */
 @theme {
-  --color-surface:        #FEFACD;
-  --color-card:           #FDF7B8;
-  --color-overlay:        #FAF5A0;
-  --color-input:          #FFF9D6;
+  --color-surface:        #FFFACD;
+  --color-card:           #F5F0D4;
+  --color-overlay:        #EDE8C0;
+  --color-input:          #FFFDF5;
   --color-primary:        #5F4A8B;
   --color-primary-hover:  #4E3A75;
   --color-text:           #2A1F4A;
