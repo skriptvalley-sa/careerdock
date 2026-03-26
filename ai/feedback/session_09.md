@@ -1,6 +1,6 @@
 ## Session 09 Plan
 
-Session focused on credit shop UX for premium users, pricing strategy overhaul, support email update, and relevant doc updates.
+Session focused on credit shop UX for premium users, pricing strategy overhaul, support email update, a session-isolation security fix, and relevant doc updates.
 
 ---
 
@@ -165,6 +165,37 @@ type CartItem = {
 };
 ```
 
+#### 5.4 Critical security fix: dashboard data must not persist across user switches
+
+Screenshots:
+
+![Dashboard shows previous user's data after account switch - view 1](./screenshots/session-09-user-switch-dashboard-data-leak-1.png)
+![Dashboard shows previous user's data after account switch - view 2](./screenshots/session-09-user-switch-dashboard-data-leak-2.png)
+
+Problem:
+- After logging out and signing back in as a different user, the dashboard can continue showing data from the previous user.
+- This is a serious session-isolation and privacy issue.
+
+Likely cause from current implementation:
+- The frontend appears to keep a long-lived TanStack Query cache across account switches.
+- Logout clears the auth store, but user-scoped query caches do not appear to be fully cleared.
+- Several dashboard-related queries use generic cache keys such as dashboard counts, lists, resumes, credits, ATS history, and related user data instead of keys scoped by user identity.
+- Some of those queries use non-zero or long stale times, which increases the chance that the next logged-in user briefly or persistently sees cached data from the previous user.
+- This looks more like stale client-side cache leakage than a multi-tenant architecture concern.
+
+Action:
+- Debug the full chain causing stale user data to persist across account switches.
+- Investigate both frontend and backend layers: auth store reset, client cache invalidation, route or data cache reuse, local storage persistence, and any user-scoped API caching.
+- Prioritise checking React Query cache lifecycle, logout invalidation, user-scoped query keys, and any in-flight requests that can resolve after an account switch.
+
+Expected behaviour after fix:
+- Logging out must clear all user-scoped dashboard state, cached responses, and persisted client data tied to the previous identity.
+- Logging in as a different user must force a clean fetch for the new identity.
+- The dashboard must never render another user's data after an auth change.
+- If needed, recreate or fully clear client query caches on logout and auth failure.
+- Consider scoping user-specific query keys by user ID where appropriate so cached data cannot be reused across identities.
+- Add a regression check for logout → login-as-different-user flow so this issue does not return.
+
 ---
 
 ### 6. Docs to update
@@ -178,15 +209,16 @@ type CartItem = {
 
 ## Implementation order
 
-1. Support email grep + replace (quick win)
-2. Backend: update product catalogue + business rules
-3. Backend: run `make lint-backend` + `make build`
-4. Frontend: update public pricing page (amounts + email)
-5. Frontend: sidebar nav conditional (Pricing vs Credit Shop)
-6. Frontend: Credit Shop page + cart
-7. Frontend: run `make lint-frontend` + `make build`
-8. Docs: update `payments.md` and `PRD.md`
-9. Branch: `feat/credit-shop-session-09` → PR
+1. Security fix: debug and patch stale dashboard data across logout/login user switches
+2. Support email grep + replace
+3. Backend: update product catalogue + business rules
+4. Backend: run `make lint-backend` + `make build`
+5. Frontend: update public pricing page (amounts + email)
+6. Frontend: sidebar nav conditional (Pricing vs Credit Shop)
+7. Frontend: Credit Shop page + cart
+8. Frontend: run `make lint-frontend` + `make build`
+9. Docs: update `payments.md` and `PRD.md`
+10. Branch: `feat/credit-shop-session-09` → PR
 
 ---
 
