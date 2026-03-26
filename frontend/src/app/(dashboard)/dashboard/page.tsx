@@ -22,16 +22,16 @@ const funnelStages = [
   { key: 'not_applied' as const, label: 'Not Applied', color: 'bg-slate-600' },
   { key: 'applied' as const, label: 'Applied', color: 'bg-[var(--color-primary)]' },
   { key: 'phone_screen' as const, label: 'Phone Screen', color: 'bg-[#e040fb]' },
-  { key: 'interview' as const, label: 'Interview', color: 'bg-[#ffb800]' },
-  { key: 'offer' as const, label: 'Offer', color: 'bg-[#39ff14]' },
-  { key: 'accepted' as const, label: 'Accepted', color: 'bg-[#39ff14]' },
+  { key: 'interview' as const, label: 'Interview', color: 'bg-[var(--color-warning)]' },
+  { key: 'offer' as const, label: 'Offer', color: 'bg-[var(--color-success)]' },
+  { key: 'accepted' as const, label: 'Accepted', color: 'bg-[var(--color-success)]' },
   { key: 'rejected' as const, label: 'Rejected', color: 'bg-red-500' },
   { key: 'withdrawn' as const, label: 'Withdrawn', color: 'bg-orange-500' },
 ];
 
 function scoreColor(score: number) {
-  if (score >= 80) return 'text-[#39ff14]';
-  if (score >= 60) return 'text-[#ffb800]';
+  if (score >= 80) return 'text-[var(--color-success)]';
+  if (score >= 60) return 'text-[var(--color-warning)]';
   return 'text-red-400';
 }
 
@@ -65,7 +65,7 @@ function ATSCheckMini({ check }: { check: ATSCheck }) {
           {check.result.score}%
         </span>
       ) : (
-        <Clock className="h-3.5 w-3.5 animate-spin text-[#ffb800]" />
+        <Clock className="h-3.5 w-3.5 animate-spin text-[var(--color-warning)]" />
       )}
       <ChevronRight className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-muted)]" />
     </Link>

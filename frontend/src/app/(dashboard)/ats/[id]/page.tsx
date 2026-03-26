@@ -14,14 +14,14 @@ import {
 import { useATSCheck, isATSComplete } from '@/hooks/use-ats';
 
 function scoreColor(score: number) {
-  if (score >= 80) return 'text-[#39ff14]';
-  if (score >= 60) return 'text-[#ffb800]';
+  if (score >= 80) return 'text-[var(--color-success)]';
+  if (score >= 60) return 'text-[var(--color-warning)]';
   return 'text-red-400';
 }
 
 function scoreBorderColor(score: number) {
-  if (score >= 80) return 'border-[#39ff14]/40';
-  if (score >= 60) return 'border-[#ffb800]/40';
+  if (score >= 80) return 'border-[var(--color-success)]/40';
+  if (score >= 60) return 'border-[var(--color-warning)]/40';
   return 'border-red-400/40';
 }
 
@@ -37,7 +37,7 @@ function CategoryBar({ score }: { score: number }) {
     <div className="mt-1.5 h-1.5 w-full rounded-full bg-surface">
       <div
         className={`h-1.5 rounded-full transition-all ${
-          score >= 80 ? 'bg-[#39ff14]' : score >= 60 ? 'bg-[#ffb800]' : 'bg-red-400'
+          score >= 80 ? 'bg-[var(--color-success)]' : score >= 60 ? 'bg-[var(--color-warning)]' : 'bg-red-400'
         }`}
         style={{ width: `${score}%` }}
       />
@@ -81,7 +81,7 @@ export default function ATSResultPage({
           ) : check.check_type === 'job' ? (
             <FileText className="h-5 w-5 text-[#e040fb]" />
           ) : (
-            <FileCheck2 className="h-5 w-5 text-[#39ff14]" />
+            <FileCheck2 className="h-5 w-5 text-[var(--color-success)]" />
           )}
         </div>
         <div>
@@ -104,9 +104,9 @@ export default function ATSResultPage({
 
       {/* Pending state */}
       {!complete && (
-        <div className="mt-8 flex flex-col items-center justify-center rounded-lg border border-dashed border-[#ffb800]/40 bg-[#ffb800]/5 py-16">
-          <Loader2 className="h-10 w-10 animate-spin text-[#ffb800]" />
-          <p className="mt-4 text-sm font-medium text-[#ffb800]">Analysis in progress…</p>
+        <div className="mt-8 flex flex-col items-center justify-center rounded-lg border border-dashed border-[var(--color-warning)]/40 bg-[var(--color-warning)]/5 py-16">
+          <Loader2 className="h-10 w-10 animate-spin text-[var(--color-warning)]" />
+          <p className="mt-4 text-sm font-medium text-[var(--color-warning)]">Analysis in progress…</p>
           <p className="mt-1 text-xs text-[var(--color-text-muted)]">
             This usually takes 15–30 seconds. This page will update automatically.
           </p>
@@ -190,7 +190,7 @@ export default function ATSResultPage({
                     key={i}
                     className="flex items-start gap-3 rounded-lg border border-edge bg-card p-4"
                   >
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#ffb800]" />
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-warning)]" />
                     <span className="text-sm text-[var(--color-text)]">{suggestion}</span>
                   </li>
                 ))}

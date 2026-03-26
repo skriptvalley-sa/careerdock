@@ -33,7 +33,7 @@ const tierLabels: Record<string, string> = {
 
 const hiringColors: Record<string, string> = {
   active: 'bg-green-900/30 text-green-400 border-green-800',
-  paused: 'bg-yellow-900/30 text-yellow-400 border-yellow-800',
+  paused: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)] border-[var(--color-warning)]/60',
   unknown: 'bg-slate-800 text-[var(--color-text-muted)] border-edge',
 };
 

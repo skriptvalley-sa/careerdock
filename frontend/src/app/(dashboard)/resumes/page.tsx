@@ -37,7 +37,7 @@ function StatusBadge({ status }: { status: string }) {
       );
     case 'parsing':
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#ffb800]/10 px-2 py-0.5 text-xs font-medium text-[#ffb800]">
+        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-warning)]/10 px-2 py-0.5 text-xs font-medium text-[var(--color-warning)]">
           <Clock className="h-3 w-3 animate-spin" /> Processing
         </span>
       );
@@ -121,7 +121,7 @@ function ResumeCard({
                   resume.ats_general_score >= 80
                     ? 'text-[#39ff14]'
                     : resume.ats_general_score >= 60
-                      ? 'text-[#ffb800]'
+                      ? 'text-[var(--color-warning)]'
                       : 'text-red-400'
                 }`}
               >
@@ -166,7 +166,7 @@ function ResumeCard({
           <button
             onClick={() => onRetry(resume.id)}
             disabled={retrying}
-            className="inline-flex items-center gap-1 rounded-md border border-[#ffb800]/30 px-2.5 py-1.5 text-xs text-[#ffb800] hover:border-[#ffb800]/60 hover:bg-[#ffb800]/5 transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-md border border-[var(--color-warning)]/30 px-2.5 py-1.5 text-xs text-[var(--color-warning)] hover:border-[var(--color-warning)]/60 hover:bg-[var(--color-warning)]/5 transition-all disabled:opacity-50"
             title="Retry processing"
           >
             {retrying ? (
@@ -413,9 +413,9 @@ export default function ResumesPage() {
       )}
 
       {credits && credits.resume_upload === 0 && emptySlots.length > 0 && (
-        <div className="mt-4 rounded-lg border border-[#ffb800]/30 bg-[#ffb800]/10 px-4 py-3 text-sm text-[#ffb800]">
+        <div className="mt-4 rounded-lg border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 px-4 py-3 text-sm text-[var(--color-warning)]">
           No upload credits remaining.{' '}
-          <a href="/pricing" className="underline hover:text-[#ffb800]/80">
+          <a href="/pricing" className="underline hover:text-[var(--color-warning)]/80">
             Buy more credits
           </a>{' '}
           to upload resumes.

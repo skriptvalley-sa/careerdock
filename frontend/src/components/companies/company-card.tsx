@@ -25,7 +25,7 @@ const tierLabels: Record<string, string> = {
 
 const hiringColors: Record<string, string> = {
   active: 'bg-green-900/30 text-green-400',
-  paused: 'bg-yellow-900/30 text-yellow-400',
+  paused: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]',
   unknown: 'bg-slate-800 text-[var(--color-text-muted)]',
 };
 
@@ -120,7 +120,7 @@ export function CompanyCard({ company, listCount }: CompanyCardProps) {
               </span>
             )}
             {company.has_rsu_refresher && (
-              <span className="inline-flex items-center rounded-full bg-[#ffb800]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#ffb800]">
+              <span className="inline-flex items-center rounded-full bg-[var(--color-warning)]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-warning)]">
                 Refresher
               </span>
             )}

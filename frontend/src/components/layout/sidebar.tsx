@@ -134,7 +134,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
                   {(user.role === 'moderator' || user.role === 'admin') && (
                     <span className={`shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold uppercase ${
                       user.role === 'admin'
-                        ? 'bg-amber-500/15 text-amber-400'
+                        ? 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]'
                         : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
                     }`}>
                       {user.role === 'admin' ? 'Admin' : 'Mod'}

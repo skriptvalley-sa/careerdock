@@ -7,9 +7,9 @@ const statusConfig: Record<
   marked: { label: 'Marked', className: 'bg-slate-800/60 text-[var(--color-text)] border border-slate-700' },
   researching: { label: 'Researching', className: 'bg-[#ff00e5]/10 text-[#e040fb] border border-[#ff00e5]/20' },
   applied: { label: 'Applied', className: 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20' },
-  interviewing: { label: 'Interviewing', className: 'bg-[#ffb800]/10 text-[#ffb800] border border-[#ffb800]/20' },
-  offered: { label: 'Offered', className: 'bg-[#39ff14]/10 text-[#39ff14] border border-[#39ff14]/20' },
-  accepted: { label: 'Accepted', className: 'bg-[#39ff14]/15 text-[#39ff14] border border-[#39ff14]/30' },
+  interviewing: { label: 'Interviewing', className: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/20' },
+  offered: { label: 'Offered', className: 'bg-[var(--color-success)]/10 text-[var(--color-success)] border border-[var(--color-success)]/20' },
+  accepted: { label: 'Accepted', className: 'bg-[var(--color-success)]/15 text-[var(--color-success)] border border-[var(--color-success)]/30' },
   rejected: { label: 'Rejected', className: 'bg-red-900/30 text-red-400 border border-red-800/30' },
 };
 

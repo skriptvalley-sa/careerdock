@@ -129,7 +129,7 @@ export default function AdminUsersPage() {
                     </td>
                     <td className="px-4 py-3">
                       {isPremium ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-400">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-warning)]/15 px-2 py-0.5 text-xs font-medium text-[var(--color-warning)]">
                           <Crown className="h-3 w-3" /> Premium
                         </span>
                       ) : (
@@ -170,7 +170,7 @@ export default function AdminUsersPage() {
                           title={isPremium ? 'Revoke premium' : 'Grant premium'}
                           className={`rounded-md p-1.5 ${
                             isPremium
-                              ? 'text-amber-400 hover:bg-amber-500/10'
+                              ? 'text-[var(--color-warning)] hover:bg-[var(--color-warning)]/10'
                               : 'text-[var(--color-text-muted)] hover:bg-card'
                           }`}
                         >

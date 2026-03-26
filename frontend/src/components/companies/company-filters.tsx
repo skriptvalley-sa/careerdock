@@ -16,7 +16,7 @@ const HIRING_OPTIONS = [
 ];
 
 const TIER_OPTIONS = [
-  { value: 'tier_1', label: 'T1 (>40L)', color: 'border-amber-500 text-amber-400 bg-amber-900/20' },
+  { value: 'tier_1', label: 'T1 (>40L)', color: 'border-[var(--color-warning)] text-[var(--color-warning)] bg-[var(--color-warning)]/15' },
   { value: 'tier_2', label: 'T2 (20-40L)', color: 'border-green-500 text-green-400 bg-green-900/20' },
   { value: 'tier_3', label: 'T3 (10-20L)', color: 'border-[var(--color-primary)]/50 text-[var(--color-primary)] bg-[var(--color-primary)]/10' },
   { value: 'tier_4', label: 'T4 (5-10L)', color: 'border-[var(--color-edge-hover)] text-[var(--color-text-muted)] bg-[var(--color-primary)]/10' },
@@ -161,7 +161,7 @@ export function CompanyFilters({ values, onChange }: CompanyFiltersProps) {
                 active
                   ? opt.value === 'active'
                     ? 'border-green-700 bg-green-900/30 text-green-400'
-                    : 'border-yellow-700 bg-yellow-900/30 text-yellow-400'
+                    : 'border-[var(--color-warning)] bg-[var(--color-warning)]/15 text-[var(--color-warning)]'
                   : 'border-edge text-[var(--color-text-muted)] hover:border-edge-hover hover:text-[var(--color-text-muted)]'
               }`}
             >

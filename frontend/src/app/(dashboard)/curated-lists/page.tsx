@@ -30,7 +30,7 @@ import type { CuratedList, RankedCompany } from '@/types/api';
 
 function scoreColor(score: number) {
   if (score >= 80) return 'text-[#39ff14]';
-  if (score >= 60) return 'text-[#ffb800]';
+  if (score >= 60) return 'text-[var(--color-warning)]';
   return 'text-red-400';
 }
 
@@ -227,7 +227,7 @@ function CuratedListCard({ list }: { list: CuratedList }) {
               {companies.length} companies
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#ffb800]/10 px-2.5 py-1 text-xs font-medium text-[#ffb800]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-warning)]/10 px-2.5 py-1 text-xs font-medium text-[var(--color-warning)]">
               <Clock className="h-3 w-3 animate-spin" /> Generating…
             </span>
           )}
@@ -263,7 +263,7 @@ function CuratedListCard({ list }: { list: CuratedList }) {
       {/* Pending state */}
       {!complete && (
         <div className="border-t border-edge px-4 py-6 text-center">
-          <Loader2 className="mx-auto h-6 w-6 animate-spin text-[#ffb800]" />
+          <Loader2 className="mx-auto h-6 w-6 animate-spin text-[var(--color-warning)]" />
           <p className="mt-2 text-xs text-[var(--color-text-muted)]">
             AI is ranking companies for your profile. This page will update automatically.
           </p>
@@ -434,9 +434,9 @@ export default function CuratedListsPage() {
       )}
 
       {(credits?.curated_list ?? 0) === 0 && !showForm && (
-        <div className="mt-4 rounded-lg border border-[#ffb800]/30 bg-[#ffb800]/10 px-4 py-3 text-sm text-[#ffb800]">
+        <div className="mt-4 rounded-lg border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 px-4 py-3 text-sm text-[var(--color-warning)]">
           No curated list credits.{' '}
-          <a href="/pricing" className="underline hover:text-[#ffb800]/80">
+          <a href="/pricing" className="underline hover:text-[var(--color-warning)]/80">
             Buy more credits
           </a>
           .

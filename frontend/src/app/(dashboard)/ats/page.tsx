@@ -25,14 +25,14 @@ type ResumeSource = 'slot' | 'upload';
 type CheckMode = 'company' | 'job' | 'resume';
 
 function scoreColor(score: number) {
-  if (score >= 80) return 'text-[#39ff14]';
-  if (score >= 60) return 'text-[#ffb800]';
+  if (score >= 80) return 'text-[var(--color-success)]';
+  if (score >= 60) return 'text-[var(--color-warning)]';
   return 'text-red-400';
 }
 
 function scoreBg(score: number) {
-  if (score >= 80) return 'bg-[#39ff14]/10 border-[#39ff14]/30';
-  if (score >= 60) return 'bg-[#ffb800]/10 border-[#ffb800]/30';
+  if (score >= 80) return 'bg-[var(--color-success)]/10 border-[var(--color-success)]/30';
+  if (score >= 60) return 'bg-[var(--color-warning)]/10 border-[var(--color-warning)]/30';
   return 'bg-red-500/10 border-red-500/30';
 }
 
@@ -49,7 +49,7 @@ function checkLabel(check: ATSCheck) {
 function checkIcon(type: ATSCheck['check_type']) {
   if (type === 'company') return <Building2 className="h-4 w-4 text-[var(--color-primary)]" />;
   if (type === 'job') return <FileText className="h-4 w-4 text-[#e040fb]" />;
-  return <FileScan className="h-4 w-4 text-[#39ff14]" />;
+  return <FileScan className="h-4 w-4 text-[var(--color-success)]" />;
 }
 
 function ATSCheckRow({ check }: { check: ATSCheck }) {
@@ -71,11 +71,11 @@ function ATSCheckRow({ check }: { check: ATSCheck }) {
             {checkLabel(check)}
           </span>
           {complete ? (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#39ff14]/10 px-2 py-0.5 text-[10px] font-medium text-[#39ff14]">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--color-success)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--color-success)]">
               <CheckCircle2 className="h-3 w-3" /> Done
             </span>
           ) : (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#ffb800]/10 px-2 py-0.5 text-[10px] font-medium text-[#ffb800]">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--color-warning)]/10 px-2 py-0.5 text-[10px] font-medium text-[var(--color-warning)]">
               <Clock className="h-3 w-3 animate-spin" /> Processing
             </span>
           )}
@@ -196,7 +196,7 @@ export default function ATSPage() {
     if (active) {
       if (m === 'company') return `${base} bg-[var(--color-primary)]/10 text-[var(--color-primary)]`;
       if (m === 'job') return `${base} bg-[#e040fb]/10 text-[#e040fb]`;
-      return `${base} bg-[#39ff14]/10 text-[#39ff14]`;
+      return `${base} bg-[var(--color-success)]/10 text-[var(--color-success)]`;
     }
     return `${base} text-[var(--color-text-muted)] hover:text-[var(--color-text)]`;
   };
@@ -320,7 +320,7 @@ export default function ATSPage() {
                 jdLength > 10000
                   ? 'text-red-400'
                   : jdLength < 100 && jdLength > 0
-                    ? 'text-[#ffb800]'
+                    ? 'text-[var(--color-warning)]'
                     : 'text-[var(--color-text-muted)]'
               }`}
             >
@@ -342,7 +342,7 @@ export default function ATSPage() {
                 onClick={() => { setResumeSource('slot'); setTempFile(null); setTempFileError(null); }}
                 className={`flex flex-1 items-center justify-center gap-1.5 py-2 transition-all ${
                   resumeSource === 'slot'
-                    ? 'bg-[#39ff14]/10 text-[#39ff14]'
+                    ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
                     : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
                 }`}
               >
@@ -353,7 +353,7 @@ export default function ATSPage() {
                 onClick={() => { setResumeSource('upload'); setResumeId(''); }}
                 className={`flex flex-1 items-center justify-center gap-1.5 py-2 border-l border-edge transition-all ${
                   resumeSource === 'upload'
-                    ? 'bg-[#39ff14]/10 text-[#39ff14]'
+                    ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
                     : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
                 }`}
               >
@@ -366,10 +366,10 @@ export default function ATSPage() {
               <div
                 className={`relative rounded-lg border-2 border-dashed p-5 text-center transition-all ${
                   tempFileDragOver
-                    ? 'border-[#39ff14] bg-[#39ff14]/5'
+                    ? 'border-[var(--color-success)] bg-[var(--color-success)]/5'
                     : tempFile
-                      ? 'border-[#39ff14]/40 bg-[#39ff14]/5'
-                      : 'border-edge hover:border-[#39ff14]/30'
+                      ? 'border-[var(--color-success)]/40 bg-[var(--color-success)]/5'
+                      : 'border-edge hover:border-[var(--color-success)]/30'
                 }`}
                 onDragOver={(e) => { e.preventDefault(); setTempFileDragOver(true); }}
                 onDragLeave={() => setTempFileDragOver(false)}
@@ -393,7 +393,7 @@ export default function ATSPage() {
                 />
                 {tempFile ? (
                   <div className="flex flex-col items-center gap-1">
-                    <FileScan className="h-6 w-6 text-[#39ff14]" />
+                    <FileScan className="h-6 w-6 text-[var(--color-success)]" />
                     <p className="text-sm font-medium text-[var(--color-text)]">{tempFile.name}</p>
                     <p className="text-xs text-[var(--color-text-muted)]">
                       {(tempFile.size / 1024).toFixed(0)} KB —{' '}
@@ -414,7 +414,7 @@ export default function ATSPage() {
                       <button
                         type="button"
                         onClick={() => tempFileRef.current?.click()}
-                        className="text-[#39ff14] hover:underline"
+                        className="text-[var(--color-success)] hover:underline"
                       >
                         browse
                       </button>
@@ -453,9 +453,9 @@ export default function ATSPage() {
         </button>
 
         {(credits?.ats_check ?? 0) === 0 && (
-          <p className="text-center text-xs text-[#ffb800]">
+          <p className="text-center text-xs text-[var(--color-warning)]">
             No ATS credits.{' '}
-            <a href="/pricing" className="underline hover:text-[#ffb800]/80">
+            <a href="/pricing" className="underline hover:text-[var(--color-warning)]/80">
               Buy more
             </a>
             .

@@ -71,7 +71,7 @@ function GenerateCompanySection() {
     <div className="rounded-lg border border-edge bg-card p-6">
       <div className="mb-4 flex items-center gap-2">
         <Plus className="h-5 w-5 text-[var(--color-primary)]" />
-        <h2 className="text-lg font-semibold text-white">Add New Company</h2>
+        <h2 className="text-lg font-semibold text-[var(--color-text)]">Add New Company</h2>
       </div>
       <p className="mb-4 text-sm text-[var(--color-text-muted)]">
         Enter a company name and optionally provide URLs. AI will generate a draft profile for review.
@@ -243,7 +243,7 @@ function EditCompanySection() {
     <div className="rounded-lg border border-edge bg-card p-6">
       <div className="mb-4 flex items-center gap-2">
         <Pencil className="h-5 w-5 text-[#e040fb]" />
-        <h2 className="text-lg font-semibold text-white">Edit Company</h2>
+        <h2 className="text-lg font-semibold text-[var(--color-text)]">Edit Company</h2>
       </div>
       <p className="mb-4 text-sm text-[var(--color-text-muted)]">
         Search for a company, acquire an edit lock, then submit changes. A 10-minute cooldown applies after each edit.
@@ -438,7 +438,7 @@ export default function ModeratorPage() {
       <div className="flex items-center gap-3">
         <Shield className="h-6 w-6 text-[var(--color-primary)]" />
         <div>
-          <h1 className="text-xl font-bold text-white">Moderator Tools</h1>
+          <h1 className="text-xl font-bold text-[var(--color-text)]">Moderator Tools</h1>
           <p className="text-sm text-[var(--color-text-muted)]">
             Signed in as{' '}
             <span className="rounded bg-[var(--color-primary)]/10 px-1.5 py-0.5 text-xs font-medium text-[var(--color-primary)]">

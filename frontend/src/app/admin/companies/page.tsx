@@ -158,7 +158,7 @@ export default function AdminCompaniesPage() {
                         c.hiring_status === 'active'
                           ? 'bg-green-500/15 text-green-400'
                           : c.hiring_status === 'paused'
-                            ? 'bg-amber-500/15 text-amber-400'
+                            ? 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]'
                             : 'bg-slate-500/15 text-[var(--color-text-muted)]'
                       }`}
                     >
