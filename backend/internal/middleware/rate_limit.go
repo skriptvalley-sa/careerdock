@@ -84,13 +84,16 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-// increment atomically increments the counter for the key using a sliding window.
+// increment atomically increments the counter for the key using a fixed window.
+// The window TTL is set only on the first request (ExpireNX) so it never resets
+// mid-window — every Expire call would otherwise push the deadline forward and
+// make the counter grow indefinitely for continuously-active users.
 // Returns the current count within the window.
 func (rl *RateLimiter) increment(ctx context.Context, key string) (int, error) {
 	pipe := rl.redis.Pipeline()
 
 	incr := pipe.Incr(ctx, key)
-	pipe.Expire(ctx, key, rl.window)
+	pipe.ExpireNX(ctx, key, rl.window) // sets TTL only if the key has none
 
 	_, err := pipe.Exec(ctx)
 	if err != nil {

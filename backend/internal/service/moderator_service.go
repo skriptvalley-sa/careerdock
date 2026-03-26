@@ -39,9 +39,23 @@ func NewModeratorService(
 }
 
 // GenerateCompanyDraft calls the AI provider to generate a draft company profile.
+// The input name, careers URL, and LinkedIn URL are guaranteed to appear in the
+// result even if the AI leaves those fields empty.
+// Returns a Conflict error (without calling AI) if a company with the same slug
+// already exists in the directory.
 func (s *ModeratorService) GenerateCompanyDraft(ctx context.Context, name, careersURL, linkedinURL string) (*ai.EnrichedCompany, error) {
 	if name == "" {
 		return nil, domain.ValidationError("company name is required", nil)
+	}
+
+	// Duplicate check: derive a slug from the name and see if it already exists.
+	// This avoids spending an AI call on a company we already have.
+	candidate := slugify(name)
+	if existing, err := s.companies.GetBySlug(ctx, candidate); err == nil && existing != nil {
+		return nil, domain.ValidationError(
+			fmt.Sprintf("%q already exists in the directory. Edit it instead.", existing.Name),
+			nil,
+		)
 	}
 
 	result, err := s.aiProvider.EnrichCompany(ctx, &ai.EnrichCompanyRequest{
@@ -51,6 +65,18 @@ func (s *ModeratorService) GenerateCompanyDraft(ctx context.Context, name, caree
 	})
 	if err != nil {
 		return nil, domain.InternalError(fmt.Errorf("AI company enrichment failed: %w", err))
+	}
+
+	// Ensure the input values are never lost: fall back to what the caller
+	// provided when the AI returns an empty field.
+	if result.Name == "" {
+		result.Name = name
+	}
+	if result.CareersPageURL == "" && careersURL != "" {
+		result.CareersPageURL = careersURL
+	}
+	if result.LinkedinURL == "" && linkedinURL != "" {
+		result.LinkedinURL = linkedinURL
 	}
 
 	return result, nil

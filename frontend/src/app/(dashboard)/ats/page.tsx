@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ScanSearch,
@@ -12,12 +12,15 @@ import {
   CheckCircle2,
   Clock,
   ChevronRight,
+  Upload,
 } from 'lucide-react';
 import { useResumes } from '@/hooks/use-resumes';
 import { useCreditBalance } from '@/hooks/use-payments';
-import { useATSChecks, useCheckCompany, useCheckJob, useCheckResume, isATSComplete } from '@/hooks/use-ats';
+import { useATSChecks, useCheckCompany, useCheckJob, useCheckResume, useCheckResumeTempUpload, isATSComplete } from '@/hooks/use-ats';
 import { CompanyCombobox } from '@/components/companies/company-combobox';
 import type { ATSCheck } from '@/types/api';
+
+type ResumeSource = 'slot' | 'upload';
 
 type CheckMode = 'company' | 'job' | 'resume';
 
@@ -105,24 +108,55 @@ export default function ATSPage() {
   const checkCompany = useCheckCompany();
   const checkJob = useCheckJob();
   const checkResume = useCheckResume();
+  const checkResumeTempUpload = useCheckResumeTempUpload();
 
   const [mode, setMode] = useState<CheckMode>('company');
+  const [resumeSource, setResumeSource] = useState<ResumeSource>('slot');
   const [resumeId, setResumeId] = useState('');
+  const [tempFile, setTempFile] = useState<File | null>(null);
+  const [tempFileDragOver, setTempFileDragOver] = useState(false);
+  const [tempFileError, setTempFileError] = useState<string | null>(null);
+  const tempFileRef = useRef<HTMLInputElement>(null);
   const [company, setCompany] = useState<{ id: string; name: string } | null>(null);
   const [jobDescription, setJobDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const readyResumes = resumes?.filter((r) => r.status === 'ready') ?? [];
-  const isPending = checkCompany.isPending || checkJob.isPending || checkResume.isPending;
+  const isPending = checkCompany.isPending || checkJob.isPending || checkResume.isPending || checkResumeTempUpload.isPending;
   const jdLength = jobDescription.length;
+
+  const handleTempFile = useCallback((file: File) => {
+    setTempFileError(null);
+    if (file.type !== 'application/pdf') {
+      setTempFileError('Only PDF files are supported');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setTempFileError('File must be under 5 MB');
+      return;
+    }
+    setTempFile(file);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!resumeId) {
+    // For company/job modes we always need a slot resume
+    if (mode !== 'resume' && !resumeId) {
       setError('Please select a resume');
       return;
+    }
+    // For resume-only mode: validate the chosen source
+    if (mode === 'resume') {
+      if (resumeSource === 'slot' && !resumeId) {
+        setError('Please select a resume');
+        return;
+      }
+      if (resumeSource === 'upload' && !tempFile) {
+        setError('Please select a PDF file to upload');
+        return;
+      }
     }
 
     try {
@@ -144,7 +178,12 @@ export default function ATSPage() {
         }
         result = await checkJob.mutateAsync({ resumeId, jobDescription });
       } else {
-        result = await checkResume.mutateAsync({ resumeId });
+        // resume-only mode
+        if (resumeSource === 'upload' && tempFile) {
+          result = await checkResumeTempUpload.mutateAsync(tempFile);
+        } else {
+          result = await checkResume.mutateAsync({ resumeId });
+        }
       }
       router.push(`/ats/${result.id}`);
     } catch (err: unknown) {
@@ -192,35 +231,37 @@ export default function ATSPage() {
           </div>
         )}
 
-        {/* Resume selector */}
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-            Resume
-          </label>
-          {readyResumes.length === 0 ? (
-            <p className="text-sm text-slate-500">
-              No ready resumes.{' '}
-              <a href="/resumes" className="text-[#00f0ff] hover:underline">
-                Upload one first
-              </a>
-              .
-            </p>
-          ) : (
-            <select
-              value={resumeId}
-              onChange={(e) => setResumeId(e.target.value)}
-              className="block w-full rounded-md border border-edge-input bg-input py-2 px-3 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
-            >
-              <option value="">Select a resume…</option>
-              {readyResumes.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.file_name}
-                  {r.is_default ? ' (default)' : ''}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
+        {/* Resume selector — hidden in resume-only + upload source */}
+        {(mode !== 'resume' || resumeSource === 'slot') && (
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              Resume
+            </label>
+            {readyResumes.length === 0 ? (
+              <p className="text-sm text-slate-500">
+                No ready resumes.{' '}
+                <a href="/resumes" className="text-[#00f0ff] hover:underline">
+                  Upload one first
+                </a>
+                .
+              </p>
+            ) : (
+              <select
+                value={resumeId}
+                onChange={(e) => setResumeId(e.target.value)}
+                className="block w-full rounded-md border border-edge-input bg-input py-2 px-3 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+              >
+                <option value="">Select a resume…</option>
+                {readyResumes.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.file_name}
+                    {r.is_default ? ' (default)' : ''}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        )}
 
         {/* Mode toggle — 3 modes */}
         <div>
@@ -289,17 +330,117 @@ export default function ATSPage() {
         )}
 
         {mode === 'resume' && (
-          <div className="rounded-md border border-edge bg-surface/50 px-4 py-3">
-            <p className="text-sm text-slate-400">
-              Resume-only mode evaluates your resume&apos;s general ATS compatibility — formatting,
-              keyword density, structure, and readability — without targeting a specific company or role.
+          <div className="space-y-3">
+            <p className="text-xs text-slate-500">
+              Evaluates general ATS compatibility — formatting, keyword density, structure — without targeting a specific company or role.
             </p>
+
+            {/* Source toggle: slot vs fresh upload */}
+            <div className="flex rounded-md border border-edge overflow-hidden text-xs font-medium">
+              <button
+                type="button"
+                onClick={() => { setResumeSource('slot'); setTempFile(null); setTempFileError(null); }}
+                className={`flex flex-1 items-center justify-center gap-1.5 py-2 transition-all ${
+                  resumeSource === 'slot'
+                    ? 'bg-[#39ff14]/10 text-[#39ff14]'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <FileScan className="h-3.5 w-3.5" /> From my slots
+              </button>
+              <button
+                type="button"
+                onClick={() => { setResumeSource('upload'); setResumeId(''); }}
+                className={`flex flex-1 items-center justify-center gap-1.5 py-2 border-l border-edge transition-all ${
+                  resumeSource === 'upload'
+                    ? 'bg-[#39ff14]/10 text-[#39ff14]'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Upload className="h-3.5 w-3.5" /> Upload a PDF
+              </button>
+            </div>
+
+            {/* PDF drop zone — shown when upload source is selected */}
+            {resumeSource === 'upload' && (
+              <div
+                className={`relative rounded-lg border-2 border-dashed p-5 text-center transition-all ${
+                  tempFileDragOver
+                    ? 'border-[#39ff14] bg-[#39ff14]/5'
+                    : tempFile
+                      ? 'border-[#39ff14]/40 bg-[#39ff14]/5'
+                      : 'border-edge hover:border-[#39ff14]/30'
+                }`}
+                onDragOver={(e) => { e.preventDefault(); setTempFileDragOver(true); }}
+                onDragLeave={() => setTempFileDragOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setTempFileDragOver(false);
+                  const file = e.dataTransfer.files[0];
+                  if (file) handleTempFile(file);
+                }}
+              >
+                <input
+                  ref={tempFileRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleTempFile(file);
+                    e.target.value = '';
+                  }}
+                />
+                {tempFile ? (
+                  <div className="flex flex-col items-center gap-1">
+                    <FileScan className="h-6 w-6 text-[#39ff14]" />
+                    <p className="text-sm font-medium text-slate-200">{tempFile.name}</p>
+                    <p className="text-xs text-slate-500">
+                      {(tempFile.size / 1024).toFixed(0)} KB —{' '}
+                      <button
+                        type="button"
+                        onClick={() => { setTempFile(null); setTempFileError(null); }}
+                        className="text-[#00f0ff] hover:underline"
+                      >
+                        change
+                      </button>
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="mx-auto h-7 w-7 text-slate-600" />
+                    <p className="mt-2 text-sm text-slate-400">
+                      Drop PDF here or{' '}
+                      <button
+                        type="button"
+                        onClick={() => tempFileRef.current?.click()}
+                        className="text-[#39ff14] hover:underline"
+                      >
+                        browse
+                      </button>
+                    </p>
+                    <p className="mt-1 text-xs text-slate-600">PDF, max 5 MB — not saved to your slots</p>
+                  </>
+                )}
+                {tempFileError && (
+                  <p className="mt-2 flex items-center justify-center gap-1 text-xs text-red-400">
+                    <AlertCircle className="h-3 w-3" />
+                    {tempFileError}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         )}
 
         <button
           type="submit"
-          disabled={isPending || readyResumes.length === 0 || (credits?.ats_check ?? 0) === 0}
+          disabled={
+            isPending ||
+            (credits?.ats_check ?? 0) === 0 ||
+            // Need at least one ready resume unless in resume+upload mode
+            (mode !== 'resume' || resumeSource !== 'upload') && readyResumes.length === 0
+          }
           className="btn-neon w-full rounded-md py-2.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPending ? (

@@ -71,3 +71,14 @@ export function useResumeDownloadUrl() {
       apiClient.get<{ url: string }>(`/api/resumes/${resumeId}/download`),
   });
 }
+
+export function useRetryResume() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (resumeId: string) =>
+      apiClient.post<void>(`/api/resumes/${resumeId}/retry`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.resumes.all });
+    },
+  });
+}

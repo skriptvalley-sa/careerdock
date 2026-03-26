@@ -69,6 +69,6 @@ export const staleTimes = {
   resumes: 60 * 1000,
   atsResults: Infinity, // Immutable once complete
   curatedLists: Infinity, // Immutable once complete
-  credits: 30 * 1000,
+  credits: 0, // always refetch on mount so balance is never stale after admin grants
   notifications: 0, // Always fresh
 } as const;

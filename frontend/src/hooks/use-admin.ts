@@ -9,7 +9,31 @@ import type {
   AdminPayment,
   AdminCreditTransaction,
   CompanyDetail,
+  CompanyListItem,
+  PaginatedResponse,
 } from '@/types/api';
+
+// Helper: patch an infinite-query page structure in-place.
+// Works with both useInfiniteQuery ({pages: [...{data:[]}]}) and plain {data:[]} responses.
+type InfinitePages = { pages: Array<PaginatedResponse<CompanyListItem>> };
+
+function patchCompanyInCache(
+  old: unknown,
+  patchFn: (items: CompanyListItem[]) => CompanyListItem[],
+): unknown {
+  if (!old || typeof old !== 'object') return old;
+  const asInfinite = old as InfinitePages;
+  if (Array.isArray(asInfinite.pages)) {
+    return {
+      ...asInfinite,
+      pages: asInfinite.pages.map((page) => ({
+        ...page,
+        data: patchFn(page.data),
+      })),
+    };
+  }
+  return old;
+}
 
 // Admin list endpoints return {data: T[], total: N} — not the standard {data: T} envelope.
 // Use apiClient.getRaw which reuses the same 401 auto-refresh logic as all other calls.
@@ -98,8 +122,39 @@ export function useAdminUpdateCompany() {
         `/api/admin/companies/${companyId}`,
         data,
       ),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.companies.all });
+    onSuccess: (updated) => {
+      // Immediately patch the company in every cached list page so the
+      // updated fields are visible without waiting for a background refetch.
+      qc.setQueriesData<unknown>(
+        { queryKey: queryKeys.companies.all },
+        (old: unknown) =>
+          patchCompanyInCache(old, (items) =>
+            items.map((c) =>
+              c.id === updated.id ? { ...c, ...updated } : c,
+            ),
+          ),
+      );
+      // Also invalidate for eventual consistency (background refetch).
+      void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
+    },
+  });
+}
+
+export function useAdminDeleteCompany() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (companyId: string) =>
+      apiClient.delete(`/api/admin/companies/${companyId}`),
+    onSuccess: (_, companyId) => {
+      // Immediately remove the deleted company from every cached list page.
+      qc.setQueriesData<unknown>(
+        { queryKey: queryKeys.companies.all },
+        (old: unknown) =>
+          patchCompanyInCache(old, (items) =>
+            items.filter((c) => c.id !== companyId),
+          ),
+      );
+      void qc.invalidateQueries({ queryKey: queryKeys.companies.all });
     },
   });
 }

@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   Building2,
   FileText,
+  FileCheck2,
   Loader2,
   CheckCircle2,
   AlertCircle,
@@ -77,13 +78,19 @@ export default function ATSResultPage({
         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-edge">
           {check.check_type === 'company' ? (
             <Building2 className="h-5 w-5 text-[#00f0ff]" />
-          ) : (
+          ) : check.check_type === 'job' ? (
             <FileText className="h-5 w-5 text-[#e040fb]" />
+          ) : (
+            <FileCheck2 className="h-5 w-5 text-[#39ff14]" />
           )}
         </div>
         <div>
           <h1 className="text-xl font-bold text-slate-100">
-            {check.check_type === 'company' ? 'Company ATS Check' : 'Job ATS Check'}
+            {check.check_type === 'company'
+              ? 'Company ATS Check'
+              : check.check_type === 'job'
+                ? 'Job ATS Check'
+                : 'General ATS Check'}
           </h1>
           <p className="text-xs text-slate-500">
             {new Date(check.created_at).toLocaleDateString('en-IN', {
@@ -131,7 +138,9 @@ export default function ATSResultPage({
               </p>
               <p className="mt-1 text-sm text-slate-500">
                 {check.result.score >= 80
-                  ? 'Your resume is well-optimised for this target.'
+                  ? check.check_type === 'resume'
+                    ? 'Your resume is well-optimised for ATS systems.'
+                    : 'Your resume is well-optimised for this target.'
                   : check.result.score >= 60
                     ? 'Some gaps exist — review the suggestions below.'
                     : 'Significant gaps found — work through the suggestions.'}

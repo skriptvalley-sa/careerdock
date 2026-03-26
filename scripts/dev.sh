@@ -588,8 +588,13 @@ GOEOF
       if [ -n "$_admin_hash" ]; then
         # Pipe the SQL through stdin so the bcrypt $ signs are never touched by the
         # shell (printf %s inserts them as-is; SQL single-quoted strings allow $).
-        printf "INSERT INTO users (email, password_hash, name, role, email_verified)\nVALUES ('%s', '%s', '%s', 'admin', true)\nON CONFLICT (email) DO NOTHING;\n" \
-          "$_admin_email" "$_admin_hash" "$_admin_name" | \
+        # Also set premium_since and seed 100 credits per type for dev convenience.
+        printf "INSERT INTO users (email, password_hash, name, role, email_verified)\nVALUES ('%s', '%s', '%s', 'admin', true)\nON CONFLICT (email) DO NOTHING;\n\nUPDATE users SET premium_since = NOW() WHERE email = '%s';\n\nINSERT INTO user_credits (id, user_id, credit_type, balance, updated_at)\nSELECT gen_random_uuid(), u.id, t.credit_type, 100, NOW()\nFROM users u, (VALUES ('resume_upload'), ('ats_check'), ('curated_list'), ('cv_generation')) AS t(credit_type)\nWHERE u.email = '%s'\nON CONFLICT (user_id, credit_type) DO UPDATE SET balance = 100, updated_at = NOW();\n\nINSERT INTO credit_transactions (id, user_id, credit_type, amount, balance_after, reason, created_at)\nSELECT gen_random_uuid(), u.id, t.credit_type, 100, 100, 'Admin bootstrap credits', NOW()\nFROM users u, (VALUES ('resume_upload'), ('ats_check'), ('curated_list'), ('cv_generation')) AS t(credit_type)\nWHERE u.email = '%s'\n  AND NOT EXISTS (\n    SELECT 1 FROM credit_transactions ct2\n    JOIN users u2 ON ct2.user_id = u2.id\n    WHERE u2.email = '%s' AND ct2.reason = 'Admin bootstrap credits'\n  );\n" \
+          "$_admin_email" "$_admin_hash" "$_admin_name" \
+          "$_admin_email" \
+          "$_admin_email" \
+          "$_admin_email" \
+          "$_admin_email" | \
           docker compose -f "$PROJECT_ROOT/docker-compose.yml" exec -T postgres \
           psql -U careerdock -d careerdock 2>/dev/null
 

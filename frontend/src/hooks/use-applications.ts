@@ -64,6 +64,8 @@ export function useCreateApplication() {
     }) => apiClient.post<Application>('/api/applications', data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.applications.all });
+      // Invalidate list queries so application_count in list detail updates immediately
+      qc.invalidateQueries({ queryKey: queryKeys.lists.all });
       qc.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });

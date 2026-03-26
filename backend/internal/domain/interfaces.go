@@ -40,6 +40,7 @@ type CompanyRepository interface {
 	ListAll(ctx context.Context) ([]Company, error)
 	Create(ctx context.Context, company *Company) error
 	Update(ctx context.Context, company *Company) error
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 // ResumeRepository defines data access for resumes.

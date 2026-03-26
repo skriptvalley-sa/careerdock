@@ -8,9 +8,10 @@ import type { CompanyDetail } from '@/types/api';
 interface CompanyModalProps {
   company?: CompanyDetail | null;
   onClose: () => void;
+  onSuccess?: (message: string) => void;
 }
 
-export function CompanyModal({ company, onClose }: CompanyModalProps) {
+export function CompanyModal({ company, onClose, onSuccess }: CompanyModalProps) {
   const isEdit = !!company;
   const createCompany = useAdminCreateCompany();
   const updateCompany = useAdminUpdateCompany();
@@ -92,6 +93,7 @@ export function CompanyModal({ company, onClose }: CompanyModalProps) {
         await uploadLogo.mutateAsync({ companyId, formData: fd });
       }
 
+      onSuccess?.(isEdit ? 'Company updated successfully.' : 'Company created successfully.');
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');

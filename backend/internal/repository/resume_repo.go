@@ -31,15 +31,15 @@ func (r *ResumeRepo) Create(ctx context.Context, resume *domain.Resume) error {
 		INSERT INTO resumes (
 			id, user_id, slot_number, file_name, file_size_bytes,
 			s3_key, extracted_text, parsed_data, ats_general,
-			status, is_default, is_archived, created_at, updated_at
+			status, failure_reason, is_default, is_archived, created_at, updated_at
 		) VALUES (
 			$1, $2, $3, $4, $5,
 			$6, $7, $8, $9,
-			$10, $11, $12, $13, $14
+			$10, $11, $12, $13, $14, $15
 		) RETURNING created_at, updated_at`,
 		resume.ID, resume.UserID, resume.SlotNumber, resume.FileName, resume.FileSizeBytes,
 		resume.S3Key, resume.ExtractedText, resume.ParsedData, resume.ATSGeneral,
-		resume.Status, resume.IsDefault, resume.IsArchived, time.Now(), time.Now(),
+		resume.Status, resume.FailureReason, resume.IsDefault, resume.IsArchived, time.Now(), time.Now(),
 	).Scan(&resume.CreatedAt, &resume.UpdatedAt)
 	if err != nil {
 		return domain.InternalError(err)
@@ -58,13 +58,13 @@ func (r *ResumeRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.Resume,
 	err := q.QueryRow(ctx, `
 		SELECT id, user_id, slot_number, file_name, file_size_bytes,
 		       s3_key, extracted_text, parsed_data, ats_general,
-		       status, is_default, is_archived, archived_at, created_at, updated_at
+		       status, failure_reason, is_default, is_archived, archived_at, created_at, updated_at
 		FROM resumes
 		WHERE id = $1`, id,
 	).Scan(
 		&resume.ID, &resume.UserID, &resume.SlotNumber, &resume.FileName, &resume.FileSizeBytes,
 		&resume.S3Key, &resume.ExtractedText, &parsedData, &atsGeneral,
-		&resume.Status, &resume.IsDefault, &resume.IsArchived, &resume.ArchivedAt,
+		&resume.Status, &resume.FailureReason, &resume.IsDefault, &resume.IsArchived, &resume.ArchivedAt,
 		&resume.CreatedAt, &resume.UpdatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -91,7 +91,7 @@ func (r *ResumeRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]domain
 	rows, err := q.Query(ctx, `
 		SELECT id, user_id, slot_number, file_name, file_size_bytes,
 		       s3_key, extracted_text, parsed_data, ats_general,
-		       status, is_default, is_archived, archived_at, created_at, updated_at
+		       status, failure_reason, is_default, is_archived, archived_at, created_at, updated_at
 		FROM resumes
 		WHERE user_id = $1 AND is_archived = false
 		ORDER BY slot_number`, userID,
@@ -109,7 +109,7 @@ func (r *ResumeRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]domain
 		if err := rows.Scan(
 			&res.ID, &res.UserID, &res.SlotNumber, &res.FileName, &res.FileSizeBytes,
 			&res.S3Key, &res.ExtractedText, &parsedData, &atsGeneral,
-			&res.Status, &res.IsDefault, &res.IsArchived, &res.ArchivedAt,
+			&res.Status, &res.FailureReason, &res.IsDefault, &res.IsArchived, &res.ArchivedAt,
 			&res.CreatedAt, &res.UpdatedAt,
 		); err != nil {
 			return nil, domain.InternalError(err)
@@ -137,13 +137,13 @@ func (r *ResumeRepo) Update(ctx context.Context, resume *domain.Resume) error {
 		UPDATE resumes
 		SET slot_number = $2, file_name = $3, file_size_bytes = $4,
 		    s3_key = $5, extracted_text = $6, parsed_data = $7,
-		    ats_general = $8, status = $9, is_default = $10,
-		    is_archived = $11, archived_at = $12, updated_at = $13
+		    ats_general = $8, status = $9, failure_reason = $10,
+		    is_default = $11, is_archived = $12, archived_at = $13, updated_at = $14
 		WHERE id = $1`,
 		resume.ID, resume.SlotNumber, resume.FileName, resume.FileSizeBytes,
 		resume.S3Key, resume.ExtractedText, resume.ParsedData,
-		resume.ATSGeneral, resume.Status, resume.IsDefault,
-		resume.IsArchived, resume.ArchivedAt, now,
+		resume.ATSGeneral, resume.Status, resume.FailureReason,
+		resume.IsDefault, resume.IsArchived, resume.ArchivedAt, now,
 	)
 	if err != nil {
 		return domain.InternalError(err)
@@ -187,13 +187,13 @@ func (r *ResumeRepo) GetByUserAndSlot(ctx context.Context, userID uuid.UUID, slo
 	err := q.QueryRow(ctx, `
 		SELECT id, user_id, slot_number, file_name, file_size_bytes,
 		       s3_key, extracted_text, parsed_data, ats_general,
-		       status, is_default, is_archived, archived_at, created_at, updated_at
+		       status, failure_reason, is_default, is_archived, archived_at, created_at, updated_at
 		FROM resumes
 		WHERE user_id = $1 AND slot_number = $2 AND is_archived = false`, userID, slot,
 	).Scan(
 		&resume.ID, &resume.UserID, &resume.SlotNumber, &resume.FileName, &resume.FileSizeBytes,
 		&resume.S3Key, &resume.ExtractedText, &parsedData, &atsGeneral,
-		&resume.Status, &resume.IsDefault, &resume.IsArchived, &resume.ArchivedAt,
+		&resume.Status, &resume.FailureReason, &resume.IsDefault, &resume.IsArchived, &resume.ArchivedAt,
 		&resume.CreatedAt, &resume.UpdatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {

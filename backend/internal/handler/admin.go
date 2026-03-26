@@ -165,6 +165,23 @@ func (h *AdminHandler) UpdateCompany(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, DataResponse{Data: company})
 }
 
+// DeleteCompany handles DELETE /api/admin/companies/{id}.
+func (h *AdminHandler) DeleteCompany(w http.ResponseWriter, r *http.Request) {
+	companyID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		respondError(w, r, domain.ValidationError("invalid company id", map[string]any{"field": "id"}))
+		return
+	}
+
+	adminID := middleware.UserIDFromContext(r.Context())
+	if err := h.admin.DeleteCompany(r.Context(), adminID, companyID, clientIP(r)); err != nil {
+		respondError(w, r, err)
+		return
+	}
+
+	respondMessage(w, http.StatusOK, "company deleted")
+}
+
 const maxLogoSize = 2 * 1024 * 1024 // 2 MB
 
 // UploadCompanyLogo handles POST /api/admin/companies/{id}/logo.

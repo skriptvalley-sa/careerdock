@@ -13,6 +13,7 @@ import (
 	"github.com/hibiken/asynq"
 
 	"github.com/skriptvalley/careerdock/internal/domain"
+	"github.com/skriptvalley/careerdock/internal/pdf"
 )
 
 const (
@@ -24,12 +25,13 @@ const (
 	maxJobDescriptionLength = 10000
 )
 
-// ATSService handles ATS check requests (company and job variants).
+// ATSService handles ATS check requests (company, job, and resume-only variants).
 type ATSService struct {
 	atsRepo     domain.ATSCheckRepository
 	resumeRepo  domain.ResumeRepository
 	companyRepo domain.CompanyRepository
 	creditRepo  domain.CreditRepository
+	fileStore   domain.FileStore
 	txr         domain.Transactor
 	asynq       *asynq.Client
 }
@@ -40,6 +42,7 @@ func NewATSService(
 	resumeRepo domain.ResumeRepository,
 	companyRepo domain.CompanyRepository,
 	creditRepo domain.CreditRepository,
+	fileStore domain.FileStore,
 	txr domain.Transactor,
 	asynqClient *asynq.Client,
 ) *ATSService {
@@ -48,6 +51,7 @@ func NewATSService(
 		resumeRepo:  resumeRepo,
 		companyRepo: companyRepo,
 		creditRepo:  creditRepo,
+		fileStore:   fileStore,
 		txr:         txr,
 		asynq:       asynqClient,
 	}
@@ -106,7 +110,7 @@ func (s *ATSService) CheckCompany(ctx context.Context, userID, resumeID, company
 	check := &domain.ATSCheck{
 		ID:        checkID,
 		UserID:    userID,
-		ResumeID:  resumeID,
+		ResumeID:  &resumeID,
 		CheckType: domain.ATSCheckCompany,
 		CompanyID: &companyID,
 		Result:    json.RawMessage("{}"),
@@ -183,7 +187,7 @@ func (s *ATSService) CheckJob(ctx context.Context, userID, resumeID uuid.UUID, j
 	check := &domain.ATSCheck{
 		ID:             checkID,
 		UserID:         userID,
-		ResumeID:       resumeID,
+		ResumeID:       &resumeID,
 		CheckType:      domain.ATSCheckJob,
 		JobDescription: &jobDescription,
 		Result:         json.RawMessage("{}"),
@@ -246,7 +250,7 @@ func (s *ATSService) CheckResume(ctx context.Context, userID, resumeID uuid.UUID
 	check := &domain.ATSCheck{
 		ID:        checkID,
 		UserID:    userID,
-		ResumeID:  resumeID,
+		ResumeID:  &resumeID,
 		CheckType: domain.ATSCheckResume,
 		Result:    json.RawMessage("{}"),
 		CacheKey:  cacheKey,
@@ -263,6 +267,94 @@ func (s *ATSService) CheckResume(ctx context.Context, userID, resumeID uuid.UUID
 
 	if err := s.enqueueTask(taskATSResumeCheck, checkID); err != nil {
 		slog.Error("failed to enqueue ATS resume check task",
+			"check_id", checkID, "error", err)
+	}
+
+	return check, nil
+}
+
+// CheckResumeTempUpload creates a resume-only ATS check from an inline PDF upload.
+// The PDF is stored at a temporary S3 key (not a user resume slot), scored by the
+// worker, and deleted from S3 once the result is stored.
+//
+// Pipeline:
+//  1. Validate PDF (≤5 MB)
+//  2. Check ats_check credit balance
+//  3. Extract text from PDF
+//  4. Upload PDF to temp S3 key
+//  5. Compute cache key from extracted text
+//  6. Return existing check if cache hit (no credit charge)
+//  7. Create ATSCheck record (result = {}, TempS3Key set)
+//  8. Deduct credit
+//  9. Enqueue ats:resume_check worker task
+func (s *ATSService) CheckResumeTempUpload(
+	ctx context.Context,
+	userID uuid.UUID,
+	fileData []byte,
+	fileName string,
+) (*domain.ATSCheck, error) {
+	const maxSize = 5 * 1024 * 1024
+	if len(fileData) == 0 {
+		return nil, domain.ValidationError("File is empty", nil)
+	}
+	if len(fileData) > maxSize {
+		return nil, domain.ValidationError("File exceeds maximum size of 5 MB", nil)
+	}
+	if !pdf.IsPDF(fileData) {
+		return nil, domain.ValidationError("File must be a PDF", map[string]any{"file_name": fileName})
+	}
+
+	balance, err := s.creditRepo.GetBalance(ctx, userID, domain.CreditATSCheck)
+	if err != nil {
+		return nil, domain.InternalError(fmt.Errorf("check credit balance: %w", err))
+	}
+	if balance < 1 {
+		return nil, domain.InsufficientCredits(domain.CreditATSCheck)
+	}
+
+	// Extract text for cache key computation and AI scoring.
+	extractedText, _ := pdf.ExtractText(fileData)
+
+	cacheKey := hashCacheKey(userID.String() + ":temp:" + hashCacheKey(extractedText))
+
+	existing, err := s.atsRepo.GetByCacheKey(ctx, cacheKey)
+	if err != nil {
+		return nil, domain.InternalError(fmt.Errorf("cache key lookup: %w", err))
+	}
+	if existing != nil {
+		slog.Info("returning cached ATS temp upload check", "check_id", existing.ID)
+		return existing, nil
+	}
+
+	checkID := uuid.Must(uuid.NewV7())
+	tempKey := fmt.Sprintf("ats-temp/%s/%s.pdf", userID, checkID)
+
+	if err := s.fileStore.Upload(ctx, tempKey, fileData, "application/pdf"); err != nil {
+		return nil, domain.InternalError(fmt.Errorf("upload temp PDF: %w", err))
+	}
+
+	check := &domain.ATSCheck{
+		ID:        checkID,
+		UserID:    userID,
+		ResumeID:  nil, // no slot resume — temp path
+		TempS3Key: &tempKey,
+		CheckType: domain.ATSCheckResume,
+		Result:    json.RawMessage("{}"),
+		CacheKey:  cacheKey,
+	}
+
+	if err := s.atsRepo.Create(ctx, check); err != nil {
+		_ = s.fileStore.Delete(ctx, tempKey)
+		return nil, err
+	}
+
+	if err := s.deductATSCredit(ctx, userID, checkID, "ATS check — resume (upload)"); err != nil {
+		slog.Error("failed to deduct ATS credit after temp upload check",
+			"user_id", userID, "check_id", checkID, "error", err)
+	}
+
+	if err := s.enqueueTask(taskATSResumeCheck, checkID); err != nil {
+		slog.Error("failed to enqueue ATS temp upload check task",
 			"check_id", checkID, "error", err)
 	}
 

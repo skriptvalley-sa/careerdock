@@ -219,6 +219,34 @@ func (s *ResumeService) ArchiveResume(ctx context.Context, userID, resumeID uuid
 	return nil
 }
 
+// RetryParsing resets a failed resume back to "parsing" and re-enqueues the
+// parse-and-score worker task. Only resumes in the "failed" state can be retried.
+func (s *ResumeService) RetryParsing(ctx context.Context, userID, resumeID uuid.UUID) error {
+	resume, err := s.resumeRepo.GetByID(ctx, resumeID)
+	if err != nil {
+		return err
+	}
+	if resume.UserID != userID {
+		return domain.NotFound("resume", resumeID)
+	}
+	if resume.Status != domain.ResumeStatusFailed {
+		return domain.ValidationError("Only failed resumes can be retried", map[string]any{"status": resume.Status})
+	}
+
+	resume.Status = domain.ResumeStatusParsing
+	resume.FailureReason = nil
+	if err := s.resumeRepo.Update(ctx, resume); err != nil {
+		return err
+	}
+
+	if err := s.enqueueParseTask(resumeID); err != nil {
+		slog.Error("failed to enqueue resume retry task",
+			"resume_id", resumeID, "error", err)
+	}
+
+	return nil
+}
+
 // GetDownloadURL generates a pre-signed S3 URL for downloading a resume.
 func (s *ResumeService) GetDownloadURL(ctx context.Context, userID, resumeID uuid.UUID) (string, error) {
 	resume, err := s.resumeRepo.GetByID(ctx, resumeID)

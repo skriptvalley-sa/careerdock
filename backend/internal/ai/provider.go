@@ -186,12 +186,26 @@ type EnrichCompanyRequest struct {
 
 // EnrichedCompany holds AI-inferred company attributes.
 type EnrichedCompany struct {
-	TechStack    []string   `json:"tech_stack"`
-	Domains      []string   `json:"domains"`
-	Size         string     `json:"size"`
-	HiringStatus string     `json:"hiring_status"`
-	Description  string     `json:"description"`
-	TokensUsed   TokenUsage `json:"tokens_used"`
+	// Identity
+	Name           string `json:"name"`
+	Slug           string `json:"slug"`
+	Headquarters   string `json:"headquarters"`
+	FoundedYear    int    `json:"founded_year"`
+	CareersPageURL string `json:"careers_page_url"`
+	LinkedinURL    string `json:"linkedin_url"`
+
+	// Profile
+	Description  string   `json:"description"`
+	TechStack    []string `json:"tech_stack"`
+	Domains      []string `json:"domains"`
+	Size         string   `json:"size"`
+	HiringStatus string   `json:"hiring_status"`
+	OfficeModes  []string `json:"office_modes"`
+
+	// Compensation
+	CompensationTier string `json:"compensation_tier"`
+
+	TokensUsed TokenUsage `json:"tokens_used"`
 }
 
 // MarshalCuratedListResult serialises a CuratedListResult to JSON for storage.

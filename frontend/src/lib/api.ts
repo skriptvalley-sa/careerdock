@@ -66,7 +66,7 @@ async function fetchWithAuth(
   init: RequestInit,
   path: string,
 ): Promise<Response> {
-  const resp = await fetch(url, { ...init, credentials: 'include' });
+  const resp = await fetch(url, { ...init, credentials: 'include', cache: 'no-store' });
 
   // If not a 401, or if this is an auth endpoint, return as-is
   if (resp.status !== 401 || NO_REFRESH_PATHS.some((p) => path.startsWith(p))) {
@@ -82,7 +82,7 @@ async function fetchWithAuth(
   }
 
   // Retry original request with fresh token
-  return fetch(url, { ...init, credentials: 'include' });
+  return fetch(url, { ...init, credentials: 'include', cache: 'no-store' });
 }
 
 // --- Auth failure callback ---

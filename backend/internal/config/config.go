@@ -41,6 +41,10 @@ type Config struct {
 	// S3 / MinIO
 	S3 S3Config
 
+	// Rate limiting (requests per minute)
+	RateLimitIPPerMin   int // unauthenticated (per IP)
+	RateLimitUserPerMin int // authenticated (per user)
+
 	// CORS
 	AllowedOrigins []string
 
@@ -77,6 +81,8 @@ func MustLoad() *Config {
 	viper.SetDefault("S3_LOGO_BUCKET", "careerdock-logos")
 	viper.SetDefault("S3_REGION", "us-east-1")
 	viper.SetDefault("ALLOWED_ORIGINS", "http://localhost:3000")
+	viper.SetDefault("RATE_LIMIT_IP_PER_MIN", 120)
+	viper.SetDefault("RATE_LIMIT_USER_PER_MIN", 600)
 
 	// Ignore error — env vars are sufficient in production where no .env exists.
 	_ = viper.ReadInConfig()
@@ -112,6 +118,9 @@ func MustLoad() *Config {
 		},
 
 		SentryDSN: viper.GetString("SENTRY_DSN"),
+
+		RateLimitIPPerMin:   viper.GetInt("RATE_LIMIT_IP_PER_MIN"),
+		RateLimitUserPerMin: viper.GetInt("RATE_LIMIT_USER_PER_MIN"),
 	}
 
 	// Parse comma-separated origins

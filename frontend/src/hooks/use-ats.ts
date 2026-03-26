@@ -85,3 +85,18 @@ export function useCheckResume() {
     },
   });
 }
+
+export function useCheckResumeTempUpload() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      return apiClient.upload<ATSCheck>('/api/ats/resume/upload', formData);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.ats.all });
+      qc.invalidateQueries({ queryKey: queryKeys.credits.balance });
+    },
+  });
+}

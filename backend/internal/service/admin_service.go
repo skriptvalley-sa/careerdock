@@ -3,23 +3,27 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/skriptvalley/careerdock/internal/domain"
 )
 
 // AdminService handles admin panel business logic.
 type AdminService struct {
-	companies domain.CompanyRepository
-	users     domain.UserRepository
-	credits   domain.CreditRepository
-	payments  domain.PaymentRepository
-	auditLog  domain.AuditLogRepository
-	store     domain.FileStore
-	tx        domain.Transactor
+	companies   domain.CompanyRepository
+	users       domain.UserRepository
+	credits     domain.CreditRepository
+	payments    domain.PaymentRepository
+	auditLog    domain.AuditLogRepository
+	store       domain.FileStore
+	tx          domain.Transactor
+	redisClient *redis.Client
 }
 
 // NewAdminService creates a new AdminService.
@@ -33,15 +37,17 @@ func NewAdminService(
 	auditLog domain.AuditLogRepository,
 	store domain.FileStore,
 	tx domain.Transactor,
+	redisClient *redis.Client,
 ) *AdminService {
 	return &AdminService{
-		companies: companies,
-		users:     users,
-		credits:   credits,
-		payments:  payments,
-		auditLog:  auditLog,
-		store:     store,
-		tx:        tx,
+		companies:   companies,
+		users:       users,
+		credits:     credits,
+		payments:    payments,
+		auditLog:    auditLog,
+		store:       store,
+		tx:          tx,
+		redisClient: redisClient,
 	}
 }
 
@@ -227,6 +233,15 @@ func (s *AdminService) UpdateCompany(ctx context.Context, adminID uuid.UUID, com
 	return company, nil
 }
 
+// DeleteCompany hard-deletes a company from the directory and logs the action.
+func (s *AdminService) DeleteCompany(ctx context.Context, adminID uuid.UUID, companyID uuid.UUID, ipAddress string) error {
+	if err := s.companies.Delete(ctx, companyID); err != nil {
+		return err
+	}
+	s.logAudit(ctx, adminID, "delete", "company", &companyID, nil, ipAddress)
+	return nil
+}
+
 // UploadCompanyLogo uploads a logo to S3 and returns the key.
 func (s *AdminService) UploadCompanyLogo(ctx context.Context, adminID uuid.UUID, companyID uuid.UUID, data []byte, contentType string, ipAddress string) (string, error) {
 	// Validate company exists
@@ -352,7 +367,7 @@ func (s *AdminService) AllocateCredits(ctx context.Context, adminID uuid.UUID, i
 		return err
 	}
 
-	return s.tx.WithTx(ctx, func(txCtx context.Context) error {
+	err := s.tx.WithTx(ctx, func(txCtx context.Context) error {
 		if err := s.credits.Allocate(txCtx, input.UserID, input.CreditType, input.Amount); err != nil {
 			return err
 		}
@@ -384,6 +399,43 @@ func (s *AdminService) AllocateCredits(ctx context.Context, adminID uuid.UUID, i
 		s.logAudit(txCtx, adminID, "allocate_credits", "user", &input.UserID, details, ipAddress)
 		return nil
 	})
+	if err != nil {
+		return err
+	}
+
+	// Notify the target user's connected browser via SSE so the credit widget
+	// updates immediately without requiring a hard refresh.
+	s.publishCreditsUpdated(input.UserID, string(input.CreditType))
+	return nil
+}
+
+// publishCreditsUpdated fires a credits_updated SSE event to the target user.
+func (s *AdminService) publishCreditsUpdated(userID uuid.UUID, creditType string) {
+	if s.redisClient == nil {
+		return
+	}
+
+	payload, err := json.Marshal(map[string]any{
+		"credit_type": creditType,
+	})
+	if err != nil {
+		slog.Warn("admin: failed to marshal credits_updated SSE payload", "error", err)
+		return
+	}
+
+	event, err := json.Marshal(map[string]any{
+		"type": "credits_updated",
+		"data": json.RawMessage(payload),
+	})
+	if err != nil {
+		slog.Warn("admin: failed to marshal credits_updated SSE event", "error", err)
+		return
+	}
+
+	channel := fmt.Sprintf("sse:user:%s", userID)
+	if pubErr := s.redisClient.Publish(context.Background(), channel, event).Err(); pubErr != nil {
+		slog.Warn("admin: failed to publish credits_updated SSE", "error", pubErr, "user_id", userID)
+	}
 }
 
 // --- 5.4: Admin Payment & Transaction Logs ---

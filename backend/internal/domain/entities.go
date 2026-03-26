@@ -171,6 +171,7 @@ type Resume struct {
 	ParsedData    json.RawMessage `json:"parsed_data,omitempty"`
 	ATSGeneral    json.RawMessage `json:"ats_general,omitempty"`
 	Status        ResumeStatus    `json:"status"`
+	FailureReason *string         `json:"failure_reason,omitempty"`
 	IsDefault     bool            `json:"is_default"`
 	IsArchived    bool            `json:"is_archived"`
 	ArchivedAt    *time.Time      `json:"archived_at,omitempty"`
@@ -179,10 +180,13 @@ type Resume struct {
 }
 
 // ATSCheck represents an ATS scoring result (company, job, or resume-only).
+// ResumeID is nil when the check was submitted via a one-shot temp PDF upload
+// (TempS3Key holds the storage path in that case).
 type ATSCheck struct {
 	ID             uuid.UUID       `json:"id"`
 	UserID         uuid.UUID       `json:"user_id"`
-	ResumeID       uuid.UUID       `json:"resume_id"`
+	ResumeID       *uuid.UUID      `json:"resume_id,omitempty"`
+	TempS3Key      *string         `json:"-"` // ephemeral; not exposed to clients
 	CheckType      ATSCheckType    `json:"check_type"`
 	CompanyID      *uuid.UUID      `json:"company_id,omitempty"`
 	CompanyName    *string         `json:"company_name,omitempty"`

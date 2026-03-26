@@ -78,7 +78,7 @@ func (h *ATSCompanyHandler) Handle(ctx context.Context, t *asynq.Task) error {
 	}
 
 	// 2. Load Resume
-	resume, err := h.resumeRepo.GetByID(ctx, check.ResumeID)
+	resume, err := h.resumeRepo.GetByID(ctx, *check.ResumeID)
 	if err != nil {
 		return fmt.Errorf("load resume: %w", err)
 	}
@@ -144,7 +144,7 @@ func (h *ATSCompanyHandler) Handle(ctx context.Context, t *asynq.Task) error {
 	)
 
 	// 8. Publish SSE event
-	h.publishATSComplete(check.UserID, checkID, check.ResumeID, "ats_company_complete", result.Score)
+	h.publishATSComplete(check.UserID, checkID, *check.ResumeID, "ats_company_complete", result.Score)
 
 	return nil
 }

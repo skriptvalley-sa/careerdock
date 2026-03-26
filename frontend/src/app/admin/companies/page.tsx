@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Search } from 'lucide-react';
+import { Plus, Pencil, Search, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useCompanyList } from '@/hooks/use-companies';
 import { CompanyModal } from '@/components/admin/company-modal';
+import { useAdminDeleteCompany } from '@/hooks/use-admin';
 import type { CompanyDetail, CompanyListItem } from '@/types/api';
 import { apiClient } from '@/lib/api';
 
@@ -12,11 +13,22 @@ export default function AdminCompaniesPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editCompany, setEditCompany] = useState<CompanyDetail | null>(null);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  const deleteCompany = useAdminDeleteCompany();
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(timer);
   }, [search]);
+
+  // Auto-dismiss toast after 4 seconds
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   const { data, isLoading } = useCompanyList(
     { q: debouncedSearch || undefined, limit: '50' },
@@ -31,7 +43,6 @@ export default function AdminCompaniesPage() {
       setEditCompany(detail);
       setModalOpen(true);
     } catch {
-      // If slug fetch fails, use list item as partial data
       setEditCompany(c as unknown as CompanyDetail);
       setModalOpen(true);
     }
@@ -40,6 +51,22 @@ export default function AdminCompaniesPage() {
   const handleCreate = () => {
     setEditCompany(null);
     setModalOpen(true);
+  };
+
+  const handleDelete = async (companyId: string, companyName: string) => {
+    if (deleteConfirmId !== companyId) {
+      // First click: ask for confirmation
+      setDeleteConfirmId(companyId);
+      return;
+    }
+    // Second click: confirmed — proceed
+    setDeleteConfirmId(null);
+    try {
+      await deleteCompany.mutateAsync(companyId);
+      setToast({ type: 'success', message: `"${companyName}" deleted from directory.` });
+    } catch (err) {
+      setToast({ type: 'error', message: err instanceof Error ? err.message : 'Failed to delete company.' });
+    }
   };
 
   return (
@@ -52,6 +79,24 @@ export default function AdminCompaniesPage() {
         </button>
       </div>
 
+      {/* Toast notification */}
+      {toast && (
+        <div
+          className={`mt-4 flex items-center gap-2 rounded-md border px-4 py-3 text-sm ${
+            toast.type === 'success'
+              ? 'border-[#39ff14]/30 bg-[#39ff14]/10 text-[#39ff14]'
+              : 'border-red-500/30 bg-red-500/10 text-red-400'
+          }`}
+        >
+          {toast.type === 'success' ? (
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+          ) : (
+            <AlertCircle className="h-4 w-4 shrink-0" />
+          )}
+          {toast.message}
+        </div>
+      )}
+
       <div className="relative mt-4">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
         <input
@@ -62,6 +107,11 @@ export default function AdminCompaniesPage() {
           className="block w-full rounded-md border border-edge-input bg-input py-2 pl-10 pr-3 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
         />
       </div>
+
+      {/* Dismiss delete confirm on outside click */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-10" onClick={() => setDeleteConfirmId(null)} />
+      )}
 
       <div className="mt-4 overflow-x-auto rounded-lg border border-edge">
         <table className="w-full text-sm">
@@ -93,7 +143,11 @@ export default function AdminCompaniesPage() {
               </tr>
             ) : (
               companies.map((c) => (
-                <tr key={c.id} className="border-b border-edge hover:bg-card/50">
+                <tr
+                  key={c.id}
+                  className="border-b border-edge hover:bg-card/50"
+                  onClick={() => deleteConfirmId && setDeleteConfirmId(null)}
+                >
                   <td className="px-4 py-3 font-medium text-slate-200">{c.name}</td>
                   <td className="px-4 py-3 text-slate-400">{c.slug}</td>
                   <td className="px-4 py-3 text-slate-400">{c.size || '-'}</td>
@@ -116,13 +170,33 @@ export default function AdminCompaniesPage() {
                     {c.tech_stack.length > 3 && ` +${c.tech_stack.length - 3}`}
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() => handleEdit(c)}
-                      className="rounded-md p-1.5 text-slate-400 hover:bg-card hover:text-slate-200"
-                      title="Edit"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => handleEdit(c)}
+                        className="rounded-md p-1.5 text-slate-400 hover:bg-card hover:text-slate-200"
+                        title="Edit"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      {deleteConfirmId === c.id ? (
+                        <button
+                          onClick={() => handleDelete(c.id, c.name)}
+                          disabled={deleteCompany.isPending}
+                          className="z-20 rounded-md bg-red-500/20 px-2 py-1 text-xs font-medium text-red-400 hover:bg-red-500/30 disabled:opacity-50"
+                          title="Click again to confirm deletion"
+                        >
+                          Confirm delete?
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleDelete(c.id, c.name)}
+                          className="rounded-md p-1.5 text-slate-500 hover:bg-card hover:text-red-400"
+                          title="Delete company"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -138,6 +212,7 @@ export default function AdminCompaniesPage() {
             setModalOpen(false);
             setEditCompany(null);
           }}
+          onSuccess={(msg) => setToast({ type: 'success', message: msg })}
         />
       )}
     </div>

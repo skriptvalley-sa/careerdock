@@ -127,9 +127,9 @@ func main() {
 	paymentSvc := service.NewPaymentService(paymentRepo, creditRepo, userRepo, razorpayGateway, txr)
 	creditSvc := service.NewCreditService(creditRepo, txr)
 	resumeSvc := service.NewResumeService(resumeRepo, userRepo, creditRepo, resumeStore, txr, asynqClient)
-	atsSvc := service.NewATSService(atsCheckRepo, resumeRepo, companyRepo, creditRepo, txr, asynqClient)
+	atsSvc := service.NewATSService(atsCheckRepo, resumeRepo, companyRepo, creditRepo, resumeStore, txr, asynqClient)
 	curatedListSvc := service.NewCuratedListService(curatedListRepo, resumeRepo, creditRepo, txr, asynqClient)
-	adminSvc := service.NewAdminService(companyRepo, userRepo, creditRepo, paymentRepo, auditLogRepo, logoStore, txr)
+	adminSvc := service.NewAdminService(companyRepo, userRepo, creditRepo, paymentRepo, auditLogRepo, logoStore, txr, redisClient)
 	notificationRepo := repository.NewNotificationRepo(db)
 	notificationSvc := service.NewNotificationService(notificationRepo)
 
@@ -155,8 +155,8 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.CORS(cfg.AllowedOrigins))
 
-	// Rate limiting: 300 req/min per IP (unauthenticated), 600 req/min per user (authenticated)
-	rateLimiter := middleware.NewRateLimiter(redisClient, 300, 600, time.Minute)
+	// Rate limiting: configurable via RATE_LIMIT_IP_PER_MIN / RATE_LIMIT_USER_PER_MIN env vars
+	rateLimiter := middleware.NewRateLimiter(redisClient, cfg.RateLimitIPPerMin, cfg.RateLimitUserPerMin, time.Minute)
 	r.Use(rateLimiter.Middleware)
 
 	auth := middleware.NewAuth(authSvc)

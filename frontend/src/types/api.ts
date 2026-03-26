@@ -232,7 +232,7 @@ export type ATSCheckType = 'company' | 'job' | 'resume';
 export interface ATSCheck {
   id: string;
   check_type: ATSCheckType;
-  resume_id: string;
+  resume_id?: string; // absent for temp-upload resume checks
   company_id?: string;
   company_name?: string;
   result: ATSResult | Record<string, never>;
@@ -341,6 +341,7 @@ export interface ResumeListItem {
   file_name: string;
   file_size_bytes: number;
   status: ResumeStatus;
+  failure_reason?: string;
   is_default: boolean;
   ats_general_score?: number;
   parsed_data_summary?: ParsedSummary;

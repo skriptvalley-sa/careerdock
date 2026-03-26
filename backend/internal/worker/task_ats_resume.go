@@ -13,6 +13,7 @@ import (
 
 	"github.com/skriptvalley/careerdock/internal/ai"
 	"github.com/skriptvalley/careerdock/internal/domain"
+	"github.com/skriptvalley/careerdock/internal/pdf"
 )
 
 // ATSResumeHandler processes ats:resume_check tasks.
@@ -50,12 +51,12 @@ func NewATSResumeHandler(
 //
 // Pipeline:
 //  1. Load ATSCheck from DB
-//  2. Load Resume from DB
-//  3. Download PDF from S3 (degrade to text-only on failure)
-//  4. Check AI cache; call ScoreATSGeneral if miss
-//  5. Cache result
-//  6. Update ATSCheck.Result in DB
-//  7. Publish ats_resume_complete SSE event
+//     2a. If ResumeID set: load Resume from DB, download PDF by S3Key
+//     2b. If ResumeID nil: download temp PDF directly from TempS3Key
+//  3. Check AI cache; call ScoreATSGeneral if miss
+//  4. Update ATSCheck.Result in DB
+//  5. Delete temp S3 file (if applicable)
+//  6. Publish ats_resume_complete SSE event
 func (h *ATSResumeHandler) Handle(ctx context.Context, t *asynq.Task) error {
 	checkID, err := uuid.Parse(string(t.Payload()))
 	if err != nil {
@@ -70,26 +71,45 @@ func (h *ATSResumeHandler) Handle(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("load ATS check: %w", err)
 	}
 
-	// 2. Load Resume
-	resume, err := h.resumeRepo.GetByID(ctx, check.ResumeID)
-	if err != nil {
-		return fmt.Errorf("load resume: %w", err)
-	}
-
-	resumeText := ""
-	if resume.ExtractedText != nil {
-		resumeText = *resume.ExtractedText
-	}
-
-	// 3. Download PDF (best-effort)
+	var resumeText string
 	var pdfBytes []byte
-	pdfBytes, err = h.fileStore.Download(ctx, resume.S3Key)
-	if err != nil {
-		slog.Warn("failed to download PDF for resume ATS — using text only",
-			"check_id", checkID, "error", err)
+	var tempKeyToDelete string
+
+	switch {
+	case check.ResumeID != nil:
+		// 2a. Slot-based resume path
+		resume, loadErr := h.resumeRepo.GetByID(ctx, *check.ResumeID)
+		if loadErr != nil {
+			return fmt.Errorf("load resume: %w", loadErr)
+		}
+		if resume.ExtractedText != nil {
+			resumeText = *resume.ExtractedText
+		}
+		if dlBytes, dlErr := h.fileStore.Download(ctx, resume.S3Key); dlErr != nil {
+			slog.Warn("failed to download PDF for resume ATS — using text only",
+				"check_id", checkID, "error", dlErr)
+		} else {
+			pdfBytes = dlBytes
+		}
+	case check.TempS3Key != nil:
+		// 2b. Temp upload path — download the PDF directly
+		tempKeyToDelete = *check.TempS3Key
+		pdfBytes, err = h.fileStore.Download(ctx, tempKeyToDelete)
+		if err != nil {
+			return fmt.Errorf("download temp PDF: %w", err)
+		}
+		// Extract text from downloaded PDF bytes
+		if text, extractErr := pdf.ExtractText(pdfBytes); extractErr == nil {
+			resumeText = text
+		} else {
+			slog.Warn("text extraction failed for temp PDF — scoring with PDF bytes only",
+				"check_id", checkID, "error", extractErr)
+		}
+	default:
+		return fmt.Errorf("ats check %s has neither resume_id nor temp_s3_key", checkID)
 	}
 
-	// 4. Check AI cache + call AI
+	// 3. Check AI cache + call AI
 	cacheKey := ai.CacheKeyForATSGeneral(resumeText)
 
 	result, err := h.scoreWithCache(ctx, cacheKey, func() (*ai.ATSResult, error) {
@@ -102,7 +122,7 @@ func (h *ATSResumeHandler) Handle(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("score ATS resume: %w", err)
 	}
 
-	// 6. Persist result
+	// 4. Persist result
 	resultJSON, err := json.Marshal(result)
 	if err != nil {
 		return fmt.Errorf("marshal ATS result: %w", err)
@@ -118,7 +138,14 @@ func (h *ATSResumeHandler) Handle(ctx context.Context, t *asynq.Task) error {
 		"provider", h.aiProvider.Name(),
 	)
 
-	// 7. Publish SSE event
+	// 5. Clean up temp file (best-effort — don't fail the task if delete errors)
+	if tempKeyToDelete != "" {
+		if delErr := h.fileStore.Delete(ctx, tempKeyToDelete); delErr != nil {
+			slog.Warn("failed to delete temp ATS PDF", "key", tempKeyToDelete, "error", delErr)
+		}
+	}
+
+	// 6. Publish SSE event
 	h.publishATSComplete(check.UserID, checkID, check.ResumeID, "ats_resume_complete", result.Score)
 
 	return nil
@@ -157,7 +184,8 @@ func (h *ATSResumeHandler) scoreWithCache(
 
 // publishATSComplete publishes an SSE event for a completed ATS resume check.
 func (h *ATSResumeHandler) publishATSComplete(
-	userID, checkID, resumeID uuid.UUID,
+	userID, checkID uuid.UUID,
+	resumeID *uuid.UUID,
 	eventType string,
 	score int,
 ) {
@@ -166,9 +194,11 @@ func (h *ATSResumeHandler) publishATSComplete(
 	}
 
 	event := map[string]any{
-		"check_id":  checkID,
-		"resume_id": resumeID,
-		"score":     score,
+		"check_id": checkID,
+		"score":    score,
+	}
+	if resumeID != nil {
+		event["resume_id"] = resumeID
 	}
 
 	payload, err := json.Marshal(event)

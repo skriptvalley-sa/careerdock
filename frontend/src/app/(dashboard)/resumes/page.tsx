@@ -12,8 +12,9 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
+  RefreshCw,
 } from 'lucide-react';
-import { useResumes, useUploadResume, useSetDefaultResume, useArchiveResume, useResumeDownloadUrl } from '@/hooks/use-resumes';
+import { useResumes, useUploadResume, useSetDefaultResume, useArchiveResume, useResumeDownloadUrl, useRetryResume } from '@/hooks/use-resumes';
 import { useCreditBalance } from '@/hooks/use-payments';
 import type { ResumeListItem } from '@/types/api';
 
@@ -56,17 +57,21 @@ function ResumeCard({
   onSetDefault,
   onArchive,
   onDownload,
+  onRetry,
   settingDefault,
   archiving,
   downloading,
+  retrying,
 }: {
   resume: ResumeListItem;
   onSetDefault: (id: string) => void;
   onArchive: (id: string) => void;
   onDownload: (id: string) => void;
+  onRetry: (id: string) => void;
   settingDefault: boolean;
   archiving: boolean;
   downloading: boolean;
+  retrying: boolean;
 }) {
   return (
     <div
@@ -96,6 +101,14 @@ function ResumeCard({
           </div>
         </div>
       </div>
+
+      {/* Failure reason */}
+      {resume.status === 'failed' && resume.failure_reason && (
+        <div className="mt-3 flex items-start gap-2 rounded-md border border-red-500/20 bg-red-500/5 px-3 py-2">
+          <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-400" />
+          <p className="text-xs text-red-400">{resume.failure_reason}</p>
+        </div>
+      )}
 
       {/* ATS Score + Parsed Summary */}
       {resume.status === 'ready' && (
@@ -147,6 +160,21 @@ function ResumeCard({
               <Star className="h-3 w-3" />
             )}
             Set Default
+          </button>
+        )}
+        {resume.status === 'failed' && (
+          <button
+            onClick={() => onRetry(resume.id)}
+            disabled={retrying}
+            className="inline-flex items-center gap-1 rounded-md border border-[#ffb800]/30 px-2.5 py-1.5 text-xs text-[#ffb800] hover:border-[#ffb800]/60 hover:bg-[#ffb800]/5 transition-all disabled:opacity-50"
+            title="Retry processing"
+          >
+            {retrying ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <RefreshCw className="h-3 w-3" />
+            )}
+            Retry
           </button>
         )}
         <button
@@ -282,6 +310,7 @@ export default function ResumesPage() {
   const setDefault = useSetDefaultResume();
   const archiveResume = useArchiveResume();
   const downloadUrl = useResumeDownloadUrl();
+  const retryResume = useRetryResume();
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -334,6 +363,17 @@ export default function ResumesPage() {
       window.open(result.url, '_blank');
     } catch {
       setError('Failed to get download URL');
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleRetry = async (id: string) => {
+    setActionId(id);
+    try {
+      await retryResume.mutateAsync(id);
+    } catch {
+      setError('Failed to retry resume processing');
     } finally {
       setActionId(null);
     }
@@ -401,9 +441,11 @@ export default function ResumesPage() {
                   onSetDefault={handleSetDefault}
                   onArchive={handleArchive}
                   onDownload={handleDownload}
+                  onRetry={handleRetry}
                   settingDefault={actionId === resume.id && setDefault.isPending}
                   archiving={actionId === resume.id && archiveResume.isPending}
                   downloading={actionId === resume.id && downloadUrl.isPending}
+                  retrying={actionId === resume.id && retryResume.isPending}
                 />
               ))}
             </>

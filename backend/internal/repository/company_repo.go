@@ -240,14 +240,14 @@ func (r *CompanyRepo) Create(ctx context.Context, company *domain.Company) error
 			id, slug, name, logo_url, description, size, headquarters,
 			founded_year, careers_page_url, glassdoor_url, ambitionbox_url, linkedin_url,
 			tech_stack, domains, hiring_status, interview_patterns, compensation_tier,
-			has_rsu, has_rsu_refresher, compensation_bands,
+			has_rsu, has_rsu_refresher, office_modes, compensation_bands,
 			last_verified_at, created_at, updated_at
 		) VALUES (
 			$1, $2, $3, $4, $5, $6, $7,
 			$8, $9, $10, $11, $12,
 			$13, $14, $15, $16, $17,
-			$18, $19, $20,
-			$21, $22, $23
+			$18, $19, $20, $21,
+			$22, $23, $24
 		) RETURNING id`,
 		company.ID, company.Slug, company.Name, company.LogoURL, company.Description,
 		companySizeToString(company.Size), company.Headquarters,
@@ -255,7 +255,7 @@ func (r *CompanyRepo) Create(ctx context.Context, company *domain.Company) error
 		company.AmbitionboxURL, company.LinkedinURL,
 		company.TechStack, company.Domains, string(company.HiringStatus),
 		company.InterviewPatterns, company.CompensationTier,
-		company.HasRSU, company.HasRSURefresher, company.CompensationBands,
+		company.HasRSU, company.HasRSURefresher, company.OfficeModes, company.CompensationBands,
 		company.LastVerifiedAt, company.CreatedAt, company.UpdatedAt,
 	).Scan(&company.ID)
 
@@ -282,8 +282,8 @@ func (r *CompanyRepo) Update(ctx context.Context, company *domain.Company) error
 			ambitionbox_url = $11, linkedin_url = $12,
 			tech_stack = $13, domains = $14, hiring_status = $15,
 			interview_patterns = $16, compensation_tier = $17,
-			has_rsu = $18, has_rsu_refresher = $19, compensation_bands = $20,
-			last_verified_at = $21, updated_at = $22
+			has_rsu = $18, has_rsu_refresher = $19, office_modes = $20,
+			compensation_bands = $21, last_verified_at = $22, updated_at = $23
 		WHERE id = $1
 		RETURNING id`,
 		company.ID, company.Slug, company.Name, company.LogoURL, company.Description,
@@ -292,8 +292,8 @@ func (r *CompanyRepo) Update(ctx context.Context, company *domain.Company) error
 		company.AmbitionboxURL, company.LinkedinURL,
 		company.TechStack, company.Domains, string(company.HiringStatus),
 		company.InterviewPatterns, company.CompensationTier,
-		company.HasRSU, company.HasRSURefresher, company.CompensationBands,
-		company.LastVerifiedAt, company.UpdatedAt,
+		company.HasRSU, company.HasRSURefresher, company.OfficeModes,
+		company.CompensationBands, company.LastVerifiedAt, company.UpdatedAt,
 	).Scan(&returnedID)
 
 	if err != nil {
@@ -644,6 +644,19 @@ func scanCompanyDetail(row pgx.Row) (*domain.Company, error) {
 	}
 
 	return c, nil
+}
+
+// Delete hard-deletes a company by ID.
+func (r *CompanyRepo) Delete(ctx context.Context, id uuid.UUID) error {
+	q := getDBTX(ctx, r.pool)
+	tag, err := q.Exec(ctx, `DELETE FROM companies WHERE id = $1`, id)
+	if err != nil {
+		return domain.InternalError(err)
+	}
+	if tag.RowsAffected() == 0 {
+		return domain.NotFound("company", id)
+	}
+	return nil
 }
 
 // ListAll returns all companies as compact list-column summaries, ordered by name.

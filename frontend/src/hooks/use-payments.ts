@@ -17,6 +17,7 @@ export function useCreditBalance() {
     queryKey: queryKeys.credits.balance,
     queryFn: () => apiClient.get<CreditBalances>('/api/credits'),
     staleTime: staleTimes.credits,
+    refetchInterval: 60_000, // poll every minute as a fallback to SSE
   });
 }
 

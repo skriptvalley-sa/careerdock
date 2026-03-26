@@ -19,7 +19,9 @@ const INITIAL_RETRY_DELAY = 1_000; // 1 second
  * - resume_ready: invalidates resumes list + credits
  * - ats_company_complete: invalidates ATS checks list
  * - ats_job_complete: invalidates ATS checks list
+ * - ats_resume_complete: invalidates ATS checks list
  * - curated_list_complete: invalidates curated lists
+ * - credits_updated: invalidates credit balance + auth/me (admin grant)
  */
 export function useSSE() {
   const { isAuthenticated } = useAuthStore();
@@ -59,8 +61,18 @@ export function useSSE() {
       qc.invalidateQueries({ queryKey: queryKeys.ats.all });
     });
 
+    es.addEventListener('ats_resume_complete', () => {
+      qc.invalidateQueries({ queryKey: queryKeys.ats.all });
+    });
+
     es.addEventListener('curated_list_complete', () => {
       qc.invalidateQueries({ queryKey: queryKeys.curatedLists.all });
+    });
+
+    es.addEventListener('credits_updated', () => {
+      // Admin granted credits — refresh balance and user profile immediately
+      qc.invalidateQueries({ queryKey: queryKeys.credits.balance });
+      qc.invalidateQueries({ queryKey: queryKeys.auth.me });
     });
 
     es.onerror = () => {

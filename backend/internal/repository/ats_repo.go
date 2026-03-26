@@ -34,13 +34,13 @@ func (r *ATSCheckRepo) Create(ctx context.Context, check *domain.ATSCheck) error
 
 	err := q.QueryRow(ctx, `
 		INSERT INTO ats_checks (
-			id, user_id, resume_id, check_type, company_id,
+			id, user_id, resume_id, temp_s3_key, check_type, company_id,
 			job_description, result, cache_key, created_at
 		) VALUES (
-			$1, $2, $3, $4, $5,
-			$6, $7, $8, $9
+			$1, $2, $3, $4, $5, $6,
+			$7, $8, $9, $10
 		) RETURNING created_at`,
-		check.ID, check.UserID, check.ResumeID, check.CheckType, check.CompanyID,
+		check.ID, check.UserID, check.ResumeID, check.TempS3Key, check.CheckType, check.CompanyID,
 		check.JobDescription, result, check.CacheKey, time.Now(),
 	).Scan(&check.CreatedAt)
 	if err != nil {
@@ -58,14 +58,14 @@ func (r *ATSCheckRepo) GetByID(ctx context.Context, id uuid.UUID) (*domain.ATSCh
 	var result []byte
 
 	err := q.QueryRow(ctx, `
-		SELECT ac.id, ac.user_id, ac.resume_id, ac.check_type, ac.company_id,
+		SELECT ac.id, ac.user_id, ac.resume_id, ac.temp_s3_key, ac.check_type, ac.company_id,
 		       ac.job_description, ac.result, ac.cache_key, ac.created_at,
 		       c.name
 		FROM ats_checks ac
 		LEFT JOIN companies c ON c.id = ac.company_id
 		WHERE ac.id = $1`, id,
 	).Scan(
-		&check.ID, &check.UserID, &check.ResumeID, &check.CheckType, &check.CompanyID,
+		&check.ID, &check.UserID, &check.ResumeID, &check.TempS3Key, &check.CheckType, &check.CompanyID,
 		&check.JobDescription, &result, &check.CacheKey, &check.CreatedAt,
 		&check.CompanyName,
 	)
@@ -88,7 +88,7 @@ func (r *ATSCheckRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]doma
 	q := getDBTX(ctx, r.pool)
 
 	rows, err := q.Query(ctx, `
-		SELECT ac.id, ac.user_id, ac.resume_id, ac.check_type, ac.company_id,
+		SELECT ac.id, ac.user_id, ac.resume_id, ac.temp_s3_key, ac.check_type, ac.company_id,
 		       ac.job_description, ac.result, ac.cache_key, ac.created_at,
 		       c.name
 		FROM ats_checks ac
@@ -107,7 +107,7 @@ func (r *ATSCheckRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]doma
 		var result []byte
 
 		if err := rows.Scan(
-			&check.ID, &check.UserID, &check.ResumeID, &check.CheckType, &check.CompanyID,
+			&check.ID, &check.UserID, &check.ResumeID, &check.TempS3Key, &check.CheckType, &check.CompanyID,
 			&check.JobDescription, &result, &check.CacheKey, &check.CreatedAt,
 			&check.CompanyName,
 		); err != nil {
@@ -133,13 +133,13 @@ func (r *ATSCheckRepo) GetByCacheKey(ctx context.Context, cacheKey string) (*dom
 	var result []byte
 
 	err := q.QueryRow(ctx, `
-		SELECT id, user_id, resume_id, check_type, company_id,
+		SELECT id, user_id, resume_id, temp_s3_key, check_type, company_id,
 		       job_description, result, cache_key, created_at
 		FROM ats_checks
 		WHERE cache_key = $1
 		LIMIT 1`, cacheKey,
 	).Scan(
-		&check.ID, &check.UserID, &check.ResumeID, &check.CheckType, &check.CompanyID,
+		&check.ID, &check.UserID, &check.ResumeID, &check.TempS3Key, &check.CheckType, &check.CompanyID,
 		&check.JobDescription, &result, &check.CacheKey, &check.CreatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {

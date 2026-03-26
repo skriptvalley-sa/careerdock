@@ -33,6 +33,7 @@ type resumeListResponse struct {
 	FileName        string              `json:"file_name"`
 	FileSizeBytes   int                 `json:"file_size_bytes"`
 	Status          domain.ResumeStatus `json:"status"`
+	FailureReason   *string             `json:"failure_reason,omitempty"`
 	IsDefault       bool                `json:"is_default"`
 	ATSGeneralScore *int                `json:"ats_general_score,omitempty"`
 	ParsedSummary   *parsedSummary      `json:"parsed_data_summary,omitempty"`
@@ -178,6 +179,24 @@ func (h *ResumeHandler) ArchiveResume(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// RetryResume handles POST /api/resumes/{id}/retry.
+// Resets a failed resume to "parsing" and re-enqueues the AI processing task.
+func (h *ResumeHandler) RetryResume(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.UserIDFromContext(r.Context())
+	resumeID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		respondError(w, r, domain.ValidationError("Invalid resume ID", nil))
+		return
+	}
+
+	if err := h.resumeSvc.RetryParsing(r.Context(), userID, resumeID); err != nil {
+		respondError(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+}
+
 // GetResumeDownloadURL handles GET /api/resumes/{id}/download.
 func (h *ResumeHandler) GetResumeDownloadURL(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.UserIDFromContext(r.Context())
@@ -208,6 +227,7 @@ func toResumeListResponse(r *domain.Resume) resumeListResponse {
 		FileName:      r.FileName,
 		FileSizeBytes: r.FileSizeBytes,
 		Status:        r.Status,
+		FailureReason: r.FailureReason,
 		IsDefault:     r.IsDefault,
 		CreatedAt:     r.CreatedAt,
 		UpdatedAt:     r.UpdatedAt,

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 
@@ -44,7 +45,7 @@ type checkResumeRequest struct {
 type atsCheckResponse struct {
 	ID          uuid.UUID           `json:"id"`
 	CheckType   domain.ATSCheckType `json:"check_type"`
-	ResumeID    uuid.UUID           `json:"resume_id"`
+	ResumeID    *uuid.UUID          `json:"resume_id,omitempty"` // nil for temp-upload checks
 	CompanyID   *uuid.UUID          `json:"company_id,omitempty"`
 	CompanyName *string             `json:"company_name,omitempty"`
 	Result      json.RawMessage     `json:"result"`
@@ -130,6 +131,39 @@ func (h *ATSHandler) CheckResume(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusAccepted, map[string]any{"data": toATSCheckResponse(check)})
 }
 
+// CheckResumeTempUpload handles POST /api/ats/resume/upload (multipart/form-data).
+// Accepts a PDF without requiring an existing resume slot, uploads it to a
+// temporary S3 path, and enqueues a resume-only ATS check.
+func (h *ATSHandler) CheckResumeTempUpload(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.UserIDFromContext(r.Context())
+
+	if err := r.ParseMultipartForm(6 << 20); err != nil {
+		respondError(w, r, domain.ValidationError("Invalid multipart form", nil))
+		return
+	}
+
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		respondError(w, r, domain.ValidationError("Missing file field", nil))
+		return
+	}
+	defer func() { _ = file.Close() }()
+
+	fileData, err := io.ReadAll(file)
+	if err != nil {
+		respondError(w, r, domain.InternalError(err))
+		return
+	}
+
+	check, err := h.atsSvc.CheckResumeTempUpload(r.Context(), userID, fileData, header.Filename)
+	if err != nil {
+		respondError(w, r, err)
+		return
+	}
+
+	respondJSON(w, http.StatusAccepted, map[string]any{"data": toATSCheckResponse(check)})
+}
+
 // GetCheck handles GET /api/ats/{id}.
 func (h *ATSHandler) GetCheck(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.UserIDFromContext(r.Context())
@@ -172,7 +206,7 @@ func toATSCheckResponse(c *domain.ATSCheck) atsCheckResponse {
 	return atsCheckResponse{
 		ID:          c.ID,
 		CheckType:   c.CheckType,
-		ResumeID:    c.ResumeID,
+		ResumeID:    c.ResumeID, // *uuid.UUID — nil for temp-upload checks
 		CompanyID:   c.CompanyID,
 		CompanyName: c.CompanyName,
 		Result:      c.Result,

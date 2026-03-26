@@ -69,7 +69,9 @@ func (h *ResumeParseHandler) Handle(ctx context.Context, t *asynq.Task) error {
 
 	if resumeText == "" {
 		slog.Warn("resume has no extracted text — marking as failed", "resume_id", resumeID)
+		reason := "No text could be extracted from the PDF. Please ensure the file is a text-based PDF and try again."
 		resume.Status = domain.ResumeStatusFailed
+		resume.FailureReason = &reason
 		if err := h.resumeRepo.Update(ctx, resume); err != nil {
 			return fmt.Errorf("update resume status: %w", err)
 		}
@@ -80,7 +82,9 @@ func (h *ResumeParseHandler) Handle(ctx context.Context, t *asynq.Task) error {
 	parsedData, err := h.parseResume(ctx, resumeText)
 	if err != nil {
 		slog.Error("AI resume parsing failed", "resume_id", resumeID, "error", err)
+		reason := fmt.Sprintf("AI parsing failed: %s", err.Error())
 		resume.Status = domain.ResumeStatusFailed
+		resume.FailureReason = &reason
 		_ = h.resumeRepo.Update(ctx, resume)
 		return fmt.Errorf("parse resume: %w", err) // will be retried by Asynq
 	}

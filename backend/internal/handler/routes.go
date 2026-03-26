@@ -137,6 +137,7 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 						r.Put("/default", resumeH.SetDefaultResume)
 						r.Delete("/", resumeH.ArchiveResume)
 						r.Get("/download", resumeH.GetResumeDownloadURL)
+						r.Post("/retry", resumeH.RetryResume)
 					})
 				})
 
@@ -147,6 +148,7 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 					r.Post("/company", atsH.CheckCompany)
 					r.Post("/job", atsH.CheckJob)
 					r.Post("/resume", atsH.CheckResume)
+					r.Post("/resume/upload", atsH.CheckResumeTempUpload)
 					r.Get("/{id}", atsH.GetCheck)
 				})
 
@@ -195,6 +197,7 @@ func MountRoutes(r chi.Router, svc *service.Services, auth *middleware.Auth) {
 					// Companies
 					r.Post("/companies", adminH.CreateCompany)
 					r.Put("/companies/{id}", adminH.UpdateCompany)
+					r.Delete("/companies/{id}", adminH.DeleteCompany)
 					r.Post("/companies/{id}/logo", adminH.UploadCompanyLogo)
 
 					// Users
