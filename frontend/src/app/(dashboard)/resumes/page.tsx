@@ -77,24 +77,24 @@ function ResumeCard({
     <div
       className={`rounded-lg border p-5 transition-all ${
         resume.is_default
-          ? 'border-[#00f0ff]/40 bg-[#00f0ff]/5 ring-1 ring-[#00f0ff]/20'
-          : 'border-edge card-neon-hover'
+          ? 'border-[var(--color-primary)]/40 bg-[var(--color-primary)]/5 ring-1 ring-[var(--color-primary)]/20'
+          : 'border-edge card-hover'
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 shrink-0 text-[#00f0ff]" />
-            <h3 className="truncate text-sm font-semibold text-slate-100">
+            <FileText className="h-5 w-5 shrink-0 text-[var(--color-primary)]" />
+            <h3 className="truncate text-sm font-semibold text-[var(--color-text)]">
               {resume.file_name}
             </h3>
             {resume.is_default && (
-              <span className="shrink-0 rounded-full bg-[#00f0ff]/15 px-2 py-0.5 text-[10px] font-semibold text-[#00f0ff]">
+              <span className="shrink-0 rounded-full bg-[var(--color-primary)]/15 px-2 py-0.5 text-[10px] font-semibold text-[var(--color-primary)]">
                 DEFAULT
               </span>
             )}
           </div>
-          <div className="mt-1 flex items-center gap-3 text-xs text-slate-500">
+          <div className="mt-1 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
             <span>Slot {resume.slot_number}</span>
             <span>{formatFileSize(resume.file_size_bytes)}</span>
             <StatusBadge status={resume.status} />
@@ -115,7 +115,7 @@ function ResumeCard({
         <div className="mt-3 flex flex-wrap items-center gap-3">
           {resume.ats_general_score != null && (
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-slate-500">ATS Score:</span>
+              <span className="text-xs text-[var(--color-text-muted)]">ATS Score:</span>
               <span
                 className={`text-sm font-bold ${
                   resume.ats_general_score >= 80
@@ -135,7 +135,7 @@ function ResumeCard({
                 {resume.parsed_data_summary.top_skills.slice(0, 4).map((skill) => (
                   <span
                     key={skill}
-                    className="rounded-full border border-edge bg-card px-2 py-0.5 text-[10px] text-slate-400"
+                    className="rounded-full border border-edge bg-card px-2 py-0.5 text-[10px] text-[var(--color-text-muted)]"
                   >
                     {skill}
                   </span>
@@ -151,7 +151,7 @@ function ResumeCard({
           <button
             onClick={() => onSetDefault(resume.id)}
             disabled={settingDefault}
-            className="inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1.5 text-xs text-slate-400 hover:border-[#00f0ff]/30 hover:text-[#00f0ff] transition-all disabled:opacity-50"
+            className="inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1.5 text-xs text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-primary)] transition-all disabled:opacity-50"
             title="Set as default"
           >
             {settingDefault ? (
@@ -180,7 +180,7 @@ function ResumeCard({
         <button
           onClick={() => onDownload(resume.id)}
           disabled={downloading}
-          className="inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1.5 text-xs text-slate-400 hover:border-[#00f0ff]/30 hover:text-[#00f0ff] transition-all disabled:opacity-50"
+          className="inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1.5 text-xs text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-primary)] transition-all disabled:opacity-50"
           title="Download"
         >
           {downloading ? (
@@ -251,8 +251,8 @@ function UploadSlot({
     <div
       className={`relative rounded-lg border-2 border-dashed p-6 text-center transition-all ${
         dragOver
-          ? 'border-[#00f0ff] bg-[#00f0ff]/5'
-          : 'border-edge hover:border-[#00f0ff]/30'
+          ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5'
+          : 'border-edge hover:border-[var(--color-primary)]/30'
       }`}
       onDragOver={(e) => {
         e.preventDefault();
@@ -275,22 +275,22 @@ function UploadSlot({
 
       {uploading ? (
         <div className="flex flex-col items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin text-[#00f0ff]" />
-          <p className="text-sm text-slate-400">Uploading...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)]" />
+          <p className="text-sm text-[var(--color-text-muted)]">Uploading...</p>
         </div>
       ) : (
         <>
-          <Upload className="mx-auto h-8 w-8 text-slate-600" />
-          <p className="mt-2 text-sm text-slate-400">
+          <Upload className="mx-auto h-8 w-8 text-[var(--color-text-muted)]" />
+          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
             Slot {slotNumber} — Drop PDF here or{' '}
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="text-[#00f0ff] hover:underline"
+              className="text-[var(--color-primary)] hover:underline"
             >
               browse
             </button>
           </p>
-          <p className="mt-1 text-xs text-slate-600">PDF, max {MAX_FILE_SIZE_MB} MB</p>
+          <p className="mt-1 text-xs text-[var(--color-text-muted)]">PDF, max {MAX_FILE_SIZE_MB} MB</p>
           {fileError && (
             <p className="mt-2 flex items-center justify-center gap-1 text-xs text-red-400">
               <AlertCircle className="h-3 w-3" />
@@ -383,16 +383,16 @@ export default function ResumesPage() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Resumes</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">Resumes</h1>
+          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
             Upload up to {MAX_SLOTS} resumes. AI will parse and score them
             automatically.
           </p>
         </div>
         {credits && (
           <div className="hidden sm:flex items-center gap-2 rounded-lg border border-edge bg-card px-3 py-2">
-            <span className="text-xs text-slate-500">Upload credits:</span>
-            <span className="text-sm font-bold text-[#00f0ff]">
+            <span className="text-xs text-[var(--color-text-muted)]">Upload credits:</span>
+            <span className="text-sm font-bold text-[var(--color-primary)]">
               {credits.resume_upload}
             </span>
           </div>
@@ -425,13 +425,13 @@ export default function ResumesPage() {
       {/* Active Resumes */}
       {isLoading ? (
         <div className="mt-8 flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-[#00f0ff]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)]" />
         </div>
       ) : (
         <div className="mt-8 space-y-4">
           {resumes && resumes.length > 0 && (
             <>
-              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+              <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
                 Active Resumes
               </h2>
               {resumes.map((resume) => (
@@ -454,7 +454,7 @@ export default function ResumesPage() {
           {/* Empty upload slots */}
           {emptySlots.length > 0 && (
             <>
-              <h2 className="mt-6 text-sm font-semibold text-slate-400 uppercase tracking-wider">
+              <h2 className="mt-6 text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
                 Available Slots
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -472,8 +472,8 @@ export default function ResumesPage() {
 
           {resumes?.length === 0 && emptySlots.length === 0 && (
             <div className="rounded-lg border border-edge p-8 text-center">
-              <FileText className="mx-auto h-12 w-12 text-slate-600" />
-              <p className="mt-3 text-sm text-slate-400">
+              <FileText className="mx-auto h-12 w-12 text-[var(--color-text-muted)]" />
+              <p className="mt-3 text-sm text-[var(--color-text-muted)]">
                 No resumes yet. Upload your first resume to get started.
               </p>
             </div>

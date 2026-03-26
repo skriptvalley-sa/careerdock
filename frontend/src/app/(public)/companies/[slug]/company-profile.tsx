@@ -34,7 +34,7 @@ const tierLabels: Record<string, string> = {
 const hiringColors: Record<string, string> = {
   active: 'bg-green-900/30 text-green-400 border-green-800',
   paused: 'bg-yellow-900/30 text-yellow-400 border-yellow-800',
-  unknown: 'bg-slate-800 text-slate-500 border-edge',
+  unknown: 'bg-slate-800 text-[var(--color-text-muted)] border-edge',
 };
 
 // Company tracking status priority for "best" status display
@@ -124,7 +124,7 @@ export default function CompanyProfile() {
           <p className="text-sm text-red-400">
             Failed to load company: {(error as Error).message}
           </p>
-          <Link href="/companies" className="mt-4 inline-block text-sm text-[#00f0ff] hover:text-[#00f0ff]/80">
+          <Link href="/companies" className="mt-4 inline-block text-sm text-[var(--color-primary)] hover:text-[var(--color-primary)]/80">
             Back to directory
           </Link>
         </div>
@@ -139,7 +139,7 @@ export default function CompanyProfile() {
       {/* Breadcrumb */}
       <Link
         href="/companies"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-300"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to directory
@@ -150,10 +150,10 @@ export default function CompanyProfile() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold text-slate-100">{company.name}</h1>
+              <h1 className="text-3xl font-bold text-[var(--color-text)]">{company.name}</h1>
               {overallStatus && <CompanyStatusBadge status={overallStatus} />}
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-[var(--color-text-muted)]">
               {company.headquarters && (
                 <span className="flex items-center gap-1">
                   <MapPin className="h-4 w-4" />
@@ -189,7 +189,7 @@ export default function CompanyProfile() {
       {/* Description */}
       {company.description && (
         <section className="mb-8">
-          <p className="text-slate-300 leading-relaxed">{company.description}</p>
+          <p className="text-[var(--color-text)] leading-relaxed">{company.description}</p>
         </section>
       )}
 
@@ -197,27 +197,27 @@ export default function CompanyProfile() {
       <div className="mb-8 grid gap-6 sm:grid-cols-2">
         {/* Compensation */}
         <div className="rounded-lg border border-edge p-5">
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-100">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--color-text)]">
             <DollarSign className="h-4 w-4" />
             Compensation
           </h2>
           <div className="space-y-2 text-sm">
             {company.compensation_tier && (
               <div className="flex justify-between">
-                <span className="text-slate-500">Tier</span>
-                <span className="font-medium text-slate-100">
+                <span className="text-[var(--color-text-muted)]">Tier</span>
+                <span className="font-medium text-[var(--color-text)]">
                   {tierLabels[company.compensation_tier] || company.compensation_tier}
                 </span>
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-slate-500">RSU</span>
-              <span className="font-medium text-slate-100">{company.has_rsu ? 'Yes' : 'No'}</span>
+              <span className="text-[var(--color-text-muted)]">RSU</span>
+              <span className="font-medium text-[var(--color-text)]">{company.has_rsu ? 'Yes' : 'No'}</span>
             </div>
             {company.has_rsu && (
               <div className="flex justify-between">
-                <span className="text-slate-500">RSU Refresher</span>
-                <span className="font-medium text-slate-100">
+                <span className="text-[var(--color-text-muted)]">RSU Refresher</span>
+                <span className="font-medium text-[var(--color-text)]">
                   {company.has_rsu_refresher ? 'Yes' : 'No'}
                 </span>
               </div>
@@ -225,21 +225,21 @@ export default function CompanyProfile() {
           </div>
           {company.compensation_bands != null && (
             <div className="mt-3 border-t border-edge pt-3">
-              <p className="text-xs text-slate-500">Compensation bands available</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Compensation bands available</p>
             </div>
           )}
         </div>
 
         {/* Links */}
         <div className="rounded-lg border border-edge p-5">
-          <h2 className="mb-3 text-sm font-semibold text-slate-100">Links</h2>
+          <h2 className="mb-3 text-sm font-semibold text-[var(--color-text)]">Links</h2>
           <div className="space-y-2">
             {company.careers_page_url && (
               <a
                 href={company.careers_page_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-[#00f0ff] hover:text-[#00f0ff]/80"
+                className="flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary)]/80"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 Careers Page
@@ -250,7 +250,7 @@ export default function CompanyProfile() {
                 href={company.linkedin_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-[#00f0ff] hover:text-[#00f0ff]/80"
+                className="flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary)]/80"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 LinkedIn
@@ -261,7 +261,7 @@ export default function CompanyProfile() {
                 href={company.glassdoor_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-[#00f0ff] hover:text-[#00f0ff]/80"
+                className="flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary)]/80"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 Glassdoor
@@ -272,7 +272,7 @@ export default function CompanyProfile() {
                 href={company.ambitionbox_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-[#00f0ff] hover:text-[#00f0ff]/80"
+                className="flex items-center gap-2 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary)]/80"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 AmbitionBox
@@ -282,7 +282,7 @@ export default function CompanyProfile() {
               !company.linkedin_url &&
               !company.glassdoor_url &&
               !company.ambitionbox_url && (
-                <p className="text-sm text-slate-600">No links available</p>
+                <p className="text-sm text-[var(--color-text-muted)]">No links available</p>
               )}
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function CompanyProfile() {
       {/* Tech Stack */}
       {company.tech_stack.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-3 text-sm font-semibold text-slate-100">Tech Stack</h2>
+          <h2 className="mb-3 text-sm font-semibold text-[var(--color-text)]">Tech Stack</h2>
           <TechStackTags tags={company.tech_stack} limit={0} />
         </section>
       )}
@@ -299,12 +299,12 @@ export default function CompanyProfile() {
       {/* Domains */}
       {company.domains.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-3 text-sm font-semibold text-slate-100">Domains</h2>
+          <h2 className="mb-3 text-sm font-semibold text-[var(--color-text)]">Domains</h2>
           <div className="flex flex-wrap gap-2">
             {company.domains.map((d) => (
               <span
                 key={d}
-                className="inline-flex items-center rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-300"
+                className="inline-flex items-center rounded-full bg-slate-800 px-3 py-1 text-sm text-[var(--color-text)]"
               >
                 {d}
               </span>
@@ -316,9 +316,9 @@ export default function CompanyProfile() {
       {/* Interview Patterns */}
       {company.interview_patterns != null && (
         <section className="mb-8">
-          <h2 className="mb-3 text-sm font-semibold text-slate-100">Interview Process</h2>
+          <h2 className="mb-3 text-sm font-semibold text-[var(--color-text)]">Interview Process</h2>
           <div className="rounded-lg border border-edge bg-overlay p-4">
-            <pre className="whitespace-pre-wrap text-sm text-slate-300">
+            <pre className="whitespace-pre-wrap text-sm text-[var(--color-text)]">
               {typeof company.interview_patterns === 'string'
                 ? company.interview_patterns
                 : JSON.stringify(company.interview_patterns, null, 2)}
@@ -330,7 +330,7 @@ export default function CompanyProfile() {
       {/* Your Lists — show which lists this company belongs to */}
       {isAuthenticated && uniqueLists.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-100">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--color-text)]">
             <List className="h-4 w-4" />
             Your Lists
           </h2>
@@ -339,7 +339,7 @@ export default function CompanyProfile() {
               <Link
                 key={l.listId}
                 href={`/lists/${l.listId}`}
-                className="inline-flex items-center rounded-full border border-[#00f0ff]/30 bg-[#00f0ff]/10 px-3 py-1 text-sm font-medium text-[#00f0ff] hover:bg-[#00f0ff]/20 hover:text-[#00f0ff] transition-colors"
+                className="inline-flex items-center rounded-full border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10 px-3 py-1 text-sm font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20 hover:text-[var(--color-primary)] transition-colors"
               >
                 {l.listName}
               </Link>
@@ -351,7 +351,7 @@ export default function CompanyProfile() {
       {/* Your Applications — from the applications table */}
       {isAuthenticated && applications && applications.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-100">
+          <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--color-text)]">
             <Briefcase className="h-4 w-4" />
             Your Applications
           </h2>
@@ -359,13 +359,13 @@ export default function CompanyProfile() {
             <table className="min-w-full divide-y divide-edge">
               <thead className="bg-overlay">
                 <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                  <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                     Role
                   </th>
-                  <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                  <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                     Status
                   </th>
-                  <th className="hidden px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500 sm:table-cell">
+                  <th className="hidden px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] sm:table-cell">
                     Date Applied
                   </th>
                 </tr>
@@ -373,7 +373,7 @@ export default function CompanyProfile() {
               <tbody className="divide-y divide-edge">
                 {applications.map((app) => (
                   <tr key={app.id} className="hover:bg-surface">
-                    <td className="whitespace-nowrap px-4 py-2.5 text-sm font-medium text-slate-200">
+                    <td className="whitespace-nowrap px-4 py-2.5 text-sm font-medium text-[var(--color-text)]">
                       {app.role_title || '-'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2.5">
@@ -385,7 +385,7 @@ export default function CompanyProfile() {
                           }
                           onBlur={() => setEditingStatus(null)}
                           autoFocus
-                          className="rounded-md border border-edge-input bg-input px-2 py-1 text-xs text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none"
+                          className="rounded-md border border-edge-input bg-input px-2 py-1 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none"
                         >
                           {ALL_STATUSES.map((s) => (
                             <option key={s} value={s}>
@@ -399,7 +399,7 @@ export default function CompanyProfile() {
                         </button>
                       )}
                     </td>
-                    <td className="hidden whitespace-nowrap px-4 py-2.5 text-sm text-slate-500 sm:table-cell">
+                    <td className="hidden whitespace-nowrap px-4 py-2.5 text-sm text-[var(--color-text-muted)] sm:table-cell">
                       {app.date_applied || '-'}
                     </td>
                   </tr>
@@ -411,7 +411,7 @@ export default function CompanyProfile() {
       )}
 
       {/* Footer meta */}
-      <div className="border-t border-edge pt-4 text-xs text-slate-600">
+      <div className="border-t border-edge pt-4 text-xs text-[var(--color-text-muted)]">
         {company.last_verified_at && (
           <span>Last verified: {new Date(company.last_verified_at).toLocaleDateString()}</span>
         )}

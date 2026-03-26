@@ -79,8 +79,8 @@ export default function CompaniesPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-100">Company Directory</h1>
-        <p className="mt-2 text-slate-400">
+        <h1 className="text-3xl font-bold text-[var(--color-text)]">Company Directory</h1>
+        <p className="mt-2 text-[var(--color-text-muted)]">
           Browse {companies.length > 0 ? `${companies.length}+` : ''} Indian tech companies.
           Filter by size, tech stack, compensation, and more.
         </p>
@@ -92,7 +92,7 @@ export default function CompaniesPage() {
       </div>
 
       {isLoading && (
-        <div className="py-12 text-center text-slate-500">Loading companies...</div>
+        <div className="py-12 text-center text-[var(--color-text-muted)]">Loading companies...</div>
       )}
 
       {isError && (
@@ -102,7 +102,7 @@ export default function CompaniesPage() {
       )}
 
       {!isLoading && companies.length === 0 && (
-        <div className="py-12 text-center text-slate-500">
+        <div className="py-12 text-center text-[var(--color-text-muted)]">
           No companies found. Try adjusting your search or filters.
         </div>
       )}
@@ -116,7 +116,7 @@ export default function CompaniesPage() {
       {/* Infinite scroll trigger */}
       <div ref={loadMoreRef} className="py-8 text-center">
         {isFetchingNextPage && (
-          <span className="text-sm text-slate-500">Loading more...</span>
+          <span className="text-sm text-[var(--color-text-muted)]">Loading more...</span>
         )}
       </div>
     </div>

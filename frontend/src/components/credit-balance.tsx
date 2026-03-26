@@ -40,10 +40,10 @@ export function CreditBalance({ collapsed }: { collapsed?: boolean }) {
     <div className="rounded-md border border-edge bg-card/50 px-3 py-2">
       <div className="flex items-center gap-2">
         <Coins className="h-4 w-4 text-[#ffb800]" />
-        <span className="text-xs font-medium text-slate-400">Credits</span>
+        <span className="text-xs font-medium text-[var(--color-text-muted)]">Credits</span>
         <span className="ml-auto text-sm font-bold text-[#ffb800]">{total}</span>
       </div>
-      <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px] text-slate-500">
+      <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px] text-[var(--color-text-muted)]">
         <span>Resume: {credits.resume_upload}</span>
         <span>ATS: {credits.ats_check}</span>
         <span>Lists: {credits.curated_list}</span>

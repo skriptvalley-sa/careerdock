@@ -12,13 +12,13 @@ export function TechStackTags({ tags, limit = 5 }: TechStackTagsProps) {
       {visible.map((tag) => (
         <span
           key={tag}
-          className="inline-flex items-center rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/20 px-2.5 py-0.5 text-xs font-medium text-[#00f0ff]"
+          className="inline-flex items-center rounded-full bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 px-2.5 py-0.5 text-xs font-medium text-[var(--color-primary)]"
         >
           {tag}
         </span>
       ))}
       {remaining > 0 && (
-        <span className="inline-flex items-center rounded-full bg-slate-800 px-2.5 py-0.5 text-xs text-slate-500">
+        <span className="inline-flex items-center rounded-full bg-slate-800 px-2.5 py-0.5 text-xs text-[var(--color-text-muted)]">
           +{remaining}
         </span>
       )}

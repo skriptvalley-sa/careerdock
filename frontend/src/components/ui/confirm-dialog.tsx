@@ -50,12 +50,12 @@ export function ConfirmDialog({
       >
         {/* Header */}
         <div className="border-b border-edge px-5 py-4">
-          <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
+          <h3 className="text-sm font-semibold text-[var(--color-text)]">{title}</h3>
         </div>
 
         {/* Body */}
         <div className="px-5 py-4">
-          <p className="text-sm text-slate-300">{message}</p>
+          <p className="text-sm text-[var(--color-text)]">{message}</p>
         </div>
 
         {/* Footer */}
@@ -63,7 +63,7 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-slate-300 hover:bg-overlay"
+            className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:bg-overlay"
           >
             {cancelLabel}
           </button>
@@ -79,7 +79,7 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className="btn-neon rounded-md px-4 py-2 text-sm font-medium"
+            className="btn-primary rounded-md px-4 py-2 text-sm font-medium"
           >
             {confirmLabel}
           </button>

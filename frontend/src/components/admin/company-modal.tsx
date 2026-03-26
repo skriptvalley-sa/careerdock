@@ -104,8 +104,8 @@ export function CompanyModal({ company, onClose, onSuccess }: CompanyModalProps)
     createCompany.isPending || updateCompany.isPending || uploadLogo.isPending;
 
   const inputClass =
-    'mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30';
-  const labelClass = 'block text-sm font-medium text-slate-300';
+    'mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30';
+  const labelClass = 'block text-sm font-medium text-[var(--color-text)]';
 
   return (
     <div
@@ -117,10 +117,10 @@ export function CompanyModal({ company, onClose, onSuccess }: CompanyModalProps)
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-edge px-5 py-4">
-          <h3 className="text-sm font-semibold text-slate-100">
+          <h3 className="text-sm font-semibold text-[var(--color-text)]">
             {isEdit ? 'Edit Company' : 'Create Company'}
           </h3>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-200">
+          <button type="button" onClick={onClose} className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -186,11 +186,11 @@ export function CompanyModal({ company, onClose, onSuccess }: CompanyModalProps)
           </div>
 
           <div className="flex items-center gap-6">
-            <label className="flex items-center gap-2 text-sm text-slate-300">
+            <label className="flex items-center gap-2 text-sm text-[var(--color-text)]">
               <input type="checkbox" checked={form.has_rsu} onChange={(e) => setForm({ ...form, has_rsu: e.target.checked })} className="rounded border-slate-600" />
               Has RSU
             </label>
-            <label className="flex items-center gap-2 text-sm text-slate-300">
+            <label className="flex items-center gap-2 text-sm text-[var(--color-text)]">
               <input type="checkbox" checked={form.has_rsu_refresher} onChange={(e) => setForm({ ...form, has_rsu_refresher: e.target.checked })} className="rounded border-slate-600" />
               RSU Refresher
             </label>
@@ -241,7 +241,7 @@ export function CompanyModal({ company, onClose, onSuccess }: CompanyModalProps)
               type="file"
               accept="image/*"
               onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
-              className="mt-1 block w-full text-sm text-slate-400 file:mr-4 file:rounded-md file:border-0 file:bg-[#00f0ff]/10 file:px-3 file:py-1.5 file:text-sm file:text-[#00f0ff] hover:file:bg-[#00f0ff]/20"
+              className="mt-1 block w-full text-sm text-[var(--color-text-muted)] file:mr-4 file:rounded-md file:border-0 file:bg-[var(--color-primary)]/10 file:px-3 file:py-1.5 file:text-sm file:text-[var(--color-primary)] hover:file:bg-[var(--color-primary)]/20"
             />
           </div>
 
@@ -249,14 +249,14 @@ export function CompanyModal({ company, onClose, onSuccess }: CompanyModalProps)
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-slate-300 hover:bg-card hover:text-slate-100"
+              className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:bg-card hover:text-[var(--color-text)]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="btn-neon rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+              className="btn-primary rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
             >
               {isPending ? 'Saving...' : isEdit ? 'Update Company' : 'Create Company'}
             </button>

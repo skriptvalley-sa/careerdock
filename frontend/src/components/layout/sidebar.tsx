@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react';
 import { CreditBalance } from '@/components/credit-balance';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -68,7 +69,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
         {/* Mobile close button (shown only in mobile overlay) */}
         <button
           onClick={onCloseMobile}
-          className="flex items-center justify-center rounded-md p-1.5 text-slate-400 hover:bg-card hover:text-slate-200 lg:hidden"
+          className="flex items-center justify-center rounded-md p-1.5 text-[var(--color-text-muted)] hover:bg-card hover:text-[var(--color-text)] lg:hidden"
           aria-label="Close sidebar"
         >
           <X className="h-5 w-5" />
@@ -77,11 +78,13 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
         {/* Desktop collapse toggle */}
         <button
           onClick={onToggle}
-          className="hidden items-center justify-center rounded-md p-1.5 text-slate-400 hover:bg-card hover:text-slate-200 lg:flex"
+          className="hidden items-center justify-center rounded-md p-1.5 text-[var(--color-text-muted)] hover:bg-card hover:text-[var(--color-text)] lg:flex"
           aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
+
+        {!collapsed && <ThemeToggle />}
       </div>
 
       {/* Navigation */}
@@ -97,8 +100,8 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
               title={collapsed ? item.label : undefined}
               className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-[#00f0ff]/10 text-[#00f0ff] border-l-2 border-[#00f0ff] glow-cyan'
-                  : 'text-slate-400 hover:bg-card hover:text-slate-200'
+                  ? 'bg-[var(--color-primary)]/10 nav-link-active glow-primary'
+                  : 'text-[var(--color-text-muted)] hover:bg-card hover:text-[var(--color-text)]'
               } ${collapsed ? 'justify-center px-2' : ''}`}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -119,26 +122,26 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
       {isAuthenticated && user && (
         <div className="border-t border-edge p-3">
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#00f0ff]/15 text-sm font-medium text-[#00f0ff]">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/15 text-sm font-medium text-[var(--color-primary)]">
               {user.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <p className="truncate text-sm font-medium text-slate-100">
+                  <p className="truncate text-sm font-medium text-[var(--color-text)]">
                     {user.name}
                   </p>
                   {(user.role === 'moderator' || user.role === 'admin') && (
                     <span className={`shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold uppercase ${
                       user.role === 'admin'
                         ? 'bg-amber-500/15 text-amber-400'
-                        : 'bg-[#00f0ff]/10 text-[#00f0ff]'
+                        : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
                     }`}>
                       {user.role === 'admin' ? 'Admin' : 'Mod'}
                     </span>
                   )}
                 </div>
-                <p className="truncate text-xs text-slate-500">{user.email}</p>
+                <p className="truncate text-xs text-[var(--color-text-muted)]">{user.email}</p>
               </div>
             )}
           </div>
@@ -151,7 +154,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
           <Link
             href="/login"
             onClick={onCloseMobile}
-            className={`btn-neon flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${collapsed ? 'justify-center px-2' : ''}`}
+            className={`btn-primary flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${collapsed ? 'justify-center px-2' : ''}`}
           >
             <LogIn className="h-4 w-4 shrink-0" />
             {!collapsed && <span>Sign in</span>}

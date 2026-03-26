@@ -26,7 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00f0ff] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--color-primary)] border-t-transparent" />
       </div>
     );
   }
@@ -43,12 +43,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="border-b border-edge px-4 py-3">
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300"
+              className="flex items-center gap-2 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
             >
               <ChevronLeft className="h-3 w-3" />
               Back to app
             </Link>
-            <h2 className="mt-1 text-sm font-semibold text-[#00f0ff] text-glow-cyan">
+            <h2 className="mt-1 text-sm font-semibold text-[var(--color-primary)]">
               Admin Panel
             </h2>
           </div>
@@ -63,8 +63,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   href={item.href}
                   className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-[#00f0ff]/10 text-[#00f0ff] border-l-2 border-[#00f0ff] glow-cyan'
-                      : 'text-slate-400 hover:bg-card hover:text-slate-200'
+                      ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border-l-2 border-[var(--color-primary)] glow-primary'
+                      : 'text-[var(--color-text-muted)] hover:bg-card hover:text-[var(--color-text)]'
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
@@ -88,8 +88,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 href={item.href}
                 className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-medium ${
                   isActive
-                    ? 'bg-[#00f0ff]/10 text-[#00f0ff]'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
+                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
                 }`}
               >
                 {item.label}

@@ -50,7 +50,7 @@ export function CreditModal({ userId, userName, onClose }: CreditModalProps) {
   };
 
   const inputClass =
-    'mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30';
+    'mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
@@ -60,10 +60,10 @@ export function CreditModal({ userId, userName, onClose }: CreditModalProps) {
       >
         <div className="flex items-center justify-between border-b border-edge px-5 py-4">
           <div>
-            <h3 className="text-sm font-semibold text-slate-100">Allocate Credits</h3>
-            <p className="mt-0.5 text-xs text-slate-500">{userName}</p>
+            <h3 className="text-sm font-semibold text-[var(--color-text)]">Allocate Credits</h3>
+            <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">{userName}</p>
           </div>
-          <button type="button" onClick={onClose} className="text-slate-400 hover:text-slate-200">
+          <button type="button" onClick={onClose} className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -76,7 +76,7 @@ export function CreditModal({ userId, userName, onClose }: CreditModalProps) {
           )}
 
           <div>
-            <label htmlFor="creditType" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="creditType" className="block text-sm font-medium text-[var(--color-text)]">
               Credit Type
             </label>
             <select
@@ -94,7 +94,7 @@ export function CreditModal({ userId, userName, onClose }: CreditModalProps) {
           </div>
 
           <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="amount" className="block text-sm font-medium text-[var(--color-text)]">
               Amount
             </label>
             <input
@@ -108,7 +108,7 @@ export function CreditModal({ userId, userName, onClose }: CreditModalProps) {
           </div>
 
           <div>
-            <label htmlFor="reason" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="reason" className="block text-sm font-medium text-[var(--color-text)]">
               Reason *
             </label>
             <input
@@ -125,14 +125,14 @@ export function CreditModal({ userId, userName, onClose }: CreditModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-slate-300 hover:bg-card hover:text-slate-100"
+              className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:bg-card hover:text-[var(--color-text)]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={allocate.isPending}
-              className="btn-neon rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+              className="btn-primary rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
             >
               {allocate.isPending ? 'Allocating...' : 'Allocate'}
             </button>

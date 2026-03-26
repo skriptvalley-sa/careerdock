@@ -132,11 +132,11 @@ export function CompanyBrowserPanel({
     <div className="mt-6 rounded-lg border border-edge bg-card">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-edge px-4 py-3">
-        <h3 className="text-sm font-semibold text-slate-100">Edit list companies</h3>
+        <h3 className="text-sm font-semibold text-[var(--color-text)]">Edit list companies</h3>
         <button
           type="button"
           onClick={onCancel}
-          className="text-slate-400 hover:text-slate-200"
+          className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
         >
           <X className="h-5 w-5" />
         </button>
@@ -145,13 +145,13 @@ export function CompanyBrowserPanel({
       {/* Search */}
       <div className="border-b border-edge px-4 py-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search companies..."
-            className="block w-full rounded-md border border-edge-input bg-input py-2 pl-9 pr-3 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+            className="block w-full rounded-md border border-edge-input bg-input py-2 pl-9 pr-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
           />
         </div>
       </div>
@@ -165,10 +165,10 @@ export function CompanyBrowserPanel({
       <div className="max-h-[420px] overflow-y-auto p-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#00f0ff] border-t-transparent" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
           </div>
         ) : companies.length === 0 ? (
-          <div className="py-8 text-center text-sm text-slate-500">
+          <div className="py-8 text-center text-sm text-[var(--color-text-muted)]">
             No companies found. Try adjusting your search or filters.
           </div>
         ) : (
@@ -187,8 +187,8 @@ export function CompanyBrowserPanel({
                     isRemoved
                       ? 'border-red-500/50 bg-red-500/10 opacity-70'
                       : isSelected
-                        ? 'border-[#00f0ff]/50 bg-[#00f0ff]/10 ring-1 ring-[#00f0ff]/30'
-                        : 'border-edge hover:border-[#00f0ff]/30 hover:bg-surface'
+                        ? 'border-[var(--color-primary)]/50 bg-[var(--color-primary)]/10 ring-1 ring-[var(--color-primary)]/30'
+                        : 'border-edge hover:border-[var(--color-primary)]/30 hover:bg-surface'
                   }`}
                 >
                   {/* Selection indicator */}
@@ -197,7 +197,7 @@ export function CompanyBrowserPanel({
                       isRemoved
                         ? 'bg-red-500/20 text-red-400'
                         : isSelected
-                          ? 'bg-[#00f0ff] text-[#06080f]'
+                          ? 'bg-[var(--color-primary)] text-[#06080f]'
                           : 'border border-edge group-hover:border-slate-500'
                     }`}
                   >
@@ -207,10 +207,10 @@ export function CompanyBrowserPanel({
 
                   {/* Company info */}
                   <div className="min-w-0 flex-1">
-                    <div className={`truncate text-sm font-medium ${isRemoved ? 'text-red-400 line-through' : 'text-slate-100'}`}>
+                    <div className={`truncate text-sm font-medium ${isRemoved ? 'text-red-400 line-through' : 'text-[var(--color-text)]'}`}>
                       {company.name}
                     </div>
-                    <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+                    <div className="mt-0.5 flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
                       {company.headquarters && <span>{company.headquarters}</span>}
                       {company.headquarters && company.size && <span>·</span>}
                       {company.size && <span>{company.size}</span>}
@@ -231,14 +231,14 @@ export function CompanyBrowserPanel({
         <div ref={bottomRef} className="h-1" />
         {isFetchingNextPage && (
           <div className="flex justify-center py-3">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#00f0ff] border-t-transparent" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
           </div>
         )}
       </div>
 
       {/* Footer: diff summary + save */}
       <div className="flex items-center justify-between border-t border-edge px-4 py-3">
-        <div className="flex items-center gap-3 text-sm text-slate-500">
+        <div className="flex items-center gap-3 text-sm text-[var(--color-text-muted)]">
           {diff.hasChanges ? (
             <>
               {diff.added > 0 && (
@@ -256,7 +256,7 @@ export function CompanyBrowserPanel({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-slate-300 hover:bg-overlay"
+            className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:bg-overlay"
           >
             Cancel
           </button>
@@ -264,7 +264,7 @@ export function CompanyBrowserPanel({
             type="button"
             onClick={handleSave}
             disabled={!diff.hasChanges || isSaving}
-            className="btn-neon rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+            className="btn-primary rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
           >
             {isSaving ? 'Saving...' : 'Save Changes'}
           </button>

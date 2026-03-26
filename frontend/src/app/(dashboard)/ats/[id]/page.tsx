@@ -56,7 +56,7 @@ export default function ATSResultPage({
   if (isLoading || !check) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#00f0ff]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)]" />
       </div>
     );
   }
@@ -68,7 +68,7 @@ export default function ATSResultPage({
       {/* Back */}
       <Link
         href="/ats"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-300"
+        className="inline-flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
       >
         <ArrowLeft className="h-4 w-4" /> Back to ATS Checks
       </Link>
@@ -77,7 +77,7 @@ export default function ATSResultPage({
       <div className="mt-4 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full border border-edge">
           {check.check_type === 'company' ? (
-            <Building2 className="h-5 w-5 text-[#00f0ff]" />
+            <Building2 className="h-5 w-5 text-[var(--color-primary)]" />
           ) : check.check_type === 'job' ? (
             <FileText className="h-5 w-5 text-[#e040fb]" />
           ) : (
@@ -85,14 +85,14 @@ export default function ATSResultPage({
           )}
         </div>
         <div>
-          <h1 className="text-xl font-bold text-slate-100">
+          <h1 className="text-xl font-bold text-[var(--color-text)]">
             {check.check_type === 'company'
               ? 'Company ATS Check'
               : check.check_type === 'job'
                 ? 'Job ATS Check'
                 : 'General ATS Check'}
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-[var(--color-text-muted)]">
             {new Date(check.created_at).toLocaleDateString('en-IN', {
               day: 'numeric',
               month: 'long',
@@ -107,7 +107,7 @@ export default function ATSResultPage({
         <div className="mt-8 flex flex-col items-center justify-center rounded-lg border border-dashed border-[#ffb800]/40 bg-[#ffb800]/5 py-16">
           <Loader2 className="h-10 w-10 animate-spin text-[#ffb800]" />
           <p className="mt-4 text-sm font-medium text-[#ffb800]">Analysis in progress…</p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-[var(--color-text-muted)]">
             This usually takes 15–30 seconds. This page will update automatically.
           </p>
         </div>
@@ -126,7 +126,7 @@ export default function ATSResultPage({
               </span>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
                 Overall Score
               </p>
               <p className={`mt-1 text-2xl font-bold ${scoreColor(check.result.score)}`}>
@@ -136,7 +136,7 @@ export default function ATSResultPage({
                     ? 'Moderate Match'
                     : 'Weak Match'}
               </p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-[var(--color-text-muted)]">
                 {check.result.score >= 80
                   ? check.check_type === 'resume'
                     ? 'Your resume is well-optimised for ATS systems.'
@@ -151,7 +151,7 @@ export default function ATSResultPage({
           {/* Breakdown */}
           {check.result.breakdown && Object.keys(check.result.breakdown).length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
                 Score Breakdown
               </h2>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -161,7 +161,7 @@ export default function ATSResultPage({
                     className="rounded-lg border border-edge bg-card p-4"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-200">
+                      <span className="text-sm font-medium text-[var(--color-text)]">
                         {formatCategoryName(key)}
                       </span>
                       <span className={`text-sm font-bold ${scoreColor(detail.score)}`}>
@@ -170,7 +170,7 @@ export default function ATSResultPage({
                     </div>
                     <CategoryBar score={detail.score} />
                     {detail.feedback && (
-                      <p className="mt-2 text-xs text-slate-500">{detail.feedback}</p>
+                      <p className="mt-2 text-xs text-[var(--color-text-muted)]">{detail.feedback}</p>
                     )}
                   </div>
                 ))}
@@ -181,7 +181,7 @@ export default function ATSResultPage({
           {/* Suggestions */}
           {check.result.suggestions && check.result.suggestions.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
                 Recommendations
               </h2>
               <ul className="mt-3 space-y-2">
@@ -191,7 +191,7 @@ export default function ATSResultPage({
                     className="flex items-start gap-3 rounded-lg border border-edge bg-card p-4"
                   >
                     <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#ffb800]" />
-                    <span className="text-sm text-slate-300">{suggestion}</span>
+                    <span className="text-sm text-[var(--color-text)]">{suggestion}</span>
                   </li>
                 ))}
               </ul>
@@ -202,7 +202,7 @@ export default function ATSResultPage({
           <div className="flex gap-3 pt-2">
             <Link
               href="/ats"
-              className="inline-flex items-center gap-2 rounded-md border border-edge px-4 py-2 text-sm text-slate-400 hover:border-[#00f0ff]/30 hover:text-[#00f0ff] transition-all"
+              className="inline-flex items-center gap-2 rounded-md border border-edge px-4 py-2 text-sm text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-primary)] transition-all"
             >
               <CheckCircle2 className="h-4 w-4" /> Run Another Check
             </Link>

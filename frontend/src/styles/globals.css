@@ -1,100 +1,150 @@
 @import 'tailwindcss';
 
 /* ═══════════════════════════════════════════════════════
-   NEON DARK THEME — multi-color cyberpunk aesthetic
-   Primary:   Electric Cyan  (#00f0ff)
-   Secondary: Neon Magenta   (#ff00e5)
-   Tertiary:  Neon Green     (#39ff14)
+   BRAND PALETTE
+   Light (Combo 05):  Lemon Chiffon #FEFACD + Ultra Violet #5F4A8B
+   Dark  (Combo 03):  Charcoal      #233D4C + Pumpkin      #FD802E
    ═══════════════════════════════════════════════════════ */
 
+/* ── Light-mode tokens (default) ── */
 @theme {
-  /* Base surfaces — deep space dark */
-  --color-surface: #06080f;
-  --color-card: #0a0e1a;
-  --color-overlay: #080b14;
-  --color-input: #0e1220;
-  --color-edge: rgba(0, 240, 255, 0.08);
-  --color-edge-input: rgba(0, 240, 255, 0.15);
-  --color-edge-hover: rgba(0, 240, 255, 0.25);
-  --color-accent: #00f0ff;
+  --color-surface:        #FEFACD;
+  --color-card:           #FDF7B8;
+  --color-overlay:        #FAF5A0;
+  --color-input:          #FFF9D6;
+  --color-primary:        #5F4A8B;
+  --color-primary-hover:  #4E3A75;
+  --color-text:           #2A1F4A;
+  --color-text-muted:     #7A6A9E;
+  --color-edge:           rgba(95, 74, 139, 0.15);
+  --color-edge-input:     rgba(95, 74, 139, 0.25);
+  --color-edge-hover:     rgba(95, 74, 139, 0.40);
+  --color-accent:         #5F4A8B;
+}
 
-  /* Neon palette */
-  --color-neon-cyan: #00f0ff;
-  --color-neon-magenta: #ff00e5;
-  --color-neon-green: #39ff14;
-  --color-neon-amber: #ffb800;
+/* ── Dark-mode token overrides ── */
+.dark {
+  --color-surface:        #233D4C;
+  --color-card:           #1C3040;
+  --color-overlay:        #162837;
+  --color-input:          #1E3448;
+  --color-primary:        #FD802E;
+  --color-primary-hover:  #E5711F;
+  --color-text:           #F0E8D0;
+  --color-text-muted:     #8FAABF;
+  --color-edge:           rgba(253, 128, 46, 0.15);
+  --color-edge-input:     rgba(253, 128, 46, 0.25);
+  --color-edge-hover:     rgba(253, 128, 46, 0.40);
+  --color-accent:         #FD802E;
+}
+
+/* ── Smooth mode transition ── */
+body {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease;
 }
 
 /* ── Custom scrollbar ── */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #080b14;
-}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-overlay); }
 ::-webkit-scrollbar-thumb {
-  background: #00f0ff33;
+  background: var(--color-edge-hover);
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #00f0ff55;
-}
+::-webkit-scrollbar-thumb:hover { background: var(--color-primary); opacity: 0.6; }
 
 /* ── Focus ring ── */
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
+input:focus, select:focus, textarea:focus { outline: none; }
+
+/* ══════════════════════════════════
+   UTILITY CLASSES
+   ══════════════════════════════════ */
+
+/* Primary glow (replaces .glow-cyan) */
+.glow-primary {
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--color-primary) 30%, transparent),
+    0 0  4px color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
 
-/* ── Neon glow utilities ── */
-.glow-cyan {
-  box-shadow: 0 0 12px rgba(0, 240, 255, 0.25), 0 0 4px rgba(0, 240, 255, 0.1);
+/* Primary button (replaces .btn-neon) */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+  transition: background-color 200ms ease, box-shadow 200ms ease, transform 100ms ease;
 }
-.glow-magenta {
-  box-shadow: 0 0 12px rgba(255, 0, 229, 0.25), 0 0 4px rgba(255, 0, 229, 0.1);
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 40%, transparent);
 }
-.glow-green {
-  box-shadow: 0 0 12px rgba(57, 255, 20, 0.25), 0 0 4px rgba(57, 255, 20, 0.1);
+.btn-primary:active { transform: scale(0.97); }
+
+/* Card hover (replaces .card-neon-hover) */
+.card-hover {
+  transition: border-color 200ms ease, box-shadow 200ms ease;
 }
-.glow-amber {
-  box-shadow: 0 0 12px rgba(255, 184, 0, 0.25), 0 0 4px rgba(255, 184, 0, 0.1);
+.card-hover:hover {
+  border-color: var(--color-edge-hover);
+  box-shadow:
+    0 0 16px color-mix(in srgb, var(--color-primary) 10%, transparent),
+    inset 0 0 16px color-mix(in srgb, var(--color-primary) 4%, transparent);
 }
 
-.text-glow-cyan {
-  text-shadow: 0 0 8px rgba(0, 240, 255, 0.5), 0 0 16px rgba(0, 240, 255, 0.2);
-}
-.text-glow-magenta {
-  text-shadow: 0 0 8px rgba(255, 0, 229, 0.5), 0 0 16px rgba(255, 0, 229, 0.2);
-}
-.text-glow-green {
-  text-shadow: 0 0 8px rgba(57, 255, 20, 0.5), 0 0 16px rgba(57, 255, 20, 0.2);
+/* Link hover (replaces .neon-link) */
+a.primary-link:hover {
+  color: var(--color-primary);
 }
 
-/* ── Neon gradient button ── */
-.btn-neon {
-  background: linear-gradient(135deg, #00f0ff, #6366f1, #a855f7);
-  color: white;
-  transition: box-shadow 0.2s ease, transform 0.1s ease;
+/* ══════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ══════════════════════════════════ */
+
+/* 1. CTA glow pulse — apply with class .animate-pulse-primary */
+@keyframes pulse-primary {
+  0%, 100% {
+    box-shadow: 0 0  8px color-mix(in srgb, var(--color-primary) 25%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 50%, transparent),
+                0 0  6px color-mix(in srgb, var(--color-primary) 20%, transparent);
+  }
 }
-.btn-neon:hover {
-  box-shadow: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 40px rgba(99, 102, 241, 0.15);
-}
-.btn-neon:active {
-  transform: scale(0.98);
+.animate-pulse-primary {
+  animation: pulse-primary 2.4s ease-in-out infinite;
 }
 
-/* ── Neon card hover ── */
-.card-neon-hover {
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+/* 2. Card / section entrance — apply with class .animate-fade-up */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.card-neon-hover:hover {
-  border-color: rgba(0, 240, 255, 0.2);
-  box-shadow: 0 0 16px rgba(0, 240, 255, 0.06), inset 0 0 16px rgba(0, 240, 255, 0.02);
+.animate-fade-up {
+  animation: fade-up 400ms ease forwards;
 }
 
-/* ── Neon link hover ── */
-a.neon-link:hover {
-  color: #00f0ff;
-  text-shadow: 0 0 6px rgba(0, 240, 255, 0.4);
+/* Stagger helpers */
+.animate-fade-up.delay-100 { animation-delay: 100ms; }
+.animate-fade-up.delay-200 { animation-delay: 200ms; }
+.animate-fade-up.delay-300 { animation-delay: 300ms; }
+
+/* 3. Sidebar / nav link accent slide */
+@keyframes slide-accent {
+  from { border-left-color: transparent; }
+  to   { border-left-color: var(--color-primary); }
+}
+.nav-link-active {
+  border-left: 2px solid var(--color-primary);
+  animation: slide-accent 200ms ease forwards;
+  color: var(--color-primary);
+}
+
+/* 4. Input focus ring */
+.input-primary:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }

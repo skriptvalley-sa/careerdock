@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen overscroll-none bg-surface text-slate-200 antialiased">
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen overscroll-none bg-surface text-[var(--color-text)] antialiased">
         <Providers>
           <Header />
           {/* pt-14 compensates for the fixed header (h-14 = 56px) */}

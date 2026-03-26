@@ -46,7 +46,7 @@ export function NotificationBell() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="relative rounded-md p-1.5 text-slate-400 hover:bg-card hover:text-slate-200"
+        className="relative rounded-md p-1.5 text-[var(--color-text-muted)] hover:bg-card hover:text-[var(--color-text)]"
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
@@ -60,12 +60,12 @@ export function NotificationBell() {
       {open && (
         <div className="absolute right-0 top-full mt-2 w-80 rounded-lg border border-edge bg-card shadow-xl">
           <div className="border-b border-edge px-4 py-3">
-            <h3 className="text-sm font-semibold text-slate-100">Notifications</h3>
+            <h3 className="text-sm font-semibold text-[var(--color-text)]">Notifications</h3>
           </div>
 
           <div className="max-h-80 overflow-y-auto">
             {!notifications || notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-slate-500">
+              <div className="px-4 py-8 text-center text-sm text-[var(--color-text-muted)]">
                 No notifications yet
               </div>
             ) : (
@@ -79,14 +79,14 @@ export function NotificationBell() {
                 >
                   <div className="flex items-start gap-2">
                     {!n.read_at && (
-                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[#00f0ff]" />
+                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[var(--color-primary)]" />
                     )}
                     <div className={!n.read_at ? '' : 'pl-4'}>
-                      <p className="text-sm font-medium text-slate-200">{n.title}</p>
+                      <p className="text-sm font-medium text-[var(--color-text)]">{n.title}</p>
                       {n.message && (
-                        <p className="mt-0.5 text-xs text-slate-500">{n.message}</p>
+                        <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">{n.message}</p>
                       )}
-                      <p className="mt-1 text-[10px] text-slate-600">
+                      <p className="mt-1 text-[10px] text-[var(--color-text-muted)]">
                         {timeAgo(n.created_at)}
                       </p>
                     </div>

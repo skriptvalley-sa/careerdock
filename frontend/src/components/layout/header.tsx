@@ -27,7 +27,7 @@ export function Header() {
           {showHamburger && (
             <button
               onClick={toggleMobile}
-              className="rounded-md p-1.5 text-slate-400 hover:bg-card hover:text-slate-200 lg:hidden"
+              className="rounded-md p-1.5 text-[var(--color-text-muted)] hover:bg-card hover:text-[var(--color-text)] lg:hidden"
               aria-label="Toggle navigation"
             >
               <Menu className="h-5 w-5" />
@@ -36,7 +36,7 @@ export function Header() {
 
           <Link
             href={isAuthenticated ? '/dashboard' : '/'}
-            className="text-lg font-bold text-[#00f0ff] text-glow-cyan"
+            className="text-lg font-bold text-[var(--color-primary)]"
           >
             CareerDock
           </Link>
@@ -48,7 +48,7 @@ export function Header() {
               <NotificationBell />
               <button
                 onClick={logout}
-                className="flex items-center gap-2 rounded-md border border-edge px-3 py-1.5 text-sm font-medium text-slate-300 hover:bg-card hover:text-slate-100"
+                className="flex items-center gap-2 rounded-md border border-edge px-3 py-1.5 text-sm font-medium text-[var(--color-text)] hover:bg-card hover:text-[var(--color-text)]"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Sign out</span>
@@ -58,13 +58,13 @@ export function Header() {
             <>
               <Link
                 href="/login"
-                className="text-sm font-medium text-slate-400 hover:text-slate-200"
+                className="text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
               >
                 Log in
               </Link>
               <Link
                 href="/register"
-                className="btn-neon rounded-md px-4 py-1.5 text-sm font-medium"
+                className="btn-primary rounded-md px-4 py-1.5 text-sm font-medium"
               >
                 Sign up
               </Link>

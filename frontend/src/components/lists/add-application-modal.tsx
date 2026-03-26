@@ -50,15 +50,15 @@ export function AddApplicationModal({ company, onClose }: AddApplicationModalPro
         {/* Header */}
         <div className="flex items-center justify-between border-b border-edge px-5 py-4">
           <div>
-            <h3 className="text-sm font-semibold text-slate-100">Add Application</h3>
+            <h3 className="text-sm font-semibold text-[var(--color-text)]">Add Application</h3>
             {company && (
-              <p className="mt-0.5 text-xs text-slate-500">{company.name}</p>
+              <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">{company.name}</p>
             )}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-200"
+            className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -69,7 +69,7 @@ export function AddApplicationModal({ company, onClose }: AddApplicationModalPro
           {/* Company selector — only shown when no company is pre-selected */}
           {!company && (
             <div>
-              <label className="block text-sm font-medium text-slate-300">
+              <label className="block text-sm font-medium text-[var(--color-text)]">
                 Company <span className="text-red-400">*</span>
               </label>
               <div className="mt-1">
@@ -83,7 +83,7 @@ export function AddApplicationModal({ company, onClose }: AddApplicationModalPro
           )}
 
           <div>
-            <label htmlFor="roleTitle" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="roleTitle" className="block text-sm font-medium text-[var(--color-text)]">
               Role Title
             </label>
             <input
@@ -92,19 +92,19 @@ export function AddApplicationModal({ company, onClose }: AddApplicationModalPro
               value={roleTitle}
               onChange={(e) => setRoleTitle(e.target.value)}
               placeholder="e.g. Senior Software Engineer"
-              className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+              className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
             />
           </div>
 
           <div>
-            <label htmlFor="appStatus" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="appStatus" className="block text-sm font-medium text-[var(--color-text)]">
               Application Status
             </label>
             <select
               id="appStatus"
               value={status}
               onChange={(e) => setStatus(e.target.value as ApplicationStatus)}
-              className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+              className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
             >
               {statusOptions.map((s) => (
                 <option key={s} value={s}>
@@ -115,7 +115,7 @@ export function AddApplicationModal({ company, onClose }: AddApplicationModalPro
           </div>
 
           <div>
-            <label htmlFor="dateApplied" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="dateApplied" className="block text-sm font-medium text-[var(--color-text)]">
               Date Applied
             </label>
             <input
@@ -123,12 +123,12 @@ export function AddApplicationModal({ company, onClose }: AddApplicationModalPro
               type="date"
               value={dateApplied}
               onChange={(e) => setDateApplied(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+              className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
             />
           </div>
 
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="notes" className="block text-sm font-medium text-[var(--color-text)]">
               Notes
             </label>
             <textarea
@@ -137,7 +137,7 @@ export function AddApplicationModal({ company, onClose }: AddApplicationModalPro
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any notes about this application..."
               rows={3}
-              className="mt-1 block w-full resize-none rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+              className="mt-1 block w-full resize-none rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
             />
           </div>
 
@@ -145,14 +145,14 @@ export function AddApplicationModal({ company, onClose }: AddApplicationModalPro
             <button
               type="button"
               onClick={onClose}
-              className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-slate-300 hover:bg-overlay"
+              className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:bg-overlay"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={createApp.isPending || !selectedCompany}
-              className="btn-neon rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+              className="btn-primary rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
             >
               {createApp.isPending ? 'Saving...' : 'Save Application'}
             </button>

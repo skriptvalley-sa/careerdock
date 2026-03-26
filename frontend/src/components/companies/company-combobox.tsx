@@ -65,12 +65,12 @@ export function CompanyCombobox({
   if (value) {
     return (
       <div className="flex items-center gap-2 rounded-md border border-edge-input bg-input px-3 py-2">
-        <Building2 className="h-4 w-4 shrink-0 text-slate-500" />
-        <span className="flex-1 truncate text-sm text-slate-200">{value.name}</span>
+        <Building2 className="h-4 w-4 shrink-0 text-[var(--color-text-muted)]" />
+        <span className="flex-1 truncate text-sm text-[var(--color-text)]">{value.name}</span>
         <button
           type="button"
           onClick={handleClear}
-          className="shrink-0 text-slate-500 hover:text-slate-300"
+          className="shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
         >
           <X className="h-4 w-4" />
         </button>
@@ -81,7 +81,7 @@ export function CompanyCombobox({
   return (
     <div ref={wrapperRef} className="relative">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
         <input
           ref={inputRef}
           type="text"
@@ -94,14 +94,14 @@ export function CompanyCombobox({
             if (query.length >= 2) setIsOpen(true);
           }}
           placeholder={placeholder}
-          className="block w-full rounded-md border border-edge-input bg-input py-2 pl-9 pr-3 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+          className="block w-full rounded-md border border-edge-input bg-input py-2 pl-9 pr-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
         />
       </div>
 
       {isOpen && debouncedQuery.length >= 2 && (
         <div className="absolute z-50 mt-1 max-h-56 w-full overflow-auto rounded-md border border-edge bg-card shadow-lg shadow-black/30">
           {isLoading ? (
-            <div className="px-4 py-3 text-sm text-slate-500">Searching...</div>
+            <div className="px-4 py-3 text-sm text-[var(--color-text-muted)]">Searching...</div>
           ) : results && results.length > 0 ? (
             results.map((company) => (
               <button
@@ -110,10 +110,10 @@ export function CompanyCombobox({
                 onClick={() => handleSelect(company)}
                 className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-surface"
               >
-                <Building2 className="h-4 w-4 shrink-0 text-slate-600" />
+                <Building2 className="h-4 w-4 shrink-0 text-[var(--color-text-muted)]" />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-medium text-slate-200">{company.name}</div>
-                  <div className="truncate text-xs text-slate-600">
+                  <div className="truncate font-medium text-[var(--color-text)]">{company.name}</div>
+                  <div className="truncate text-xs text-[var(--color-text-muted)]">
                     {[company.headquarters, company.size].filter(Boolean).join(' · ')}
                   </div>
                 </div>
@@ -125,7 +125,7 @@ export function CompanyCombobox({
               </button>
             ))
           ) : (
-            <div className="px-4 py-3 text-sm text-slate-500">No companies found</div>
+            <div className="px-4 py-3 text-sm text-[var(--color-text-muted)]">No companies found</div>
           )}
         </div>
       )}

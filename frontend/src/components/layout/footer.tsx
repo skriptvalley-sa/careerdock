@@ -6,56 +6,56 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div>
-            <h3 className="text-sm font-semibold text-slate-100">Product</h3>
+            <h3 className="text-sm font-semibold text-[var(--color-text)]">Product</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <Link href="/companies" className="text-sm text-slate-400 hover:text-slate-200">
+                <Link href="/companies" className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
                   Company Directory
                 </Link>
               </li>
               <li>
-                <Link href="/pricing" className="text-sm text-slate-400 hover:text-slate-200">
+                <Link href="/pricing" className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
                   Pricing
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-100">Features</h3>
+            <h3 className="text-sm font-semibold text-[var(--color-text)]">Features</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <span className="text-sm text-slate-400">ATS Scoring</span>
+                <span className="text-sm text-[var(--color-text-muted)]">ATS Scoring</span>
               </li>
               <li>
-                <span className="text-sm text-slate-400">Company Lists</span>
+                <span className="text-sm text-[var(--color-text-muted)]">Company Lists</span>
               </li>
               <li>
-                <span className="text-sm text-slate-400">Application Tracking</span>
+                <span className="text-sm text-[var(--color-text-muted)]">Application Tracking</span>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-100">Resources</h3>
+            <h3 className="text-sm font-semibold text-[var(--color-text)]">Resources</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <span className="text-sm text-slate-400">Blog (coming soon)</span>
+                <span className="text-sm text-[var(--color-text-muted)]">Blog (coming soon)</span>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-100">Legal</h3>
+            <h3 className="text-sm font-semibold text-[var(--color-text)]">Legal</h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <span className="text-sm text-slate-400">Privacy Policy</span>
+                <span className="text-sm text-[var(--color-text-muted)]">Privacy Policy</span>
               </li>
               <li>
-                <span className="text-sm text-slate-400">Terms of Service</span>
+                <span className="text-sm text-[var(--color-text-muted)]">Terms of Service</span>
               </li>
             </ul>
           </div>
         </div>
         <div className="mt-8 border-t border-edge pt-8 text-center">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-[var(--color-text-muted)]">
             &copy; {new Date().getFullYear()} CareerDock by SkriptValley. All rights reserved.
           </p>
         </div>

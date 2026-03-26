@@ -60,16 +60,16 @@ export default function SettingsPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-slate-100">Settings</h1>
-        <p className="mt-1 text-sm text-slate-500">Manage your profile and account</p>
+        <h1 className="text-2xl font-bold text-[var(--color-text)]">Settings</h1>
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">Manage your profile and account</p>
       </div>
 
       {/* Profile section */}
       <section className="rounded-lg border border-edge bg-card p-6">
-        <h2 className="text-lg font-semibold text-slate-100">Profile</h2>
+        <h2 className="text-lg font-semibold text-[var(--color-text)]">Profile</h2>
         <form onSubmit={handleProfileSubmit} className="mt-4 space-y-4">
           <div>
-            <label htmlFor="settings-name" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="settings-name" className="block text-sm font-medium text-[var(--color-text)]">
               Name
             </label>
             <input
@@ -77,11 +77,11 @@ export default function SettingsPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+              className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
             />
           </div>
           <div>
-            <label htmlFor="settings-email" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="settings-email" className="block text-sm font-medium text-[var(--color-text)]">
               Email
             </label>
             <input
@@ -89,11 +89,11 @@ export default function SettingsPage() {
               type="email"
               value={user?.email ?? ''}
               disabled
-              className="mt-1 block w-full max-w-md rounded-md border border-edge bg-overlay px-3 py-2 text-sm text-slate-500"
+              className="mt-1 block w-full max-w-md rounded-md border border-edge bg-overlay px-3 py-2 text-sm text-[var(--color-text-muted)]"
             />
           </div>
           <div>
-            <label htmlFor="settings-title" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="settings-title" className="block text-sm font-medium text-[var(--color-text)]">
               Current Title
             </label>
             <input
@@ -102,18 +102,18 @@ export default function SettingsPage() {
               value={currentTitle}
               onChange={(e) => setCurrentTitle(e.target.value)}
               placeholder="e.g., Senior Software Engineer"
-              className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+              className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
             />
           </div>
           <div>
-            <label htmlFor="settings-level" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="settings-level" className="block text-sm font-medium text-[var(--color-text)]">
               Experience Level
             </label>
             <select
               id="settings-level"
               value={experienceLevel}
               onChange={(e) => setExperienceLevel(e.target.value)}
-              className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+              className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
             >
               <option value="">Select...</option>
               <option value="fresher">Fresher</option>
@@ -127,7 +127,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={updateProfile.isPending}
-              className="btn-neon rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+              className="btn-primary rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
             >
               {updateProfile.isPending ? 'Saving...' : 'Save profile'}
             </button>
@@ -145,10 +145,10 @@ export default function SettingsPage() {
 
       {/* Password section */}
       <section className="rounded-lg border border-edge bg-card p-6">
-        <h2 className="text-lg font-semibold text-slate-100">Change Password</h2>
+        <h2 className="text-lg font-semibold text-[var(--color-text)]">Change Password</h2>
         <form onSubmit={handlePasswordSubmit} className="mt-4 space-y-4">
           <div>
-            <label htmlFor="current-pw" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="current-pw" className="block text-sm font-medium text-[var(--color-text)]">
               Current Password
             </label>
             <input
@@ -156,11 +156,11 @@ export default function SettingsPage() {
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+              className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
             />
           </div>
           <div>
-            <label htmlFor="new-pw" className="block text-sm font-medium text-slate-300">
+            <label htmlFor="new-pw" className="block text-sm font-medium text-[var(--color-text)]">
               New Password
             </label>
             <input
@@ -168,9 +168,9 @@ export default function SettingsPage() {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+              className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
             />
-            <p className="mt-1 text-xs text-slate-600">
+            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
               Min 8 characters, 1 uppercase, 1 lowercase, 1 digit
             </p>
           </div>
@@ -178,7 +178,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={!currentPassword || !newPassword || changePassword.isPending}
-              className="btn-neon rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+              className="btn-primary rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
             >
               {changePassword.isPending ? 'Changing...' : 'Change password'}
             </button>
@@ -197,7 +197,7 @@ export default function SettingsPage() {
       {/* Danger zone */}
       <section className="rounded-lg border border-red-900/50 bg-card p-6">
         <h2 className="text-lg font-semibold text-red-400">Danger Zone</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           Deleting your account is irreversible. Your data will be permanently removed after 30 days.
         </p>
         {!showDelete ? (
@@ -210,7 +210,7 @@ export default function SettingsPage() {
         ) : (
           <form onSubmit={handleDeleteAccount} className="mt-4 space-y-3">
             <div>
-              <label htmlFor="delete-pw" className="block text-sm font-medium text-slate-300">
+              <label htmlFor="delete-pw" className="block text-sm font-medium text-[var(--color-text)]">
                 Confirm your password
               </label>
               <input
@@ -218,7 +218,7 @@ export default function SettingsPage() {
                 type="password"
                 value={deletePassword}
                 onChange={(e) => setDeletePassword(e.target.value)}
-                className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+                className="mt-1 block w-full max-w-md rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
               />
             </div>
             <div className="flex gap-3">
@@ -235,7 +235,7 @@ export default function SettingsPage() {
                   setShowDelete(false);
                   setDeletePassword('');
                 }}
-                className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-slate-300 hover:bg-overlay"
+                className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:bg-overlay"
               >
                 Cancel
               </button>

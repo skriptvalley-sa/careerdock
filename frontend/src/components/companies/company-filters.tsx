@@ -18,8 +18,8 @@ const HIRING_OPTIONS = [
 const TIER_OPTIONS = [
   { value: 'tier_1', label: 'T1 (>40L)', color: 'border-amber-500 text-amber-400 bg-amber-900/20' },
   { value: 'tier_2', label: 'T2 (20-40L)', color: 'border-green-500 text-green-400 bg-green-900/20' },
-  { value: 'tier_3', label: 'T3 (10-20L)', color: 'border-[#00f0ff]/50 text-[#00f0ff] bg-[#00f0ff]/10' },
-  { value: 'tier_4', label: 'T4 (5-10L)', color: 'border-purple-500 text-purple-400 bg-purple-900/20' },
+  { value: 'tier_3', label: 'T3 (10-20L)', color: 'border-[var(--color-primary)]/50 text-[var(--color-primary)] bg-[var(--color-primary)]/10' },
+  { value: 'tier_4', label: 'T4 (5-10L)', color: 'border-[var(--color-edge-hover)] text-[var(--color-text-muted)] bg-[var(--color-primary)]/10' },
 ];
 
 const SORT_OPTIONS = [
@@ -85,7 +85,7 @@ export function CompanyFilters({ values, onChange }: CompanyFiltersProps) {
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
                 active
                   ? tier.color
-                  : 'border-edge text-slate-600 hover:border-edge-hover hover:text-slate-400'
+                  : 'border-edge text-[var(--color-text-muted)] hover:border-edge-hover hover:text-[var(--color-text-muted)]'
               }`}
             >
               {tier.label}
@@ -108,7 +108,7 @@ export function CompanyFilters({ values, onChange }: CompanyFiltersProps) {
           className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
             values.has_rsu === 'true'
               ? 'border-green-700 bg-green-900/30 text-green-400'
-              : 'border-edge text-slate-600 hover:border-edge-hover hover:text-slate-400'
+              : 'border-edge text-[var(--color-text-muted)] hover:border-edge-hover hover:text-[var(--color-text-muted)]'
           }`}
         >
           RSU
@@ -132,8 +132,8 @@ export function CompanyFilters({ values, onChange }: CompanyFiltersProps) {
               }
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
                 active
-                  ? 'border-slate-500 bg-slate-800 text-slate-200'
-                  : 'border-edge text-slate-600 hover:border-edge-hover hover:text-slate-400'
+                  ? 'border-slate-500 bg-slate-800 text-[var(--color-text)]'
+                  : 'border-edge text-[var(--color-text-muted)] hover:border-edge-hover hover:text-[var(--color-text-muted)]'
               }`}
             >
               {opt.label}
@@ -162,7 +162,7 @@ export function CompanyFilters({ values, onChange }: CompanyFiltersProps) {
                   ? opt.value === 'active'
                     ? 'border-green-700 bg-green-900/30 text-green-400'
                     : 'border-yellow-700 bg-yellow-900/30 text-yellow-400'
-                  : 'border-edge text-slate-600 hover:border-edge-hover hover:text-slate-400'
+                  : 'border-edge text-[var(--color-text-muted)] hover:border-edge-hover hover:text-[var(--color-text-muted)]'
               }`}
             >
               {opt.label}
@@ -178,7 +178,7 @@ export function CompanyFilters({ values, onChange }: CompanyFiltersProps) {
           <select
             value={values.sort}
             onChange={(e) => onChange({ ...values, sort: e.target.value })}
-            className="rounded-md border border-edge bg-input px-2.5 py-1 text-xs text-slate-300 focus:border-[#00f0ff]/50 focus:outline-none"
+            className="rounded-md border border-edge bg-input px-2.5 py-1 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -189,7 +189,7 @@ export function CompanyFilters({ values, onChange }: CompanyFiltersProps) {
           <button
             type="button"
             onClick={() => onChange({ ...values, order: values.order === 'asc' ? 'desc' : 'asc' })}
-            className="rounded-md border border-edge px-2.5 py-1 text-xs text-slate-400 hover:bg-card"
+            className="rounded-md border border-edge px-2.5 py-1 text-xs text-[var(--color-text-muted)] hover:bg-card"
           >
             {values.order === 'desc' ? '↓' : '↑'}
           </button>
@@ -202,7 +202,7 @@ export function CompanyFilters({ values, onChange }: CompanyFiltersProps) {
           <button
             type="button"
             onClick={clearFilters}
-            className="flex items-center gap-1 text-xs text-[#00f0ff] hover:text-[#00f0ff]/80"
+            className="flex items-center gap-1 text-xs text-[var(--color-primary)] hover:text-[var(--color-primary)]/80"
           >
             <X className="h-3 w-3" />
             Clear filters

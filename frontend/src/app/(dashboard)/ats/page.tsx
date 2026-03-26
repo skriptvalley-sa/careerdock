@@ -47,7 +47,7 @@ function checkLabel(check: ATSCheck) {
 }
 
 function checkIcon(type: ATSCheck['check_type']) {
-  if (type === 'company') return <Building2 className="h-4 w-4 text-[#00f0ff]" />;
+  if (type === 'company') return <Building2 className="h-4 w-4 text-[var(--color-primary)]" />;
   if (type === 'job') return <FileText className="h-4 w-4 text-[#e040fb]" />;
   return <FileScan className="h-4 w-4 text-[#39ff14]" />;
 }
@@ -59,7 +59,7 @@ function ATSCheckRow({ check }: { check: ATSCheck }) {
   return (
     <button
       onClick={() => router.push(`/ats/${check.id}`)}
-      className="flex w-full items-center gap-4 rounded-lg border border-edge bg-card p-4 text-left transition-all card-neon-hover"
+      className="flex w-full items-center gap-4 rounded-lg border border-edge bg-card p-4 text-left transition-all card-hover"
     >
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-edge">
         {checkIcon(check.check_type)}
@@ -67,7 +67,7 @@ function ATSCheckRow({ check }: { check: ATSCheck }) {
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-200 truncate">
+          <span className="text-sm font-medium text-[var(--color-text)] truncate">
             {checkLabel(check)}
           </span>
           {complete ? (
@@ -80,7 +80,7 @@ function ATSCheckRow({ check }: { check: ATSCheck }) {
             </span>
           )}
         </div>
-        <p className="mt-0.5 text-xs text-slate-500">
+        <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
           {new Date(check.created_at).toLocaleDateString('en-IN', {
             day: 'numeric',
             month: 'short',
@@ -95,7 +95,7 @@ function ATSCheckRow({ check }: { check: ATSCheck }) {
         </div>
       )}
 
-      <ChevronRight className="h-4 w-4 shrink-0 text-slate-600" />
+      <ChevronRight className="h-4 w-4 shrink-0 text-[var(--color-text-muted)]" />
     </button>
   );
 }
@@ -194,27 +194,27 @@ export default function ATSPage() {
   const modeButtonClass = (m: CheckMode, active: boolean) => {
     const base = 'flex flex-1 items-center justify-center gap-2 py-2 text-sm font-medium transition-all';
     if (active) {
-      if (m === 'company') return `${base} bg-[#00f0ff]/10 text-[#00f0ff]`;
+      if (m === 'company') return `${base} bg-[var(--color-primary)]/10 text-[var(--color-primary)]`;
       if (m === 'job') return `${base} bg-[#e040fb]/10 text-[#e040fb]`;
       return `${base} bg-[#39ff14]/10 text-[#39ff14]`;
     }
-    return `${base} text-slate-400 hover:text-slate-200`;
+    return `${base} text-[var(--color-text-muted)] hover:text-[var(--color-text)]`;
   };
 
   return (
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">ATS Check</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">ATS Check</h1>
+          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
             Score your resume against a company, job description, or on its own.
           </p>
         </div>
         {credits && (
           <div className="hidden sm:flex items-center gap-2 rounded-lg border border-edge bg-card px-3 py-2">
-            <ScanSearch className="h-4 w-4 text-slate-500" />
-            <span className="text-xs text-slate-500">ATS credits:</span>
-            <span className="text-sm font-bold text-[#00f0ff]">{credits.ats_check}</span>
+            <ScanSearch className="h-4 w-4 text-[var(--color-text-muted)]" />
+            <span className="text-xs text-[var(--color-text-muted)]">ATS credits:</span>
+            <span className="text-sm font-bold text-[var(--color-primary)]">{credits.ats_check}</span>
           </div>
         )}
       </div>
@@ -234,13 +234,13 @@ export default function ATSPage() {
         {/* Resume selector — hidden in resume-only + upload source */}
         {(mode !== 'resume' || resumeSource === 'slot') && (
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
               Resume
             </label>
             {readyResumes.length === 0 ? (
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-[var(--color-text-muted)]">
                 No ready resumes.{' '}
-                <a href="/resumes" className="text-[#00f0ff] hover:underline">
+                <a href="/resumes" className="text-[var(--color-primary)] hover:underline">
                   Upload one first
                 </a>
                 .
@@ -249,7 +249,7 @@ export default function ATSPage() {
               <select
                 value={resumeId}
                 onChange={(e) => setResumeId(e.target.value)}
-                className="block w-full rounded-md border border-edge-input bg-input py-2 px-3 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+                className="block w-full rounded-md border border-edge-input bg-input py-2 px-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
               >
                 <option value="">Select a resume…</option>
                 {readyResumes.map((r) => (
@@ -265,7 +265,7 @@ export default function ATSPage() {
 
         {/* Mode toggle — 3 modes */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
             Check type
           </label>
           <div className="flex rounded-md border border-edge overflow-hidden">
@@ -296,7 +296,7 @@ export default function ATSPage() {
         {/* Company or JD input — hidden for resume-only mode */}
         {mode === 'company' && (
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
               Company
             </label>
             <CompanyCombobox value={company} onChange={setCompany} />
@@ -305,7 +305,7 @@ export default function ATSPage() {
 
         {mode === 'job' && (
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
               Job Description
             </label>
             <textarea
@@ -313,7 +313,7 @@ export default function ATSPage() {
               onChange={(e) => setJobDescription(e.target.value)}
               placeholder="Paste the full job description here…"
               rows={8}
-              className="block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30 resize-y"
+              className="block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30 resize-y"
             />
             <p
               className={`mt-1 text-right text-xs ${
@@ -321,7 +321,7 @@ export default function ATSPage() {
                   ? 'text-red-400'
                   : jdLength < 100 && jdLength > 0
                     ? 'text-[#ffb800]'
-                    : 'text-slate-600'
+                    : 'text-[var(--color-text-muted)]'
               }`}
             >
               {jdLength.toLocaleString()} / 10,000
@@ -331,7 +331,7 @@ export default function ATSPage() {
 
         {mode === 'resume' && (
           <div className="space-y-3">
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[var(--color-text-muted)]">
               Evaluates general ATS compatibility — formatting, keyword density, structure — without targeting a specific company or role.
             </p>
 
@@ -343,7 +343,7 @@ export default function ATSPage() {
                 className={`flex flex-1 items-center justify-center gap-1.5 py-2 transition-all ${
                   resumeSource === 'slot'
                     ? 'bg-[#39ff14]/10 text-[#39ff14]'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
                 }`}
               >
                 <FileScan className="h-3.5 w-3.5" /> From my slots
@@ -354,7 +354,7 @@ export default function ATSPage() {
                 className={`flex flex-1 items-center justify-center gap-1.5 py-2 border-l border-edge transition-all ${
                   resumeSource === 'upload'
                     ? 'bg-[#39ff14]/10 text-[#39ff14]'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
                 }`}
               >
                 <Upload className="h-3.5 w-3.5" /> Upload a PDF
@@ -394,13 +394,13 @@ export default function ATSPage() {
                 {tempFile ? (
                   <div className="flex flex-col items-center gap-1">
                     <FileScan className="h-6 w-6 text-[#39ff14]" />
-                    <p className="text-sm font-medium text-slate-200">{tempFile.name}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-sm font-medium text-[var(--color-text)]">{tempFile.name}</p>
+                    <p className="text-xs text-[var(--color-text-muted)]">
                       {(tempFile.size / 1024).toFixed(0)} KB —{' '}
                       <button
                         type="button"
                         onClick={() => { setTempFile(null); setTempFileError(null); }}
-                        className="text-[#00f0ff] hover:underline"
+                        className="text-[var(--color-primary)] hover:underline"
                       >
                         change
                       </button>
@@ -408,8 +408,8 @@ export default function ATSPage() {
                   </div>
                 ) : (
                   <>
-                    <Upload className="mx-auto h-7 w-7 text-slate-600" />
-                    <p className="mt-2 text-sm text-slate-400">
+                    <Upload className="mx-auto h-7 w-7 text-[var(--color-text-muted)]" />
+                    <p className="mt-2 text-sm text-[var(--color-text-muted)]">
                       Drop PDF here or{' '}
                       <button
                         type="button"
@@ -419,7 +419,7 @@ export default function ATSPage() {
                         browse
                       </button>
                     </p>
-                    <p className="mt-1 text-xs text-slate-600">PDF, max 5 MB — not saved to your slots</p>
+                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">PDF, max 5 MB — not saved to your slots</p>
                   </>
                 )}
                 {tempFileError && (
@@ -441,7 +441,7 @@ export default function ATSPage() {
             // Need at least one ready resume unless in resume+upload mode
             (mode !== 'resume' || resumeSource !== 'upload') && readyResumes.length === 0
           }
-          className="btn-neon w-full rounded-md py-2.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-primary w-full rounded-md py-2.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isPending ? (
             <span className="flex items-center justify-center gap-2">
@@ -465,18 +465,18 @@ export default function ATSPage() {
 
       {/* History */}
       <div className="mt-10">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
           Recent Checks
         </h2>
         <div className="mt-3 space-y-3">
           {checksLoading ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-[#00f0ff]" />
+              <Loader2 className="h-6 w-6 animate-spin text-[var(--color-primary)]" />
             </div>
           ) : !checks || checks.length === 0 ? (
             <div className="rounded-lg border border-dashed border-edge p-8 text-center">
-              <ScanSearch className="mx-auto h-10 w-10 text-slate-600" />
-              <p className="mt-3 text-sm text-slate-500">No checks yet. Run your first ATS check above.</p>
+              <ScanSearch className="mx-auto h-10 w-10 text-[var(--color-text-muted)]" />
+              <p className="mt-3 text-sm text-[var(--color-text-muted)]">No checks yet. Run your first ATS check above.</p>
             </div>
           ) : (
             checks.map((check) => <ATSCheckRow key={check.id} check={check} />)

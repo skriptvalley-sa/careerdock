@@ -130,7 +130,7 @@ export default function ListDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00f0ff] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--color-primary)] border-t-transparent" />
       </div>
     );
   }
@@ -138,10 +138,10 @@ export default function ListDetailPage() {
   if (!list) {
     return (
       <div className="py-12 text-center">
-        <p className="text-slate-500">List not found.</p>
+        <p className="text-[var(--color-text-muted)]">List not found.</p>
         <button
           onClick={() => router.push('/lists')}
-          className="mt-4 text-sm text-[#00f0ff] hover:text-[#00f0ff]/80"
+          className="mt-4 text-sm text-[var(--color-primary)] hover:text-[var(--color-primary)]/80"
         >
           Back to lists
         </button>
@@ -155,13 +155,13 @@ export default function ListDetailPage() {
         <div>
           <button
             onClick={() => guardedNavigate('/lists')}
-            className="mb-2 text-sm text-slate-500 hover:text-slate-300"
+            className="mb-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           >
             &larr; Back to lists
           </button>
-          <h1 className="text-2xl font-bold text-slate-100">{list.name}</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">{list.name}</h1>
           {list.description && (
-            <p className="mt-1 text-sm text-slate-500">{list.description}</p>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">{list.description}</p>
           )}
         </div>
 
@@ -172,7 +172,7 @@ export default function ListDetailPage() {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-slate-300 hover:bg-overlay"
+                className="rounded-md border border-edge px-4 py-2 text-sm font-medium text-[var(--color-text)] hover:bg-overlay"
               >
                 Cancel
               </button>
@@ -180,7 +180,7 @@ export default function ListDetailPage() {
                 type="button"
                 onClick={handleHeaderSave}
                 disabled={!hasUnsavedChanges || syncEntries.isPending}
-                className="btn-neon rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
+                className="btn-primary rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50"
               >
                 {syncEntries.isPending ? 'Saving...' : 'Save Changes'}
               </button>
@@ -188,7 +188,7 @@ export default function ListDetailPage() {
           ) : (
             <button
               onClick={() => setShowBrowser(true)}
-              className="btn-neon rounded-md px-4 py-2 text-sm font-medium"
+              className="btn-primary rounded-md px-4 py-2 text-sm font-medium"
             >
               Edit List
             </button>
@@ -211,7 +211,7 @@ export default function ListDetailPage() {
       {/* Entry table — company-centric columns */}
       {list.entries.length === 0 && !showBrowser ? (
         <div className="mt-8 rounded-lg border border-dashed border-edge p-12 text-center">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-[var(--color-text-muted)]">
             No companies yet. Click &quot;Edit List&quot; to start adding companies.
           </p>
         </div>
@@ -220,16 +220,16 @@ export default function ListDetailPage() {
           <table className="min-w-full divide-y divide-edge">
             <thead className="bg-overlay">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                   Company
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                   Status
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-500">
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                   Applications
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-500">
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                   Add
                 </th>
               </tr>
@@ -242,12 +242,12 @@ export default function ListDetailPage() {
                     {entry.company_slug ? (
                       <Link
                         href={`/companies/${entry.company_slug}`}
-                        className="text-sm font-medium text-[#00f0ff] hover:text-[#00f0ff]/80 hover:underline"
+                        className="text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary)]/80 hover:underline"
                       >
                         {entry.company_name || entry.company_id.slice(0, 8) + '...'}
                       </Link>
                     ) : (
-                      <div className="text-sm font-medium text-slate-100">
+                      <div className="text-sm font-medium text-[var(--color-text)]">
                         {entry.company_name || entry.company_id.slice(0, 8) + '...'}
                       </div>
                     )}
@@ -263,7 +263,7 @@ export default function ListDetailPage() {
                         }
                         onBlur={() => setEditingCompanyStatus(null)}
                         autoFocus
-                        className="rounded-md border border-edge-input bg-input px-2 py-1 text-xs text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none"
+                        className="rounded-md border border-edge-input bg-input px-2 py-1 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none"
                       >
                         {ALL_COMPANY_STATUSES.map((s) => (
                           <option key={s} value={s}>
@@ -283,13 +283,13 @@ export default function ListDetailPage() {
                     {entry.application_count > 0 ? (
                       <Link
                         href={`/applications?company=${entry.company_id}`}
-                        className="inline-flex items-center gap-1 rounded-full bg-[#00f0ff]/10 px-2.5 py-0.5 text-xs font-medium text-[#00f0ff] hover:bg-[#00f0ff]/20 transition-colors"
+                        className="inline-flex items-center gap-1 rounded-full bg-[var(--color-primary)]/10 px-2.5 py-0.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20 transition-colors"
                       >
                         {entry.application_count}
                         <ExternalLink className="h-3 w-3" />
                       </Link>
                     ) : (
-                      <span className="text-xs text-slate-600">—</span>
+                      <span className="text-xs text-[var(--color-text-muted)]">—</span>
                     )}
                   </td>
 
@@ -302,7 +302,7 @@ export default function ListDetailPage() {
                           name: entry.company_name,
                         })
                       }
-                      className="inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1 text-xs font-medium text-slate-400 hover:border-[#00f0ff]/30 hover:bg-surface hover:text-[#00f0ff] transition-colors"
+                      className="inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1 text-xs font-medium text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/30 hover:bg-surface hover:text-[var(--color-primary)] transition-colors"
                     >
                       <Plus className="h-3 w-3" />
                       Add

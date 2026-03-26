@@ -47,18 +47,18 @@ export default function AdminUsersPage() {
   };
 
   const inputClass =
-    'block w-full rounded-md border border-edge-input bg-input py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30';
+    'block w-full rounded-md border border-edge-input bg-input py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30';
 
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-100">Users</h1>
-        <span className="text-sm text-slate-500">{total} total</span>
+        <h1 className="text-xl font-bold text-[var(--color-text)]">Users</h1>
+        <span className="text-sm text-[var(--color-text-muted)]">{total} total</span>
       </div>
 
       <div className="mt-4 flex gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
           <input
             type="text"
             value={search}
@@ -83,27 +83,27 @@ export default function AdminUsersPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-edge bg-overlay text-left">
-              <th className="px-4 py-3 font-medium text-slate-400">Name</th>
-              <th className="px-4 py-3 font-medium text-slate-400">Email</th>
-              <th className="px-4 py-3 font-medium text-slate-400">Role</th>
-              <th className="px-4 py-3 font-medium text-slate-400">Premium</th>
-              <th className="px-4 py-3 font-medium text-slate-400">Status</th>
-              <th className="px-4 py-3 font-medium text-slate-400">Joined</th>
-              <th className="px-4 py-3 font-medium text-slate-400">Actions</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Name</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Email</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Role</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Premium</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Status</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Joined</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Actions</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-[var(--color-text-muted)]">
                   <div className="flex items-center justify-center">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#00f0ff] border-t-transparent" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
                   </div>
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-[var(--color-text-muted)]">
                   No users found.
                 </td>
               </tr>
@@ -113,14 +113,14 @@ export default function AdminUsersPage() {
                 const isPremium = !!u.premium_since;
                 return (
                   <tr key={u.id} className={`border-b border-edge ${isBanned ? 'opacity-50' : 'hover:bg-card/50'}`}>
-                    <td className="px-4 py-3 font-medium text-slate-200">{u.name}</td>
-                    <td className="px-4 py-3 text-slate-400">{u.email}</td>
+                    <td className="px-4 py-3 font-medium text-[var(--color-text)]">{u.name}</td>
+                    <td className="px-4 py-3 text-[var(--color-text-muted)]">{u.email}</td>
                     <td className="px-4 py-3">
                       <select
                         value={u.role}
                         onChange={(e) => handleRoleChange(u, e.target.value)}
                         disabled={updateUser.isPending}
-                        className="rounded border border-edge bg-input px-2 py-1 text-xs text-slate-300"
+                        className="rounded border border-edge bg-input px-2 py-1 text-xs text-[var(--color-text)]"
                       >
                         <option value="user">user</option>
                         <option value="moderator">moderator</option>
@@ -133,7 +133,7 @@ export default function AdminUsersPage() {
                           <Crown className="h-3 w-3" /> Premium
                         </span>
                       ) : (
-                        <span className="text-xs text-slate-500">Free</span>
+                        <span className="text-xs text-[var(--color-text-muted)]">Free</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -147,7 +147,7 @@ export default function AdminUsersPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-slate-500">
+                    <td className="px-4 py-3 text-[var(--color-text-muted)]">
                       {new Date(u.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
@@ -171,7 +171,7 @@ export default function AdminUsersPage() {
                           className={`rounded-md p-1.5 ${
                             isPremium
                               ? 'text-amber-400 hover:bg-amber-500/10'
-                              : 'text-slate-400 hover:bg-card'
+                              : 'text-[var(--color-text-muted)] hover:bg-card'
                           }`}
                         >
                           <Crown className="h-4 w-4" />
@@ -179,7 +179,7 @@ export default function AdminUsersPage() {
                         <button
                           onClick={() => setCreditTarget(u)}
                           title="Allocate credits"
-                          className="rounded-md p-1.5 text-[#00f0ff] hover:bg-[#00f0ff]/10"
+                          className="rounded-md p-1.5 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10"
                         >
                           <Coins className="h-4 w-4" />
                         </button>

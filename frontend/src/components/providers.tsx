@@ -1,5 +1,6 @@
 'use client';
 
+import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
@@ -82,10 +83,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useServiceWorker();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SidebarContext.Provider value={sidebar}>
-        <AuthProvider>{children}</AuthProvider>
-      </SidebarContext.Provider>
-    </QueryClientProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange={false}>
+      <QueryClientProvider client={queryClient}>
+        <SidebarContext.Provider value={sidebar}>
+          <AuthProvider>{children}</AuthProvider>
+        </SidebarContext.Provider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

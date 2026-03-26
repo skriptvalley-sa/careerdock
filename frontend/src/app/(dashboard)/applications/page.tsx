@@ -60,15 +60,15 @@ export default function ApplicationsPage() {
     <div>
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">All Applications</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">All Applications</h1>
+          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
             Track all your applications across every company in one place.
           </p>
         </div>
         <button
           type="button"
           onClick={() => setShowAddModal(true)}
-          className="btn-neon inline-flex shrink-0 items-center gap-2 rounded-md px-4 py-2 text-sm font-medium"
+          className="btn-primary inline-flex shrink-0 items-center gap-2 rounded-md px-4 py-2 text-sm font-medium"
         >
           <Plus className="h-4 w-4" />
           Add Application
@@ -84,8 +84,8 @@ export default function ApplicationsPage() {
             onClick={() => handleFilterChange('')}
             className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
               !statusFilter
-                ? 'border-[#00f0ff]/50 bg-[#00f0ff]/10 text-[#00f0ff]'
-                : 'border-edge text-slate-600 hover:border-edge-hover hover:text-slate-400'
+                ? 'border-[var(--color-primary)]/50 bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
+                : 'border-edge text-[var(--color-text-muted)] hover:border-edge-hover hover:text-[var(--color-text-muted)]'
             }`}
           >
             All
@@ -97,8 +97,8 @@ export default function ApplicationsPage() {
               onClick={() => handleFilterChange(s)}
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-all ${
                 statusFilter === s
-                  ? 'border-[#00f0ff]/50 bg-[#00f0ff]/10 text-[#00f0ff]'
-                  : 'border-edge text-slate-600 hover:border-edge-hover hover:text-slate-400'
+                  ? 'border-[var(--color-primary)]/50 bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
+                  : 'border-edge text-[var(--color-text-muted)] hover:border-edge-hover hover:text-[var(--color-text-muted)]'
               }`}
             >
               {getStatusLabel(s)}
@@ -112,7 +112,7 @@ export default function ApplicationsPage() {
             <select
               value={companyFilter}
               onChange={(e) => setCompanyFilter(e.target.value)}
-              className="appearance-none rounded-full border border-edge bg-overlay py-1 pl-3 pr-8 text-xs font-medium text-slate-400 transition-all hover:border-edge-hover hover:text-slate-300 focus:border-[#00f0ff]/50 focus:text-[#00f0ff] focus:outline-none"
+              className="appearance-none rounded-full border border-edge bg-overlay py-1 pl-3 pr-8 text-xs font-medium text-[var(--color-text-muted)] transition-all hover:border-edge-hover hover:text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:text-[var(--color-primary)] focus:outline-none"
             >
               <option value="">All Companies</option>
               {uniqueCompanies.map((c) => (
@@ -121,20 +121,20 @@ export default function ApplicationsPage() {
                 </option>
               ))}
             </select>
-            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-500" />
+            <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[var(--color-text-muted)]" />
           </div>
         )}
       </div>
 
       {isLoading && (
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#00f0ff] border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--color-primary)] border-t-transparent" />
         </div>
       )}
 
       {!isLoading && filtered && filtered.length === 0 && (
         <div className="rounded-lg border border-dashed border-edge p-12 text-center">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-[var(--color-text-muted)]">
             {statusFilter || companyFilter
               ? 'No applications match the selected filters.'
               : 'No applications yet. Add applications from a list detail page.'}
@@ -147,19 +147,19 @@ export default function ApplicationsPage() {
           <table className="min-w-full divide-y divide-edge">
             <thead className="bg-overlay">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                   Company
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                   Role
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
                   Status
                 </th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 md:table-cell">
+                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] md:table-cell">
                   Date Applied
                 </th>
-                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 lg:table-cell">
+                <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] lg:table-cell">
                   Notes
                 </th>
               </tr>
@@ -168,12 +168,12 @@ export default function ApplicationsPage() {
               {filtered.map((app) => (
                 <tr key={app.id} className="hover:bg-surface">
                   <td className="whitespace-nowrap px-4 py-3">
-                    <div className="text-sm font-medium text-slate-100">
+                    <div className="text-sm font-medium text-[var(--color-text)]">
                       {app.company_name || app.company_id.slice(0, 8) + '...'}
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
-                    <div className="text-sm text-slate-300">{app.role_title || '-'}</div>
+                    <div className="text-sm text-[var(--color-text)]">{app.role_title || '-'}</div>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
                     {editingEntry === app.id ? (
@@ -184,7 +184,7 @@ export default function ApplicationsPage() {
                         }
                         onBlur={() => setEditingEntry(null)}
                         autoFocus
-                        className="rounded-md border border-edge-input bg-input px-2 py-1 text-xs text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none"
+                        className="rounded-md border border-edge-input bg-input px-2 py-1 text-xs text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none"
                       >
                         {ALL_STATUSES.filter((s) => s !== 'not_applied').map((s) => (
                           <option key={s} value={s}>
@@ -198,10 +198,10 @@ export default function ApplicationsPage() {
                       </button>
                     )}
                   </td>
-                  <td className="hidden whitespace-nowrap px-4 py-3 text-sm text-slate-500 md:table-cell">
+                  <td className="hidden whitespace-nowrap px-4 py-3 text-sm text-[var(--color-text-muted)] md:table-cell">
                     {app.date_applied || '-'}
                   </td>
-                  <td className="hidden max-w-xs truncate px-4 py-3 text-sm text-slate-500 lg:table-cell">
+                  <td className="hidden max-w-xs truncate px-4 py-3 text-sm text-[var(--color-text-muted)] lg:table-cell">
                     {app.notes || '-'}
                   </td>
                 </tr>
@@ -212,7 +212,7 @@ export default function ApplicationsPage() {
       )}
 
       {filtered && filtered.length > 0 && (
-        <div className="mt-4 text-xs text-slate-600">
+        <div className="mt-4 text-xs text-[var(--color-text-muted)]">
           {filtered.length} application{filtered.length !== 1 ? 's' : ''}
           {statusFilter ? ` with status "${getStatusLabel(statusFilter as ApplicationStatus)}"` : ''}
           {companyFilter

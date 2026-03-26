@@ -66,13 +66,13 @@ function AddToListButton({ companyId, companyName }: { companyId: string; compan
         type="button"
         onClick={() => setOpen((v) => !v)}
         title={`Add ${companyName} to a list`}
-        className="inline-flex items-center gap-1 rounded-md border border-edge px-2 py-1 text-xs font-medium text-slate-400 hover:border-[#00f0ff]/30 hover:bg-surface hover:text-[#00f0ff] transition-colors"
+        className="inline-flex items-center gap-1 rounded-md border border-edge px-2 py-1 text-xs font-medium text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/30 hover:bg-surface hover:text-[var(--color-primary)] transition-colors"
       >
         <Plus className="h-3 w-3" />
       </button>
       {open && (
         <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border border-edge bg-overlay shadow-lg">
-          <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+          <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
             Add to list
           </p>
           {lists.map((list) => (
@@ -80,7 +80,7 @@ function AddToListButton({ companyId, companyName }: { companyId: string; compan
               key={list.id}
               onClick={() => handleAdd(list.id)}
               disabled={createEntry.isPending}
-              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-300 hover:bg-surface hover:text-[#00f0ff] transition-colors"
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[var(--color-text)] hover:bg-surface hover:text-[var(--color-primary)] transition-colors"
             >
               {list.name}
             </button>
@@ -94,12 +94,12 @@ function AddToListButton({ companyId, companyName }: { companyId: string; compan
 function RankedCompanyCard({ company, rank }: { company: RankedCompany; rank: number }) {
   return (
     <div className="flex items-start gap-4 rounded-lg border border-edge bg-card p-4">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-edge text-xs font-bold text-slate-500">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-edge text-xs font-bold text-[var(--color-text-muted)]">
         {rank}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-3">
-          <h4 className="font-semibold text-slate-100">{company.name}</h4>
+          <h4 className="font-semibold text-[var(--color-text)]">{company.name}</h4>
           <div className="flex items-center gap-2">
             <span className={`shrink-0 text-sm font-bold ${scoreColor(company.match_score)}`}>
               {company.match_score}%
@@ -107,12 +107,12 @@ function RankedCompanyCard({ company, rank }: { company: RankedCompany; rank: nu
             <AddToListButton companyId={company.company_id} companyName={company.name} />
           </div>
         </div>
-        <p className="mt-1 text-sm text-slate-400">{company.recommendation}</p>
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">{company.recommendation}</p>
         {company.match_reasons.length > 0 && (
           <ul className="mt-2 space-y-0.5">
             {company.match_reasons.map((reason, i) => (
-              <li key={i} className="flex items-start gap-1.5 text-xs text-slate-500">
-                <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-[#00f0ff]/50" />
+              <li key={i} className="flex items-start gap-1.5 text-xs text-[var(--color-text-muted)]">
+                <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-[var(--color-primary)]/50" />
                 {reason}
               </li>
             ))}
@@ -155,7 +155,7 @@ function InlineNameEditor({ list }: { list: CuratedList }) {
               setEditing(false);
             }
           }}
-          className="rounded-md border border-edge-input bg-input px-2 py-0.5 text-sm font-semibold text-slate-100 focus:border-[#00f0ff]/50 focus:outline-none"
+          className="rounded-md border border-edge-input bg-input px-2 py-0.5 text-sm font-semibold text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none"
         />
         <button onClick={handleSave} className="text-[#39ff14] hover:text-[#39ff14]/80">
           <Check className="h-3.5 w-3.5" />
@@ -165,7 +165,7 @@ function InlineNameEditor({ list }: { list: CuratedList }) {
             setName(list.name || 'Curated List');
             setEditing(false);
           }}
-          className="text-slate-500 hover:text-slate-300"
+          className="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -175,10 +175,10 @@ function InlineNameEditor({ list }: { list: CuratedList }) {
 
   return (
     <div className="flex items-center gap-1.5">
-      <p className="text-sm font-semibold text-slate-100">{list.name || 'Curated List'}</p>
+      <p className="text-sm font-semibold text-[var(--color-text)]">{list.name || 'Curated List'}</p>
       <button
         onClick={() => setEditing(true)}
-        className="text-slate-600 hover:text-slate-300 transition-colors"
+        className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
         title="Rename"
       >
         <Pencil className="h-3 w-3" />
@@ -208,11 +208,11 @@ function CuratedListCard({ list }: { list: CuratedList }) {
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full border border-edge">
-            <Sparkles className="h-4 w-4 text-[#00f0ff]" />
+            <Sparkles className="h-4 w-4 text-[var(--color-primary)]" />
           </div>
           <div>
             <InlineNameEditor list={list} />
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[var(--color-text-muted)]">
               {new Date(list.created_at).toLocaleDateString('en-IN', {
                 day: 'numeric',
                 month: 'short',
@@ -223,7 +223,7 @@ function CuratedListCard({ list }: { list: CuratedList }) {
         </div>
         <div className="flex items-center gap-3">
           {complete ? (
-            <span className="text-sm font-semibold text-[#00f0ff]">
+            <span className="text-sm font-semibold text-[var(--color-primary)]">
               {companies.length} companies
             </span>
           ) : (
@@ -243,7 +243,7 @@ function CuratedListCard({ list }: { list: CuratedList }) {
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="text-xs text-slate-500 hover:text-slate-300"
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
               >
                 Cancel
               </button>
@@ -251,7 +251,7 @@ function CuratedListCard({ list }: { list: CuratedList }) {
           ) : (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="text-slate-600 hover:text-red-400 transition-colors"
+              className="text-[var(--color-text-muted)] hover:text-red-400 transition-colors"
               title="Delete list"
             >
               <Trash2 className="h-4 w-4" />
@@ -264,7 +264,7 @@ function CuratedListCard({ list }: { list: CuratedList }) {
       {!complete && (
         <div className="border-t border-edge px-4 py-6 text-center">
           <Loader2 className="mx-auto h-6 w-6 animate-spin text-[#ffb800]" />
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-[var(--color-text-muted)]">
             AI is ranking companies for your profile. This page will update automatically.
           </p>
         </div>
@@ -280,7 +280,7 @@ function CuratedListCard({ list }: { list: CuratedList }) {
           {hasMore && (
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="flex w-full items-center justify-center gap-2 rounded-md border border-edge py-2 text-sm text-slate-400 hover:text-slate-200 transition-all"
+              className="flex w-full items-center justify-center gap-2 rounded-md border border-edge py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all"
             >
               {expanded ? (
                 <>
@@ -338,23 +338,23 @@ export default function CuratedListsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Curated Lists</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">Curated Lists</h1>
+          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
             AI-ranked company recommendations based on your resume.
           </p>
         </div>
         <div className="flex items-center gap-3">
           {credits && (
             <div className="hidden sm:flex items-center gap-2 rounded-lg border border-edge bg-card px-3 py-2">
-              <Sparkles className="h-4 w-4 text-slate-500" />
-              <span className="text-xs text-slate-500">Credits:</span>
-              <span className="text-sm font-bold text-[#00f0ff]">{credits.curated_list}</span>
+              <Sparkles className="h-4 w-4 text-[var(--color-text-muted)]" />
+              <span className="text-xs text-[var(--color-text-muted)]">Credits:</span>
+              <span className="text-sm font-bold text-[var(--color-primary)]">{credits.curated_list}</span>
             </div>
           )}
           <button
             onClick={() => setShowForm((v) => !v)}
             disabled={(credits?.curated_list ?? 0) === 0}
-            className="btn-neon rounded-md px-4 py-2 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary rounded-md px-4 py-2 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="flex items-center gap-2">
               <Sparkles className="h-4 w-4" />
@@ -368,9 +368,9 @@ export default function CuratedListsPage() {
       {showForm && (
         <form
           onSubmit={handleGenerate}
-          className="mt-4 rounded-lg border border-[#00f0ff]/30 bg-[#00f0ff]/5 p-5 space-y-4"
+          className="mt-4 rounded-lg border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/5 p-5 space-y-4"
         >
-          <h2 className="text-sm font-semibold text-slate-200">
+          <h2 className="text-sm font-semibold text-[var(--color-text)]">
             Select resume to curate against
           </h2>
 
@@ -382,9 +382,9 @@ export default function CuratedListsPage() {
           )}
 
           {readyResumes.length === 0 ? (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-[var(--color-text-muted)]">
               No ready resumes.{' '}
-              <a href="/resumes" className="text-[#00f0ff] hover:underline">
+              <a href="/resumes" className="text-[var(--color-primary)] hover:underline">
                 Upload one first
               </a>
               .
@@ -393,7 +393,7 @@ export default function CuratedListsPage() {
             <select
               value={resumeId}
               onChange={(e) => setResumeId(e.target.value)}
-              className="block w-full rounded-md border border-edge-input bg-input py-2 px-3 text-sm text-slate-200 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+              className="block w-full rounded-md border border-edge-input bg-input py-2 px-3 text-sm text-[var(--color-text)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
             >
               <option value="">Select a resume…</option>
               {readyResumes.map((r) => (
@@ -409,7 +409,7 @@ export default function CuratedListsPage() {
             <button
               type="submit"
               disabled={generate.isPending || readyResumes.length === 0}
-              className="btn-neon flex-1 rounded-md py-2 text-sm font-semibold disabled:opacity-50"
+              className="btn-primary flex-1 rounded-md py-2 text-sm font-semibold disabled:opacity-50"
             >
               {generate.isPending ? (
                 <span className="flex items-center justify-center gap-2">
@@ -425,7 +425,7 @@ export default function CuratedListsPage() {
                 setShowForm(false);
                 setError(null);
               }}
-              className="rounded-md border border-edge px-4 py-2 text-sm text-slate-400 hover:text-slate-200 transition-all"
+              className="rounded-md border border-edge px-4 py-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-all"
             >
               Cancel
             </button>
@@ -447,13 +447,13 @@ export default function CuratedListsPage() {
       <div className="mt-8 space-y-4">
         {isLoading ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-[#00f0ff]" />
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)]" />
           </div>
         ) : !lists || lists.length === 0 ? (
           <div className="rounded-lg border border-dashed border-edge p-12 text-center">
-            <Building2 className="mx-auto h-12 w-12 text-slate-600" />
-            <p className="mt-3 text-sm text-slate-400">No curated lists yet.</p>
-            <p className="mt-1 text-xs text-slate-600">
+            <Building2 className="mx-auto h-12 w-12 text-[var(--color-text-muted)]" />
+            <p className="mt-3 text-sm text-[var(--color-text-muted)]">No curated lists yet.</p>
+            <p className="mt-1 text-xs text-[var(--color-text-muted)]">
               Generate your first list to see AI-ranked company recommendations.
             </p>
           </div>

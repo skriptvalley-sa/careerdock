@@ -101,29 +101,29 @@ function PricingCard({
     <div
       className={`flex flex-col rounded-xl border p-8 ${
         plan.highlight
-          ? 'border-[#00f0ff]/40 shadow-lg shadow-[#00f0ff]/5 ring-1 ring-[#00f0ff]/30 glow-cyan'
-          : 'border-edge card-neon-hover'
+          ? 'border-[var(--color-primary)]/40 shadow-lg shadow-[var(--color-primary)]/5 ring-1 ring-[var(--color-primary)]/30 glow-primary'
+          : 'border-edge card-hover'
       }`}
     >
       {plan.highlight && (
-        <span className="-mt-12 mb-4 self-start rounded-full bg-[#00f0ff]/15 border border-[#00f0ff]/30 px-3 py-1 text-xs font-semibold text-[#00f0ff]">
+        <span className="-mt-12 mb-4 self-start rounded-full bg-[var(--color-primary)]/15 border border-[var(--color-primary)]/30 px-3 py-1 text-xs font-semibold text-[var(--color-primary)]">
           Most Popular
         </span>
       )}
-      <h3 className="text-lg font-semibold text-slate-100">{plan.name}</h3>
-      <p className="mt-1 text-sm text-slate-500">{plan.description}</p>
+      <h3 className="text-lg font-semibold text-[var(--color-text)]">{plan.name}</h3>
+      <p className="mt-1 text-sm text-[var(--color-text-muted)]">{plan.description}</p>
       <div className="mt-6">
-        <span className="text-4xl font-bold text-slate-100">
+        <span className="text-4xl font-bold text-[var(--color-text)]">
           {plan.price === '0' ? 'Free' : `₹${plan.price}`}
         </span>
         {plan.price !== '0' && (
-          <span className="text-sm text-slate-500"> one-time</span>
+          <span className="text-sm text-[var(--color-text-muted)]"> one-time</span>
         )}
       </div>
       <ul className="mt-8 flex-1 space-y-3">
         {plan.features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm text-slate-300">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#00f0ff]" />
+          <li key={f} className="flex items-start gap-2 text-sm text-[var(--color-text)]">
+            <Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" />
             {f}
           </li>
         ))}
@@ -133,7 +133,7 @@ function PricingCard({
         <button
           onClick={(cta as { action?: () => void }).action}
           disabled={buying}
-          className="mt-8 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold btn-neon disabled:opacity-50 disabled:cursor-not-allowed"
+          className="mt-8 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {buying ? (
             <>
@@ -152,8 +152,8 @@ function PricingCard({
           href={cta.href}
           className={`mt-8 block rounded-lg px-4 py-2.5 text-center text-sm font-semibold ${
             plan.highlight
-              ? 'btn-neon'
-              : 'border border-[#00f0ff]/20 text-[#00f0ff] hover:bg-[#00f0ff]/5 hover:border-[#00f0ff]/40 transition-all'
+              ? 'btn-primary'
+              : 'border border-[var(--color-primary)]/20 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 hover:border-[var(--color-primary)]/40 transition-all'
           }`}
         >
           {cta.label}
@@ -162,8 +162,8 @@ function PricingCard({
         <span
           className={`mt-8 block rounded-lg px-4 py-2.5 text-center text-sm font-semibold opacity-50 ${
             plan.highlight
-              ? 'border border-[#00f0ff]/30 text-[#00f0ff]'
-              : 'border border-edge text-slate-400'
+              ? 'border border-[var(--color-primary)]/30 text-[var(--color-primary)]'
+              : 'border border-edge text-[var(--color-text-muted)]'
           }`}
         >
           {cta.label}
@@ -201,7 +201,7 @@ export default function PricingPage() {
           email: user?.email,
         },
         theme: {
-          color: '#00f0ff',
+          color: '#FD802E',
         },
         handler: async (response: RazorpayPaymentResponse) => {
           try {
@@ -232,10 +232,10 @@ export default function PricingPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-slate-100">
+        <h1 className="text-3xl font-bold text-[var(--color-text)]">
           Simple, transparent pricing
         </h1>
-        <p className="mt-4 text-lg text-slate-400">
+        <p className="mt-4 text-lg text-[var(--color-text-muted)]">
           Start free. Pay once for AI features. No subscriptions.
         </p>
       </div>
@@ -265,31 +265,31 @@ export default function PricingPage() {
 
       {/* Credit Packs — only shown for premium users */}
       <section className="mt-16">
-        <h2 className="text-center text-xl font-bold text-slate-100">
+        <h2 className="text-center text-xl font-bold text-[var(--color-text)]">
           Need more credits?
         </h2>
-        <p className="mt-2 text-center text-sm text-slate-400">
+        <p className="mt-2 text-center text-sm text-[var(--color-text-muted)]">
           Buy additional AI credits a la carte after your Starter Pack.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {creditPacks.map((pack) => (
             <div
               key={pack.productType}
-              className="card-neon-hover rounded-lg border border-edge p-6 text-center"
+              className="card-hover rounded-lg border border-edge p-6 text-center"
             >
-              <div className="text-lg font-semibold text-slate-100">
+              <div className="text-lg font-semibold text-[var(--color-text)]">
                 {pack.name}
               </div>
-              <div className="mt-1 text-2xl font-bold text-[#00f0ff]">
+              <div className="mt-1 text-2xl font-bold text-[var(--color-primary)]">
                 ₹{pack.price}
               </div>
-              <p className="mt-1 text-xs text-slate-500">{pack.description}</p>
+              <p className="mt-1 text-xs text-[var(--color-text-muted)]">{pack.description}</p>
 
               {isAuthenticated && isPremium ? (
                 <button
                   onClick={() => handleBuy(pack.productType)}
                   disabled={buyingProduct === pack.productType}
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-[#00f0ff]/20 px-3 py-1.5 text-xs font-medium text-[#00f0ff] hover:bg-[#00f0ff]/5 hover:border-[#00f0ff]/40 transition-all disabled:opacity-50"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-primary)]/20 px-3 py-1.5 text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 hover:border-[var(--color-primary)]/40 transition-all disabled:opacity-50"
                 >
                   {buyingProduct === pack.productType ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -299,13 +299,13 @@ export default function PricingPage() {
                   Buy
                 </button>
               ) : isAuthenticated && !isPremium ? (
-                <p className="mt-4 text-xs text-slate-500">
+                <p className="mt-4 text-xs text-[var(--color-text-muted)]">
                   Get the Starter Pack first
                 </p>
               ) : (
                 <Link
                   href="/register"
-                  className="mt-4 inline-block text-xs text-[#00f0ff] hover:underline"
+                  className="mt-4 inline-block text-xs text-[var(--color-primary)] hover:underline"
                 >
                   Sign up
                 </Link>
@@ -317,10 +317,10 @@ export default function PricingPage() {
 
       {/* FAQ hint */}
       <section className="mt-16 text-center">
-        <h2 className="text-xl font-bold text-slate-100">Questions?</h2>
-        <p className="mt-2 text-sm text-slate-400">
+        <h2 className="text-xl font-bold text-[var(--color-text)]">Questions?</h2>
+        <p className="mt-2 text-sm text-[var(--color-text-muted)]">
           Reach out at{' '}
-          <span className="font-medium text-slate-100">
+          <span className="font-medium text-[var(--color-text)]">
             support@careerdock.in
           </span>{' '}
           and we&apos;ll get back to you within 24 hours.

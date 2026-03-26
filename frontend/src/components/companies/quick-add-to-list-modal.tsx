@@ -55,13 +55,13 @@ export function QuickAddToListModal({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-edge px-4 py-3">
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-slate-100">Add to list</h3>
-            <p className="mt-0.5 truncate text-xs text-slate-500">{companyName}</p>
+            <h3 className="text-sm font-semibold text-[var(--color-text)]">Add to list</h3>
+            <p className="mt-0.5 truncate text-xs text-[var(--color-text-muted)]">{companyName}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="ml-3 text-slate-400 hover:text-slate-200"
+            className="ml-3 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -71,10 +71,10 @@ export function QuickAddToListModal({
         <div className="max-h-[300px] overflow-y-auto p-2">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#00f0ff] border-t-transparent" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
             </div>
           ) : !lists || lists.length === 0 ? (
-            <div className="py-8 text-center text-sm text-slate-500">
+            <div className="py-8 text-center text-sm text-[var(--color-text-muted)]">
               No lists yet. Create a list first.
             </div>
           ) : (
@@ -88,7 +88,7 @@ export function QuickAddToListModal({
                   className="flex w-full items-center justify-between rounded-md px-3 py-2.5 transition-colors hover:bg-surface"
                 >
                   {/* List name */}
-                  <span className="truncate text-sm text-slate-200">{list.name}</span>
+                  <span className="truncate text-sm text-[var(--color-text)]">{list.name}</span>
 
                   {/* Action button — far right, single-icon */}
                   <button
@@ -99,7 +99,7 @@ export function QuickAddToListModal({
                     title={inList ? 'Remove from list' : 'Add to list'}
                   >
                     {isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                      <Loader2 className="h-4 w-4 animate-spin text-[var(--color-text-muted)]" />
                     ) : inList ? (
                       <>
                         {/* Default: green check. Hover: red X */}
@@ -113,7 +113,7 @@ export function QuickAddToListModal({
                     ) : (
                       <>
                         {/* Default: empty circle. Hover: green + */}
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 text-slate-600 group-hover/btn:hidden">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-700 text-[var(--color-text-muted)] group-hover/btn:hidden">
                           <Circle className="h-3 w-3" />
                         </span>
                         <span className="hidden h-6 w-6 items-center justify-center rounded-full bg-green-500/20 text-green-400 group-hover/btn:flex">

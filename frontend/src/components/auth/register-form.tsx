@@ -39,8 +39,8 @@ export function RegisterForm() {
   return (
     <div className="rounded-lg border border-edge bg-card p-8 shadow-sm">
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold text-slate-100">Create your account</h1>
-        <p className="mt-1 text-sm text-slate-500">Start tracking your job applications</p>
+        <h1 className="text-2xl font-bold text-[var(--color-text)]">Create your account</h1>
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">Start tracking your job applications</p>
       </div>
 
       {error && (
@@ -49,7 +49,7 @@ export function RegisterForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-slate-300">
+          <label htmlFor="name" className="block text-sm font-medium text-[var(--color-text)]">
             Full name
           </label>
           <input
@@ -57,7 +57,7 @@ export function RegisterForm() {
             type="text"
             autoComplete="name"
             {...register('name')}
-            className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 shadow-sm focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+            className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
           />
           {errors.name && (
             <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>
@@ -65,7 +65,7 @@ export function RegisterForm() {
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-slate-300">
+          <label htmlFor="email" className="block text-sm font-medium text-[var(--color-text)]">
             Email
           </label>
           <input
@@ -73,7 +73,7 @@ export function RegisterForm() {
             type="email"
             autoComplete="email"
             {...register('email')}
-            className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 shadow-sm focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+            className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
           />
           {errors.email && (
             <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
@@ -81,7 +81,7 @@ export function RegisterForm() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-slate-300">
+          <label htmlFor="password" className="block text-sm font-medium text-[var(--color-text)]">
             Password
           </label>
           <input
@@ -89,12 +89,12 @@ export function RegisterForm() {
             type="password"
             autoComplete="new-password"
             {...register('password')}
-            className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 shadow-sm focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+            className="mt-1 block w-full rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] shadow-sm focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
           />
           {errors.password && (
             <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
           )}
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-[var(--color-text-muted)]">
             Min 8 chars, 1 uppercase, 1 lowercase, 1 digit
           </p>
         </div>
@@ -102,15 +102,15 @@ export function RegisterForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="btn-neon w-full rounded-md px-4 py-2 text-sm font-medium shadow-sm disabled:opacity-50"
+          className="btn-primary w-full rounded-md px-4 py-2 text-sm font-medium shadow-sm disabled:opacity-50"
         >
           {isSubmitting ? 'Creating account...' : 'Create account'}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-slate-500">
+      <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
         Already have an account?{' '}
-        <Link href="/login" className="font-medium text-[#00f0ff] hover:text-[#00f0ff]/80">
+        <Link href="/login" className="font-medium text-[var(--color-primary)] hover:text-[var(--color-primary)]/80">
           Sign in
         </Link>
       </p>

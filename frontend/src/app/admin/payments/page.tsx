@@ -27,13 +27,13 @@ export default function AdminPaymentsPage() {
   const txns = txnData?.data ?? [];
 
   const inputClass =
-    'block rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30';
+    'block rounded-md border border-edge-input bg-input px-3 py-2 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30';
 
   const formatAmount = (paise: number) => `\u20B9${(paise / 100).toFixed(2)}`;
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-slate-100">Payments & Credits</h1>
+      <h1 className="text-xl font-bold text-[var(--color-text)]">Payments & Credits</h1>
 
       {/* Tab bar */}
       <div className="mt-4 flex gap-1 rounded-lg border border-edge bg-overlay p-1">
@@ -41,8 +41,8 @@ export default function AdminPaymentsPage() {
           onClick={() => setTab('payments')}
           className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
             tab === 'payments'
-              ? 'bg-[#00f0ff]/10 text-[#00f0ff]'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
+              : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
           }`}
         >
           Payments ({paymentData?.total ?? 0})
@@ -51,8 +51,8 @@ export default function AdminPaymentsPage() {
           onClick={() => setTab('credits')}
           className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
             tab === 'credits'
-              ? 'bg-[#00f0ff]/10 text-[#00f0ff]'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
+              : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
           }`}
         >
           Credit Transactions ({txnData?.total ?? 0})
@@ -102,37 +102,37 @@ export default function AdminPaymentsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-edge bg-overlay text-left">
-                <th className="px-4 py-3 font-medium text-slate-400">User ID</th>
-                <th className="px-4 py-3 font-medium text-slate-400">Product</th>
-                <th className="px-4 py-3 font-medium text-slate-400">Amount</th>
-                <th className="px-4 py-3 font-medium text-slate-400">Status</th>
-                <th className="px-4 py-3 font-medium text-slate-400">Razorpay Order</th>
-                <th className="px-4 py-3 font-medium text-slate-400">Date</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">User ID</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Product</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Amount</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Status</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Razorpay Order</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Date</th>
               </tr>
             </thead>
             <tbody>
               {paymentsLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-[var(--color-text-muted)]">
                     <div className="flex items-center justify-center">
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#00f0ff] border-t-transparent" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
                     </div>
                   </td>
                 </tr>
               ) : payments.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-[var(--color-text-muted)]">
                     No payments found.
                   </td>
                 </tr>
               ) : (
                 payments.map((p) => (
                   <tr key={p.id} className="border-b border-edge hover:bg-card/50">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-400">
+                    <td className="px-4 py-3 font-mono text-xs text-[var(--color-text-muted)]">
                       {p.user_id.slice(0, 8)}...
                     </td>
-                    <td className="px-4 py-3 text-slate-300">{p.product_type}</td>
-                    <td className="px-4 py-3 text-slate-200">{formatAmount(p.amount_paise)}</td>
+                    <td className="px-4 py-3 text-[var(--color-text)]">{p.product_type}</td>
+                    <td className="px-4 py-3 text-[var(--color-text)]">{formatAmount(p.amount_paise)}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -141,17 +141,17 @@ export default function AdminPaymentsPage() {
                             : p.status === 'failed'
                               ? 'bg-red-500/15 text-red-400'
                               : p.status === 'refunded'
-                                ? 'bg-purple-500/15 text-purple-400'
-                                : 'bg-slate-500/15 text-slate-400'
+                                ? 'bg-[var(--color-primary)]/15 text-[var(--color-primary)]'
+                                : 'bg-slate-500/15 text-[var(--color-text-muted)]'
                         }`}
                       >
                         {p.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-500">
+                    <td className="px-4 py-3 font-mono text-xs text-[var(--color-text-muted)]">
                       {p.razorpay_order_id}
                     </td>
-                    <td className="px-4 py-3 text-slate-500">
+                    <td className="px-4 py-3 text-[var(--color-text-muted)]">
                       {new Date(p.created_at).toLocaleDateString()}
                     </td>
                   </tr>
@@ -168,36 +168,36 @@ export default function AdminPaymentsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-edge bg-overlay text-left">
-                <th className="px-4 py-3 font-medium text-slate-400">User ID</th>
-                <th className="px-4 py-3 font-medium text-slate-400">Type</th>
-                <th className="px-4 py-3 font-medium text-slate-400">Amount</th>
-                <th className="px-4 py-3 font-medium text-slate-400">Balance After</th>
-                <th className="px-4 py-3 font-medium text-slate-400">Reason</th>
-                <th className="px-4 py-3 font-medium text-slate-400">Date</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">User ID</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Type</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Amount</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Balance After</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Reason</th>
+                <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Date</th>
               </tr>
             </thead>
             <tbody>
               {txnsLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-[var(--color-text-muted)]">
                     <div className="flex items-center justify-center">
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#00f0ff] border-t-transparent" />
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
                     </div>
                   </td>
                 </tr>
               ) : txns.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-[var(--color-text-muted)]">
                     No credit transactions found.
                   </td>
                 </tr>
               ) : (
                 txns.map((t) => (
                   <tr key={t.id} className="border-b border-edge hover:bg-card/50">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-400">
+                    <td className="px-4 py-3 font-mono text-xs text-[var(--color-text-muted)]">
                       {t.user_id.slice(0, 8)}...
                     </td>
-                    <td className="px-4 py-3 text-slate-300">{t.credit_type}</td>
+                    <td className="px-4 py-3 text-[var(--color-text)]">{t.credit_type}</td>
                     <td className="px-4 py-3">
                       <span
                         className={
@@ -208,11 +208,11 @@ export default function AdminPaymentsPage() {
                         {t.amount}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-300">{t.balance_after}</td>
-                    <td className="max-w-[250px] truncate px-4 py-3 text-slate-500">
+                    <td className="px-4 py-3 text-[var(--color-text)]">{t.balance_after}</td>
+                    <td className="max-w-[250px] truncate px-4 py-3 text-[var(--color-text-muted)]">
                       {t.reason}
                     </td>
-                    <td className="px-4 py-3 text-slate-500">
+                    <td className="px-4 py-3 text-[var(--color-text-muted)]">
                       {new Date(t.created_at).toLocaleDateString()}
                     </td>
                   </tr>

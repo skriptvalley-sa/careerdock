@@ -4,13 +4,13 @@ const statusConfig: Record<
   ApplicationStatus,
   { label: string; className: string }
 > = {
-  not_applied: { label: 'Not Applied', className: 'bg-slate-800/60 text-slate-400 border border-slate-700' },
-  applied: { label: 'Applied', className: 'bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff]/20' },
+  not_applied: { label: 'Not Applied', className: 'bg-slate-800/60 text-[var(--color-text-muted)] border border-slate-700' },
+  applied: { label: 'Applied', className: 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20' },
   phone_screen: { label: 'Phone Screen', className: 'bg-[#ff00e5]/10 text-[#e040fb] border border-[#ff00e5]/20' },
   interview: { label: 'Interview', className: 'bg-[#ffb800]/10 text-[#ffb800] border border-[#ffb800]/20' },
   offer: { label: 'Offer', className: 'bg-[#39ff14]/10 text-[#39ff14] border border-[#39ff14]/20' },
   rejected: { label: 'Rejected', className: 'bg-red-900/30 text-red-400 border border-red-800/30' },
-  accepted: { label: 'Accepted', className: 'bg-[#39ff14]/15 text-[#39ff14] border border-[#39ff14]/30 glow-green' },
+  accepted: { label: 'Accepted', className: 'bg-[#39ff14]/15 text-[#39ff14] border border-[#39ff14]/30' },
   withdrawn: { label: 'Withdrawn', className: 'bg-orange-900/30 text-orange-400 border border-orange-800/30' },
 };
 

@@ -72,8 +72,8 @@ export default function AdminCompaniesPage() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-100">Companies</h1>
-        <button onClick={handleCreate} className="btn-neon flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
+        <h1 className="text-xl font-bold text-[var(--color-text)]">Companies</h1>
+        <button onClick={handleCreate} className="btn-primary flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium">
           <Plus className="h-4 w-4" />
           Create
         </button>
@@ -98,13 +98,13 @@ export default function AdminCompaniesPage() {
       )}
 
       <div className="relative mt-4">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search companies..."
-          className="block w-full rounded-md border border-edge-input bg-input py-2 pl-10 pr-3 text-sm text-slate-200 placeholder:text-slate-600 focus:border-[#00f0ff]/50 focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/30"
+          className="block w-full rounded-md border border-edge-input bg-input py-2 pl-10 pr-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/30"
         />
       </div>
 
@@ -117,27 +117,27 @@ export default function AdminCompaniesPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-edge bg-overlay text-left">
-              <th className="px-4 py-3 font-medium text-slate-400">Name</th>
-              <th className="px-4 py-3 font-medium text-slate-400">Slug</th>
-              <th className="px-4 py-3 font-medium text-slate-400">Size</th>
-              <th className="px-4 py-3 font-medium text-slate-400">HQ</th>
-              <th className="px-4 py-3 font-medium text-slate-400">Hiring</th>
-              <th className="px-4 py-3 font-medium text-slate-400">Tech Stack</th>
-              <th className="px-4 py-3 font-medium text-slate-400" />
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Name</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Slug</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Size</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">HQ</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Hiring</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]">Tech Stack</th>
+              <th className="px-4 py-3 font-medium text-[var(--color-text-muted)]" />
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-[var(--color-text-muted)]">
                   <div className="flex items-center justify-center">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#00f0ff] border-t-transparent" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
                   </div>
                 </td>
               </tr>
             ) : companies.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-[var(--color-text-muted)]">
                   No companies found.
                 </td>
               </tr>
@@ -148,10 +148,10 @@ export default function AdminCompaniesPage() {
                   className="border-b border-edge hover:bg-card/50"
                   onClick={() => deleteConfirmId && setDeleteConfirmId(null)}
                 >
-                  <td className="px-4 py-3 font-medium text-slate-200">{c.name}</td>
-                  <td className="px-4 py-3 text-slate-400">{c.slug}</td>
-                  <td className="px-4 py-3 text-slate-400">{c.size || '-'}</td>
-                  <td className="px-4 py-3 text-slate-400">{c.headquarters || '-'}</td>
+                  <td className="px-4 py-3 font-medium text-[var(--color-text)]">{c.name}</td>
+                  <td className="px-4 py-3 text-[var(--color-text-muted)]">{c.slug}</td>
+                  <td className="px-4 py-3 text-[var(--color-text-muted)]">{c.size || '-'}</td>
+                  <td className="px-4 py-3 text-[var(--color-text-muted)]">{c.headquarters || '-'}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -159,13 +159,13 @@ export default function AdminCompaniesPage() {
                           ? 'bg-green-500/15 text-green-400'
                           : c.hiring_status === 'paused'
                             ? 'bg-amber-500/15 text-amber-400'
-                            : 'bg-slate-500/15 text-slate-400'
+                            : 'bg-slate-500/15 text-[var(--color-text-muted)]'
                       }`}
                     >
                       {c.hiring_status}
                     </span>
                   </td>
-                  <td className="max-w-[200px] truncate px-4 py-3 text-slate-500">
+                  <td className="max-w-[200px] truncate px-4 py-3 text-[var(--color-text-muted)]">
                     {c.tech_stack.slice(0, 3).join(', ')}
                     {c.tech_stack.length > 3 && ` +${c.tech_stack.length - 3}`}
                   </td>
@@ -173,7 +173,7 @@ export default function AdminCompaniesPage() {
                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => handleEdit(c)}
-                        className="rounded-md p-1.5 text-slate-400 hover:bg-card hover:text-slate-200"
+                        className="rounded-md p-1.5 text-[var(--color-text-muted)] hover:bg-card hover:text-[var(--color-text)]"
                         title="Edit"
                       >
                         <Pencil className="h-4 w-4" />
@@ -190,7 +190,7 @@ export default function AdminCompaniesPage() {
                       ) : (
                         <button
                           onClick={() => handleDelete(c.id, c.name)}
-                          className="rounded-md p-1.5 text-slate-500 hover:bg-card hover:text-red-400"
+                          className="rounded-md p-1.5 text-[var(--color-text-muted)] hover:bg-card hover:text-red-400"
                           title="Delete company"
                         >
                           <Trash2 className="h-4 w-4" />
