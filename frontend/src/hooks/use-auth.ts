@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { useAuthStore } from '@/store/auth-store';
@@ -27,6 +28,7 @@ interface LoginInput {
  */
 export function useAuth() {
   const { setUser, logout: storeLogout } = useAuthStore();
+  const qc = useQueryClient();
   const router = useRouter();
 
   const register = useCallback(
@@ -53,9 +55,11 @@ export function useAuth() {
     } catch {
       // Ignore errors — clear local state regardless
     }
+    await qc.cancelQueries();
+    qc.clear();
     storeLogout();
     router.push('/login');
-  }, [storeLogout, router]);
+  }, [qc, storeLogout, router]);
 
   const forgotPassword = useCallback(async (email: string) => {
     await apiClient.post('/api/auth/forgot-password', { email });

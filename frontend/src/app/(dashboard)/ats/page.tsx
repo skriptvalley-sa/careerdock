@@ -17,6 +17,7 @@ import {
 import { useResumes } from '@/hooks/use-resumes';
 import { useCreditBalance } from '@/hooks/use-payments';
 import { useATSChecks, useCheckCompany, useCheckJob, useCheckResume, useCheckResumeTempUpload, isATSComplete } from '@/hooks/use-ats';
+import { CreditUpsellBanner } from '@/components/credits/credit-upsell-banner';
 import { CompanyCombobox } from '@/components/companies/company-combobox';
 import type { ATSCheck } from '@/types/api';
 
@@ -452,15 +453,7 @@ export default function ATSPage() {
           )}
         </button>
 
-        {(credits?.ats_check ?? 0) === 0 && (
-          <p className="text-center text-xs text-[var(--color-warning)]">
-            No ATS credits.{' '}
-            <a href="/pricing" className="underline hover:text-[var(--color-warning)]/80">
-              Buy more
-            </a>
-            .
-          </p>
-        )}
+        {(credits?.ats_check ?? 0) === 0 && <CreditUpsellBanner creditType="ats_check" />}
       </form>
 
       {/* History */}

@@ -8,16 +8,14 @@ import {
   List,
   Briefcase,
   Building2,
-  Settings,
   ChevronLeft,
   ChevronRight,
   LogIn,
-  DollarSign,
   FileText,
   ScanSearch,
+  ShoppingBag,
   Sparkles,
-  ShieldCheck,
-  Shield,
+  Tag,
   X,
 } from 'lucide-react';
 import { CreditBalance } from '@/components/credit-balance';
@@ -30,37 +28,30 @@ interface SidebarProps {
   onCloseMobile: () => void;
 }
 
-const authedNavItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/lists', label: 'My Lists', icon: List },
-  { href: '/applications', label: 'Applications', icon: Briefcase },
-  { href: '/resumes', label: 'Resumes', icon: FileText },
-  { href: '/ats', label: 'ATS Check', icon: ScanSearch },
-  { href: '/curated-lists', label: 'Curated Lists', icon: Sparkles },
-  { href: '/companies', label: 'Companies', icon: Building2 },
-  { href: '/pricing', label: 'Pricing', icon: DollarSign },
-  { href: '/settings', label: 'Settings', icon: Settings },
-];
+function getAuthedNavItems(isPremium: boolean) {
+  return [
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/lists', label: 'My Lists', icon: List },
+    { href: '/applications', label: 'Applications', icon: Briefcase },
+    { href: '/resumes', label: 'Resumes', icon: FileText },
+    { href: '/ats', label: 'ATS Check', icon: ScanSearch },
+    { href: '/curated-lists', label: 'Curated Lists', icon: Sparkles },
+    { href: '/companies', label: 'Companies', icon: Building2 },
+    ...(isPremium
+      ? [{ href: '/shop', label: 'Credit Shop', icon: ShoppingBag }]
+      : [{ href: '/pricing', label: 'Pricing', icon: Tag }]),
+  ];
+}
 
 const publicNavItems = [
   { href: '/companies', label: 'Companies', icon: Building2 },
-  { href: '/pricing', label: 'Pricing', icon: DollarSign },
+  { href: '/pricing', label: 'Pricing', icon: Tag },
 ];
 
 export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
   const { isAuthenticated, user } = useAuthStore();
-
-  const isAdmin = user?.role === 'admin';
-  const isModerator = user?.role === 'moderator' || user?.role === 'admin';
-  const navItems = isAuthenticated
-    ? (() => {
-        const items = [...authedNavItems];
-        if (isModerator) items.push({ href: '/moderator', label: 'Moderator', icon: Shield });
-        if (isAdmin) items.push({ href: '/admin', label: 'Admin', icon: ShieldCheck });
-        return items;
-      })()
-    : publicNavItems;
+  const navItems = isAuthenticated ? getAuthedNavItems(!!user?.premium_since) : publicNavItems;
 
   const sidebarContent = (
     <div className="flex h-full flex-col">
@@ -115,36 +106,6 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
       {isAuthenticated && (
         <div className="px-3 pb-2">
           <CreditBalance collapsed={collapsed} />
-        </div>
-      )}
-
-      {/* User info at bottom (authenticated only) */}
-      {isAuthenticated && user && (
-        <div className="border-t border-edge p-3">
-          <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3'}`}>
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/15 text-sm font-medium text-[var(--color-primary)]">
-              {user.name?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
-            {!collapsed && (
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <p className="truncate text-sm font-medium text-[var(--color-text)]">
-                    {user.name}
-                  </p>
-                  {(user.role === 'moderator' || user.role === 'admin') && (
-                    <span className={`shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold uppercase ${
-                      user.role === 'admin'
-                        ? 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]'
-                        : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'
-                    }`}>
-                      {user.role === 'admin' ? 'Admin' : 'Mod'}
-                    </span>
-                  )}
-                </div>
-                <p className="truncate text-xs text-[var(--color-text-muted)]">{user.email}</p>
-              </div>
-            )}
-          </div>
         </div>
       )}
 

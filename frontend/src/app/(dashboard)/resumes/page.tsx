@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useResumes, useUploadResume, useSetDefaultResume, useArchiveResume, useResumeDownloadUrl, useRetryResume } from '@/hooks/use-resumes';
 import { useCreditBalance } from '@/hooks/use-payments';
+import { CreditUpsellBanner } from '@/components/credits/credit-upsell-banner';
 import type { ResumeListItem } from '@/types/api';
 
 const MAX_SLOTS = 3;
@@ -413,13 +414,7 @@ export default function ResumesPage() {
       )}
 
       {credits && credits.resume_upload === 0 && emptySlots.length > 0 && (
-        <div className="mt-4 rounded-lg border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 px-4 py-3 text-sm text-[var(--color-warning)]">
-          No upload credits remaining.{' '}
-          <a href="/pricing" className="underline hover:text-[var(--color-warning)]/80">
-            Buy more credits
-          </a>{' '}
-          to upload resumes.
-        </div>
+        <CreditUpsellBanner creditType="resume_upload" />
       )}
 
       {/* Active Resumes */}

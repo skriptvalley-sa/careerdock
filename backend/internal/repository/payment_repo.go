@@ -31,17 +31,17 @@ func (r *PaymentRepo) Create(ctx context.Context, payment *domain.Payment) error
 	err := q.QueryRow(ctx, `
 		INSERT INTO payments (
 			id, user_id, razorpay_order_id, razorpay_payment_id,
-			amount_paise, currency, product_type, status,
+			amount_paise, currency, product_type, cart_snapshot, status,
 			receipt_number, webhook_received_at,
 			created_at, updated_at
 		) VALUES (
 			$1, $2, $3, $4,
-			$5, $6, $7, $8,
-			$9, $10,
-			$11, $12
+			$5, $6, $7, $8, $9,
+			$10, $11,
+			$12, $13
 		) RETURNING id`,
 		payment.ID, payment.UserID, payment.RazorpayOrderID, payment.RazorpayPaymentID,
-		payment.AmountPaise, payment.Currency, string(payment.ProductType), string(payment.Status),
+		payment.AmountPaise, payment.Currency, string(payment.ProductType), payment.CartSnapshot, string(payment.Status),
 		payment.ReceiptNumber, payment.WebhookReceivedAt,
 		payment.CreatedAt, payment.UpdatedAt,
 	).Scan(&payment.ID)
@@ -62,14 +62,14 @@ func (r *PaymentRepo) GetByOrderID(ctx context.Context, orderID string) (*domain
 	p := &domain.Payment{}
 	err := q.QueryRow(ctx, `
 		SELECT id, user_id, razorpay_order_id, razorpay_payment_id,
-		       amount_paise, currency, product_type, status,
+		       amount_paise, currency, product_type, cart_snapshot, status,
 		       receipt_number, refund_reason, refunded_at, refunded_by,
 		       webhook_received_at, created_at, updated_at
 		FROM payments
 		WHERE razorpay_order_id = $1`, orderID,
 	).Scan(
 		&p.ID, &p.UserID, &p.RazorpayOrderID, &p.RazorpayPaymentID,
-		&p.AmountPaise, &p.Currency, &p.ProductType, &p.Status,
+		&p.AmountPaise, &p.Currency, &p.ProductType, &p.CartSnapshot, &p.Status,
 		&p.ReceiptNumber, &p.RefundReason, &p.RefundedAt, &p.RefundedBy,
 		&p.WebhookReceivedAt, &p.CreatedAt, &p.UpdatedAt,
 	)
@@ -134,7 +134,7 @@ func (r *PaymentRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]domai
 
 	rows, err := q.Query(ctx, `
 		SELECT id, user_id, razorpay_order_id, razorpay_payment_id,
-		       amount_paise, currency, product_type, status,
+		       amount_paise, currency, product_type, cart_snapshot, status,
 		       receipt_number, refund_reason, refunded_at, refunded_by,
 		       webhook_received_at, created_at, updated_at
 		FROM payments
@@ -150,7 +150,7 @@ func (r *PaymentRepo) ListByUser(ctx context.Context, userID uuid.UUID) ([]domai
 		var p domain.Payment
 		if err := rows.Scan(
 			&p.ID, &p.UserID, &p.RazorpayOrderID, &p.RazorpayPaymentID,
-			&p.AmountPaise, &p.Currency, &p.ProductType, &p.Status,
+			&p.AmountPaise, &p.Currency, &p.ProductType, &p.CartSnapshot, &p.Status,
 			&p.ReceiptNumber, &p.RefundReason, &p.RefundedAt, &p.RefundedBy,
 			&p.WebhookReceivedAt, &p.CreatedAt, &p.UpdatedAt,
 		); err != nil {
@@ -210,7 +210,7 @@ func (r *PaymentRepo) ListAll(ctx context.Context, filter domain.PaymentFilter) 
 
 	query := fmt.Sprintf(`
 		SELECT id, user_id, razorpay_order_id, razorpay_payment_id,
-		       amount_paise, currency, product_type, status,
+		       amount_paise, currency, product_type, cart_snapshot, status,
 		       receipt_number, refund_reason, refunded_at, refunded_by,
 		       webhook_received_at, created_at, updated_at
 		FROM payments
@@ -229,7 +229,7 @@ func (r *PaymentRepo) ListAll(ctx context.Context, filter domain.PaymentFilter) 
 		var p domain.Payment
 		if err := rows.Scan(
 			&p.ID, &p.UserID, &p.RazorpayOrderID, &p.RazorpayPaymentID,
-			&p.AmountPaise, &p.Currency, &p.ProductType, &p.Status,
+			&p.AmountPaise, &p.Currency, &p.ProductType, &p.CartSnapshot, &p.Status,
 			&p.ReceiptNumber, &p.RefundReason, &p.RefundedAt, &p.RefundedBy,
 			&p.WebhookReceivedAt, &p.CreatedAt, &p.UpdatedAt,
 		); err != nil {

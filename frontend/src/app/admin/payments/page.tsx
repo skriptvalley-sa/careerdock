@@ -91,7 +91,7 @@ export default function AdminPaymentsPage() {
             <option value="resume_upload">Resume Upload</option>
             <option value="ats_check">ATS Check</option>
             <option value="curated_list">Curated List</option>
-            <option value="cv_generation">CV Generation</option>
+            <option value="cv_generation">Cover Letter</option>
           </select>
         )}
       </div>

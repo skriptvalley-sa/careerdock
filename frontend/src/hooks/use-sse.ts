@@ -24,7 +24,8 @@ const INITIAL_RETRY_DELAY = 1_000; // 1 second
  * - credits_updated: invalidates credit balance + auth/me (admin grant)
  */
 export function useSSE() {
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const userId = useAuthStore((s) => s.user?.id);
   const qc = useQueryClient();
   const esRef = useRef<EventSource | null>(null);
   const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -48,30 +49,36 @@ export function useSSE() {
     });
 
     es.addEventListener('resume_ready', () => {
+      if (!userId) return;
       // Resume processing complete — refresh resume list and credits
-      qc.invalidateQueries({ queryKey: queryKeys.resumes.all });
-      qc.invalidateQueries({ queryKey: queryKeys.credits.balance });
+      qc.invalidateQueries({ queryKey: queryKeys.resumes.all(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.credits.balance(userId) });
     });
 
     es.addEventListener('ats_company_complete', () => {
-      qc.invalidateQueries({ queryKey: queryKeys.ats.all });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.ats.all(userId) });
     });
 
     es.addEventListener('ats_job_complete', () => {
-      qc.invalidateQueries({ queryKey: queryKeys.ats.all });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.ats.all(userId) });
     });
 
     es.addEventListener('ats_resume_complete', () => {
-      qc.invalidateQueries({ queryKey: queryKeys.ats.all });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.ats.all(userId) });
     });
 
     es.addEventListener('curated_list_complete', () => {
-      qc.invalidateQueries({ queryKey: queryKeys.curatedLists.all });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.curatedLists.all(userId) });
     });
 
     es.addEventListener('credits_updated', () => {
+      if (!userId) return;
       // Admin granted credits — refresh balance and user profile immediately
-      qc.invalidateQueries({ queryKey: queryKeys.credits.balance });
+      qc.invalidateQueries({ queryKey: queryKeys.credits.balance(userId) });
       qc.invalidateQueries({ queryKey: queryKeys.auth.me });
     });
 
@@ -92,7 +99,7 @@ export function useSSE() {
         }
       }, delay);
     };
-  }, [qc]);
+  }, [qc, userId]);
 
   useEffect(() => {
     if (!isAuthenticated) {

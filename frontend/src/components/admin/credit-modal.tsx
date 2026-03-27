@@ -8,7 +8,7 @@ const CREDIT_TYPES = [
   { value: 'resume_upload', label: 'Resume Upload' },
   { value: 'ats_check', label: 'ATS Check' },
   { value: 'curated_list', label: 'Curated List' },
-  { value: 'cv_generation', label: 'CV Generation' },
+  { value: 'cv_generation', label: 'Cover Letter' },
 ];
 
 interface CreditModalProps {

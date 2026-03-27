@@ -32,6 +32,10 @@ func NewPaymentHandler(payment *service.PaymentService, credit *service.CreditSe
 
 type createOrderRequest struct {
 	ProductType string `json:"product_type"`
+	Items       []struct {
+		ProductType string `json:"product_type"`
+		Quantity    int    `json:"quantity"`
+	} `json:"items"`
 }
 
 // --- Response DTOs ---
@@ -74,8 +78,8 @@ func (h *PaymentHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.ProductType == "" {
-		respondError(w, r, domain.ValidationError("product_type is required", map[string]any{
+	if req.ProductType == "" && len(req.Items) == 0 {
+		respondError(w, r, domain.ValidationError("product_type or items is required", map[string]any{
 			"field": "product_type",
 		}))
 		return
@@ -83,9 +87,18 @@ func (h *PaymentHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	userID := middleware.UserIDFromContext(r.Context())
 
+	cartItems := make([]service.CreateOrderItemInput, 0, len(req.Items))
+	for _, item := range req.Items {
+		cartItems = append(cartItems, service.CreateOrderItemInput{
+			ProductType: domain.ProductType(item.ProductType),
+			Quantity:    item.Quantity,
+		})
+	}
+
 	result, err := h.payment.CreateOrder(r.Context(), service.CreateOrderInput{
 		UserID:      userID,
 		ProductType: domain.ProductType(req.ProductType),
+		CartItems:   cartItems,
 	}, h.razorpayKeyID)
 	if err != nil {
 		respondError(w, r, err)

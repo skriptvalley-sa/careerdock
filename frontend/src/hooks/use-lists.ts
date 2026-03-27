@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { queryKeys, staleTimes } from '@/lib/query-keys';
+import { useAuthStore } from '@/store/auth-store';
 import type {
   UserList,
   ListDetail,
@@ -20,19 +21,22 @@ function patchEntry(old: ListDetail | undefined, updated: ListEntry): ListDetail
 // --- Queries ---
 
 export function useLists() {
+  const userId = useAuthStore((s) => s.user?.id);
   return useQuery({
-    queryKey: queryKeys.lists.list(),
+    queryKey: queryKeys.lists.list(userId!),
     queryFn: () => apiClient.get<UserList[]>('/api/lists'),
     staleTime: staleTimes.userLists,
+    enabled: !!userId,
   });
 }
 
 export function useListDetail(id: string) {
+  const userId = useAuthStore((s) => s.user?.id);
   return useQuery({
-    queryKey: queryKeys.lists.detail(id),
+    queryKey: queryKeys.lists.detail(userId!, id),
     queryFn: () => apiClient.get<ListDetail>(`/api/lists/${id}`),
     staleTime: staleTimes.userLists,
-    enabled: !!id,
+    enabled: !!id && !!userId,
   });
 }
 
@@ -40,17 +44,20 @@ export function useListDetail(id: string) {
 
 export function useCreateList() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: (data: { name: string; description?: string }) =>
       apiClient.post<UserList>('/api/lists', data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.lists.all });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.lists.all(userId) });
     },
   });
 }
 
 export function useUpdateList() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: ({
       id,
@@ -62,24 +69,28 @@ export function useUpdateList() {
       position?: number;
     }) => apiClient.put<UserList>(`/api/lists/${id}`, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.lists.all });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.lists.all(userId) });
     },
   });
 }
 
 export function useDeleteList() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: (id: string) => apiClient.delete(`/api/lists/${id}`),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.lists.all });
-      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.lists.all(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.all(userId) });
     },
   });
 }
 
 export function useCreateEntry() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: ({
       listId,
@@ -90,14 +101,16 @@ export function useCreateEntry() {
       company_status?: CompanyTrackingStatus;
     }) => apiClient.post<ListEntry>(`/api/lists/${listId}/entries`, data),
     onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: queryKeys.lists.detail(vars.listId) });
-      qc.invalidateQueries({ queryKey: queryKeys.lists.list() });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.lists.detail(userId, vars.listId) });
+      qc.invalidateQueries({ queryKey: queryKeys.lists.list(userId) });
     },
   });
 }
 
 export function useBatchCreateEntries() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: ({
       listId,
@@ -111,15 +124,17 @@ export function useBatchCreateEntries() {
         { company_ids },
       ),
     onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: queryKeys.lists.detail(vars.listId) });
-      qc.invalidateQueries({ queryKey: queryKeys.lists.list() });
-      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.lists.detail(userId, vars.listId) });
+      qc.invalidateQueries({ queryKey: queryKeys.lists.list(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.all(userId) });
     },
   });
 }
 
 export function useUpdateEntry() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: ({
       listId,
@@ -136,34 +151,38 @@ export function useUpdateEntry() {
         data,
       ),
     onSuccess: (updatedEntry, vars) => {
+      if (!userId) return;
       // Immediately patch the current list's cache so the UI updates without
       // waiting for a round-trip refetch.
       qc.setQueryData<ListDetail>(
-        queryKeys.lists.detail(vars.listId),
+        queryKeys.lists.detail(userId, vars.listId),
         (old) => patchEntry(old, updatedEntry),
       );
       // Company status is synced across ALL lists for this user+company, so
       // invalidate every list detail to reflect the change everywhere.
-      qc.invalidateQueries({ queryKey: queryKeys.lists.all });
+      qc.invalidateQueries({ queryKey: queryKeys.lists.all(userId) });
     },
   });
 }
 
 export function useDeleteEntry() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: ({ listId, entryId }: { listId: string; entryId: string }) =>
       apiClient.delete(`/api/lists/${listId}/entries/${entryId}`),
     onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: queryKeys.lists.detail(vars.listId) });
-      qc.invalidateQueries({ queryKey: queryKeys.lists.list() });
-      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.lists.detail(userId, vars.listId) });
+      qc.invalidateQueries({ queryKey: queryKeys.lists.list(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.all(userId) });
     },
   });
 }
 
 export function useSyncListEntries() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: ({
       listId,
@@ -177,35 +196,40 @@ export function useSyncListEntries() {
         { company_ids },
       ),
     onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: queryKeys.lists.detail(vars.listId) });
-      qc.invalidateQueries({ queryKey: queryKeys.lists.list() });
-      qc.invalidateQueries({ queryKey: ['dashboard'] });
-      qc.invalidateQueries({ queryKey: ['entries'] });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.lists.detail(userId, vars.listId) });
+      qc.invalidateQueries({ queryKey: queryKeys.lists.list(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.all(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.companyEntries.all(userId) });
     },
   });
 }
 
 export function useListsForCompany(companyId: string | undefined) {
+  const userId = useAuthStore((s) => s.user?.id);
   return useQuery({
-    queryKey: ['lists', 'by-company', companyId] as const,
+    queryKey: queryKeys.lists.byCompany(userId!, companyId!),
     queryFn: () =>
       apiClient.get<ListCompanyFlag[]>(`/api/lists/by-company/${companyId!}`),
-    enabled: !!companyId,
+    enabled: !!companyId && !!userId,
     staleTime: staleTimes.userLists,
   });
 }
 
 export function useCompanyListCounts() {
+  const userId = useAuthStore((s) => s.user?.id);
   return useQuery({
-    queryKey: ['lists', 'company-counts'] as const,
+    queryKey: queryKeys.lists.companyCounts(userId!),
     queryFn: () =>
       apiClient.get<Record<string, number>>('/api/lists/company-counts'),
     staleTime: staleTimes.userLists,
+    enabled: !!userId,
   });
 }
 
 export function useAddCompanyToList() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: ({
       listId,
@@ -218,16 +242,18 @@ export function useAddCompanyToList() {
         company_id: companyId,
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.lists.all });
-      qc.invalidateQueries({ queryKey: ['lists', 'by-company'] });
-      qc.invalidateQueries({ queryKey: ['lists', 'company-counts'] });
-      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.lists.all(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.lists.byCompanyAll(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.lists.companyCounts(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.all(userId) });
     },
   });
 }
 
 export function useRemoveCompanyFromList() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: ({
       listId,
@@ -238,10 +264,11 @@ export function useRemoveCompanyFromList() {
     }) =>
       apiClient.delete(`/api/lists/${listId}/entries/by-company/${companyId}`),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.lists.all });
-      qc.invalidateQueries({ queryKey: ['lists', 'by-company'] });
-      qc.invalidateQueries({ queryKey: ['lists', 'company-counts'] });
-      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.lists.all(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.lists.byCompanyAll(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.lists.companyCounts(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.all(userId) });
     },
   });
 }

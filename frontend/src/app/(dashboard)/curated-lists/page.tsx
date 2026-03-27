@@ -26,6 +26,7 @@ import {
   isCuratedListComplete,
 } from '@/hooks/use-curated-lists';
 import { useLists, useCreateEntry } from '@/hooks/use-lists';
+import { CreditUpsellBanner } from '@/components/credits/credit-upsell-banner';
 import type { CuratedList, RankedCompany } from '@/types/api';
 
 function scoreColor(score: number) {
@@ -434,13 +435,7 @@ export default function CuratedListsPage() {
       )}
 
       {(credits?.curated_list ?? 0) === 0 && !showForm && (
-        <div className="mt-4 rounded-lg border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/10 px-4 py-3 text-sm text-[var(--color-warning)]">
-          No curated list credits.{' '}
-          <a href="/pricing" className="underline hover:text-[var(--color-warning)]/80">
-            Buy more credits
-          </a>
-          .
-        </div>
+        <CreditUpsellBanner creditType="curated_list" />
       )}
 
       {/* List of curated results */}

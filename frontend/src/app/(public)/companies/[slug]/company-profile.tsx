@@ -13,7 +13,7 @@ import { CompanyStatusBadge } from '@/components/lists/company-status-badge';
 import type { ApplicationStatus, Application, CompanyTrackingStatus } from '@/types/api';
 import { apiClient } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
-import { staleTimes } from '@/lib/query-keys';
+import { queryKeys, staleTimes } from '@/lib/query-keys';
 import type { ListEntry } from '@/types/api';
 
 const sizeLabels: Record<string, string> = {
@@ -48,14 +48,14 @@ const statusPriority: Record<CompanyTrackingStatus, number> = {
   rejected: -1,
 };
 
-function useEntriesByCompany(companyId: string | undefined) {
+function useEntriesByCompany(userId: string | undefined, companyId: string | undefined) {
   return useQuery({
-    queryKey: ['entries', 'by-company', companyId] as const,
+    queryKey: queryKeys.companyEntries.byCompany(userId!, companyId!),
     queryFn: () =>
       apiClient.get<
         (ListEntry & { list_name: string })[]
       >('/api/entries', { company_id: companyId! }),
-    enabled: !!companyId,
+    enabled: !!companyId && !!userId,
     staleTime: staleTimes.userLists,
   });
 }
@@ -63,8 +63,9 @@ function useEntriesByCompany(companyId: string | undefined) {
 export default function CompanyProfile() {
   const { slug } = useParams<{ slug: string }>();
   const { data: company, isLoading, isError, error } = useCompanyDetail(slug);
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const { data: userEntries } = useEntriesByCompany(
+    isAuthenticated ? user?.id : undefined,
     isAuthenticated && company ? company.id : undefined,
   );
   const { data: applications } = useApplicationsByCompany(

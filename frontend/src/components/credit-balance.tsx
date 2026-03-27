@@ -43,11 +43,23 @@ export function CreditBalance({ collapsed }: { collapsed?: boolean }) {
         <span className="text-xs font-medium text-[var(--color-text-muted)]">Credits</span>
         <span className="ml-auto text-sm font-bold text-[var(--color-warning)]">{total}</span>
       </div>
-      <div className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px] text-[var(--color-text-muted)]">
-        <span>Resume: {credits.resume_upload}</span>
-        <span>ATS: {credits.ats_check}</span>
-        <span>Lists: {credits.curated_list}</span>
-        <span>CV: {credits.cv_generation}</span>
+      <div className="mt-2 space-y-1 text-[10px] text-[var(--color-text-muted)]">
+        <div className="flex items-center justify-between gap-3">
+          <span>Resume</span>
+          <span className="font-medium text-[var(--color-text)]">{credits.resume_upload}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span>ATS</span>
+          <span className="font-medium text-[var(--color-text)]">{credits.ats_check}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span>Lists</span>
+          <span className="font-medium text-[var(--color-text)]">{credits.curated_list}</span>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span>Cover letters</span>
+          <span className="font-medium text-[var(--color-text)]">{credits.cv_generation}</span>
+        </div>
       </div>
     </div>
   );

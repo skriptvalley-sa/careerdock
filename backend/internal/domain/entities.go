@@ -218,21 +218,22 @@ type CompanyEditLock struct {
 
 // Payment represents a Razorpay transaction.
 type Payment struct {
-	ID                uuid.UUID     `json:"id"`
-	UserID            uuid.UUID     `json:"user_id"`
-	RazorpayOrderID   string        `json:"razorpay_order_id"`
-	RazorpayPaymentID *string       `json:"razorpay_payment_id,omitempty"`
-	AmountPaise       int           `json:"amount_paise"`
-	Currency          string        `json:"currency"`
-	ProductType       ProductType   `json:"product_type"`
-	Status            PaymentStatus `json:"status"`
-	ReceiptNumber     *string       `json:"receipt_number,omitempty"`
-	RefundReason      *string       `json:"refund_reason,omitempty"`
-	RefundedAt        *time.Time    `json:"refunded_at,omitempty"`
-	RefundedBy        *uuid.UUID    `json:"refunded_by,omitempty"`
-	WebhookReceivedAt *time.Time    `json:"webhook_received_at,omitempty"`
-	CreatedAt         time.Time     `json:"created_at"`
-	UpdatedAt         time.Time     `json:"updated_at"`
+	ID                uuid.UUID       `json:"id"`
+	UserID            uuid.UUID       `json:"user_id"`
+	RazorpayOrderID   string          `json:"razorpay_order_id"`
+	RazorpayPaymentID *string         `json:"razorpay_payment_id,omitempty"`
+	AmountPaise       int             `json:"amount_paise"`
+	Currency          string          `json:"currency"`
+	ProductType       ProductType     `json:"product_type"`
+	CartSnapshot      json.RawMessage `json:"cart_snapshot,omitempty"`
+	Status            PaymentStatus   `json:"status"`
+	ReceiptNumber     *string         `json:"receipt_number,omitempty"`
+	RefundReason      *string         `json:"refund_reason,omitempty"`
+	RefundedAt        *time.Time      `json:"refunded_at,omitempty"`
+	RefundedBy        *uuid.UUID      `json:"refunded_by,omitempty"`
+	WebhookReceivedAt *time.Time      `json:"webhook_received_at,omitempty"`
+	CreatedAt         time.Time       `json:"created_at"`
+	UpdatedAt         time.Time       `json:"updated_at"`
 }
 
 // UserCredit represents a user's balance for a specific credit type.

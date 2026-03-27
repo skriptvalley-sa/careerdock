@@ -167,9 +167,10 @@ export default function DashboardPage() {
                 </div>
                 <div className="mt-3 space-y-2">
                   {[
-                    { label: 'Resume Upload', value: credits.resume_upload },
-                    { label: 'ATS Check', value: credits.ats_check },
-                    { label: 'Curated List', value: credits.curated_list },
+                    { label: 'Resume Uploads', value: credits.resume_upload },
+                    { label: 'ATS Checks', value: credits.ats_check },
+                    { label: 'Curated Lists', value: credits.curated_list },
+                    { label: 'Cover Letters', value: credits.cv_generation },
                   ].map(({ label, value }) => (
                     <div key={label} className="flex items-center justify-between">
                       <span className="text-xs text-[var(--color-text-muted)]">{label}</span>
@@ -182,7 +183,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
                 <Link
-                  href="/pricing"
+                  href="/shop"
                   className="mt-3 inline-flex items-center gap-1 text-xs text-[var(--color-primary)] hover:underline"
                 >
                   Buy more <ChevronRight className="h-3 w-3" />

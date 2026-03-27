@@ -25,23 +25,25 @@ All prices in INR. Stored in application config (not DB) — price changes requi
 
 | Product ID | Display Name | Price (₹) | Amount (paise) |
 |-----------|-------------|----------:|---------------:|
-| `starter_pack` | Starter Pack | 399 | 39900 |
-| `resume_upload` | Extra Resume Upload | 49 | 4900 |
-| `ats_bundle` | ATS Check Bundle (10) | 99 | 9900 |
-| `rebuy_pack` | Re-buy Starter Pack | 399 | 39900 |
-
-**CV Generation** pricing is TBD (deferred to v2). The product type exists in the schema but is not purchasable yet.
+| `starter_pack` | Starter Pack | 449 | 44900 |
+| `starter_refill` | Starter Refill Pack | 399 | 39900 |
+| `resume_bundle` | Resume Bundle | 89 | 8900 |
+| `ats_bundle` | ATS Bundle | 229 | 22900 |
+| `curated_list_bundle` | Curated Lists Bundle | 59 | 5900 |
+| `cv_bundle` | Cover Letter Bundle | Coming soon | N/A |
 
 ### 2.1 Credit Allocation per Product
 
 | Product | `resume_upload` | `ats_check` | `curated_list` | `cv_generation` | Sets `premium_since`? |
 |---------|----------------:|------------:|---------------:|----------------:|:---------------------:|
-| `starter_pack` | +9 | +20 | +3 | 0 | Yes (if not already set) |
-| `resume_upload` | +1 | 0 | 0 | 0 | No |
-| `ats_bundle` | 0 | +10 | 0 | 0 | No |
-| `rebuy_pack` | +9 | +20 | +3 | 0 | No (already premium) |
+| `starter_pack` | +10 | +50 | +10 | +50 | Yes (if not already set) |
+| `starter_refill` | +10 | +50 | +10 | +50 | No |
+| `resume_bundle` | +10 | 0 | 0 | 0 | No |
+| `ats_bundle` | 0 | +50 | 0 | 0 | No |
+| `curated_list_bundle` | 0 | 0 | +5 | 0 | No |
+| `cv_bundle` | 0 | 0 | 0 | +50 | No |
 
-**Note:** `starter_pack` and `rebuy_pack` allocate identical credits. The difference: `starter_pack` also sets `premium_since` to unlock premium features. `rebuy_pack` is only available to users who already have `premium_since` set.
+**Business rules:** `starter_pack` is only available to non-premium users. All other bundles require `premium_since` to already be set. `cv_bundle` is intentionally unavailable until the cover letter feature ships.
 
 ---
 
@@ -71,7 +73,7 @@ All prices in INR. Stored in application config (not DB) — price changes requi
        │                          │─────────────────────────────►  │
        │                          │◄─────────────────────────────  │
        │                          │  { id: "order_xxx",            │
-       │                          │    amount: 39900,              │
+       │                          │    amount: 44900,              │
        │                          │    status: "created" }         │
        │                          │                                │
        │                          │  5. Insert into payments       │
@@ -140,8 +142,8 @@ func (s *PaymentService) CreateOrder(ctx context.Context, userID uuid.UUID, prod
         }
     }
 
-    // 3. Business rule: rebuy_pack only for premium users
-    if productType == "rebuy_pack" {
+    // 3. Business rule: all refill / bundle products require premium
+    if productType != "starter_pack" {
         user, _ := s.userRepo.GetByID(ctx, userID)
         if user.PremiumSince == nil {
             return nil, ErrNotPremium
@@ -312,10 +314,10 @@ func (s *PaymentService) HandleWebhook(ctx context.Context, payload []byte, sign
 
 | Type | Consumed By | Allocated By |
 |------|-------------|-------------|
-| `resume_upload` | Resume upload / re-upload | starter_pack, resume_upload purchase, rebuy_pack |
-| `ats_check` | Company ATS check, Job ATS check | starter_pack, ats_bundle purchase, rebuy_pack |
-| `curated_list` | AI-curated list generation | starter_pack, rebuy_pack |
-| `cv_generation` | CV generation (future) | Future purchase product |
+| `resume_upload` | Resume upload / re-upload | starter_pack, starter_refill, resume_bundle |
+| `ats_check` | Company ATS check, Job ATS check | starter_pack, starter_refill, ats_bundle |
+| `curated_list` | AI-curated list generation | starter_pack, starter_refill, curated_list_bundle |
+| `cv_generation` | Tailored cover letter generation | starter_pack, starter_refill |
 
 **ATS check credits are fungible** — the same credit is consumed whether the check is company-specific or job-specific.
 
@@ -521,7 +523,7 @@ client := razorpay.NewClient(config.KeyID, config.KeySecret)
 
 // Create order
 orderParams := map[string]interface{}{
-    "amount":   39900,
+    "amount":   44900,
     "currency": "INR",
     "receipt":  "CDOCK-20260311-0001",
     "notes": map[string]interface{}{
@@ -533,7 +535,7 @@ order, err := client.Order.Create(orderParams, nil)
 
 // Initiate refund
 refundParams := map[string]interface{}{
-    "amount": 39900,
+    "amount": 44900,
     "notes": map[string]interface{}{
         "reason": "Customer requested, no credits consumed",
     },
@@ -609,7 +611,7 @@ The `UNIQUE` constraint on `payments.receipt_number` ensures no duplicates even 
 
 ### 7.7 Refund After Partial Credit Consumption
 
-**Scenario:** User buys Starter Pack (20 ATS credits), uses 5 ATS checks, then requests refund.
+**Scenario:** User buys Starter Pack (50 ATS credits), uses 5 ATS checks, then requests refund.
 
 **Handling:** Refund denied — the `RefundPayment` flow checks if any credits from this payment period have been consumed. Any consumption blocks the refund. The 7-day window also applies.
 
@@ -633,9 +635,11 @@ For MVP, prices are **GST-inclusive**. The displayed price is the final price th
 
 | Product | Display Price | GST (18%) | Base Price |
 |---------|-------------:|----------:|-----------:|
-| Starter Pack | ₹399 | ₹60.86 | ₹338.14 |
-| Resume Upload | ₹49 | ₹7.47 | ₹41.53 |
-| ATS Bundle | ₹99 | ₹15.10 | ₹83.90 |
+| Starter Pack | ₹449 | ₹68.49 | ₹380.51 |
+| Starter Refill Pack | ₹399 | ₹60.86 | ₹338.14 |
+| Resume Bundle | ₹89 | ₹13.58 | ₹75.42 |
+| ATS Bundle | ₹229 | ₹34.93 | ₹194.07 |
+| Curated Lists Bundle | ₹59 | ₹9.00 | ₹50.00 |
 
 **Invoice/receipt** should show the GST breakdown. This is handled in the receipt email template.
 
@@ -649,8 +653,8 @@ For MVP, prices are **GST-inclusive**. The displayed price is the final price th
 
 ```
 1. User visits /pricing page
-   → Shows Starter Pack (₹399) and à la carte options
-   → "Buy Now" button
+   → Free users see Starter Pack (₹449)
+   → Premium users are routed to /shop for refills
 
 2. User clicks "Buy Now"
    → Frontend calls POST /api/payments/orders
@@ -674,6 +678,8 @@ For MVP, prices are **GST-inclusive**. The displayed price is the final price th
    → No retry limit (user can click "Buy Now" again)
 ```
 
+**Credit Shop:** Premium users use `/shop` to add refill packs and bundles to a local cart. Checkout now creates a single bundled Razorpay order that matches the cart total, while the backend stores a cart snapshot to allocate credits correctly on capture.
+
 ### 9.2 Credit Display
 
 **Premium dashboard header:**
@@ -682,11 +688,12 @@ For MVP, prices are **GST-inclusive**. The displayed price is the final price th
 ┌─────────────────────────────────────────────────┐
 │  Your Credits                                    │
 │                                                  │
-│  📄 Resume Uploads: 7 remaining                  │
-│  🎯 ATS Checks: 18 remaining                    │
-│  ✨ Curated Lists: 2 remaining                   │
+│  Resume Uploads: 7 remaining                     │
+│  ATS Checks: 18 remaining                        │
+│  Curated Lists: 2 remaining                      │
+│  Cover Letters: 5 remaining                      │
 │                                                  │
-│  [Buy More Credits]                              │
+│  [Open Credit Shop]                              │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -701,7 +708,7 @@ When a user attempts an action with insufficient credits:
 │  You need 1 ATS check credit to run this check.  │
 │  Current balance: 0                              │
 │                                                  │
-│  [Buy ATS Bundle (₹99 for 10 checks)]           │
+│  [Buy ATS Bundle (₹229 for 50 checks)]          │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -715,17 +722,18 @@ When a user attempts an action with insufficient credits:
 ┌─────────────────────────────────────────────────┐
 │  Revenue                           March 2026    │
 │                                                  │
-│  Total Revenue:     ₹35,000                      │
-│  This Month:        ₹4,500                       │
-│  Today:             ₹399                         │
+│  Total Revenue:     ₹58,000                      │
+│  This Month:        ₹8,500                       │
+│  Today:             ₹449                         │
 │                                                  │
 │  By Product:                                     │
-│  ├── Starter Pack:     ₹31,920 (80 purchases)   │
-│  ├── ATS Bundle:       ₹2,475  (25 purchases)   │
-│  └── Resume Upload:    ₹588    (12 purchases)   │
+│  ├── Starter Pack:      ₹22,450 (50 purchases)  │
+│  ├── Starter Refill:    ₹5,985  (15 purchases)  │
+│  ├── ATS Bundle:        ₹4,580  (20 purchases)  │
+│  └── Resume Bundle:     ₹712    (8 purchases)   │
 │                                                  │
-│  Refunds:             ₹1,197 (3 refunds)        │
-│  Net Revenue:         ₹33,803                    │
+│  Refunds:             ₹1,598 (2 refunds)        │
+│  Net Revenue:         ₹56,402                    │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -735,6 +743,8 @@ Table view with columns:
 - Date | User | Product | Amount | Status | Receipt # | Actions
 
 Filters: status, product_type, date range, user search.
+
+Typical product values now include: `starter_pack`, `starter_refill`, `resume_bundle`, `ats_bundle`, `curated_list_bundle`, `cv_bundle`.
 
 Action buttons: "View Details", "Issue Refund" (for eligible payments).
 
@@ -772,11 +782,12 @@ All payment operations log with structured fields:
   "payment_id": "01912400-...",
   "razorpay_order_id": "order_abc123",
   "product_type": "starter_pack",
-  "amount_paise": 39900,
+  "amount_paise": 44900,
   "credits_allocated": {
-    "resume_upload": 9,
-    "ats_check": 20,
-    "curated_list": 3
+    "resume_upload": 10,
+    "ats_check": 50,
+    "curated_list": 10,
+    "cv_generation": 50
   },
   "processing_time_ms": 45,
   "request_id": "req_xyz789"

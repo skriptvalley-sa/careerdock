@@ -1,8 +1,8 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState, useEffect, useCallback } from 'react';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useSSE } from '@/hooks/use-sse';
 import { setAuthFailureHandler } from '@/lib/api';
@@ -12,14 +12,33 @@ import { SidebarContext, useSidebarState } from '@/hooks/use-sidebar';
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const { checkSession } = useAuth();
   const logout = useAuthStore((s) => s.logout);
+  const userId = useAuthStore((s) => s.user?.id ?? null);
+  const queryClient = useQueryClient();
+  const previousUserIDRef = useRef<string | null>(null);
 
-  // Wire up the API client's auth failure callback to clear Zustand state.
+  // Wire up the API client's auth failure callback to clear all user-scoped
+  // client state when refresh fails.
   // This fires when a 401 occurs and refresh also fails.
   useEffect(() => {
     setAuthFailureHandler(() => {
-      logout();
+      void queryClient.cancelQueries().finally(() => {
+        queryClient.clear();
+        logout();
+      });
     });
-  }, [logout]);
+  }, [logout, queryClient]);
+
+  // Defensive session isolation: if the authenticated identity changes,
+  // clear any user-scoped queries before the next user starts rendering.
+  useEffect(() => {
+    const previousUserID = previousUserIDRef.current;
+    if (previousUserID && previousUserID !== userId) {
+      void queryClient.cancelQueries().finally(() => {
+        queryClient.clear();
+      });
+    }
+    previousUserIDRef.current = userId;
+  }, [queryClient, userId]);
 
   // Check session on initial mount
   useEffect(() => {

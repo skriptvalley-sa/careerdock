@@ -32,7 +32,7 @@ CareerDock is a career intelligence platform for tech job seekers in India. It c
 |------|-------------|-------------|
 | **Visitor** | Unauthenticated user | Browse company directory, view company profiles |
 | **Free User** | Registered, email-verified | All visitor features + create up to 3 company lists, application tracking |
-| **Premium User** | Purchased Starter Pack or actions | All free features + resume uploads, ATS scoring, AI-curated lists, CV generation |
+| **Premium User** | Purchased Starter Pack or actions | All free features + resume uploads, ATS scoring, AI-curated lists, cover letter generation |
 | **Moderator** | Appointed by admin | All premium features + suggest edits to company profiles (goes to admin review queue) |
 | **Admin** | Platform operator | Full system access: user management, company CRUD, financial dashboard, feature flags, moderation queue |
 
@@ -241,33 +241,34 @@ Valid statuses: `Not Applied`, `Applied`, `Phone Screen`, `Interview`, `Offer`, 
 
 **No subscriptions. No recurring payments.** All purchases are one-time.
 
-**Starter Pack — ₹399 (one-time)**
+**Starter Pack — ₹449 (one-time)**
 
 Unlocks all premium features and includes an initial bundle of actions:
 
 | Feature | Included Quantity |
 |---------|------------------|
-| Resume uploads | 3 initial + 6 re-uploads = **9 total upload actions** |
+| Resume uploads | **10 total upload actions** |
 | General ATS score + suggestions | **Automatic** on each upload (included) |
-| AI-curated company lists | **3 list generations** |
-| Company-specific ATS checks | **10 checks** |
-| Job-specific ATS checks | **10 checks** |
+| AI-curated company lists | **10 list generations** |
+| ATS checks | **50 checks** |
+| Cover letter generation | **50 generations** |
 | Bonus lists (beyond free 3) | **+2 lists** (5 total) |
 
 **Notes on resume uploads:**
 - Users can hold a maximum of 3 resumes at any time.
 - Initial 3 uploads fill all 3 slots.
 - Re-uploads replace an existing resume in a slot (the old resume is archived, the new one is analysed fresh).
-- 9 total upload actions means: 3 initial + up to 6 replacements across all slots.
+- 10 total upload actions means: 3 initial uploads plus up to 7 replacements across the 3 slots.
 
 **À La Carte Purchases:**
 
 | Action | Price | Notes |
 |--------|-------|-------|
-| Additional resume upload (1) | ₹49 | Adds 1 upload action to account |
-| ATS check bundle (10) | ₹99 | Redeemable for any of the 3 ATS check types (general, company, job) |
-| CV generation for JD | TBD | Generate tailored CV for a specific job description using selected resume. Pricing TBD after AI cost estimation. |
-| Re-buy Init Bundle | ₹399 | Re-purchase the full Starter Pack bundle (all quantities reset/add) |
+| Starter Refill Pack | ₹399 | Refill the full starter allocation for existing premium users |
+| Resume Bundle | ₹89 | Adds 10 resume upload credits |
+| ATS Bundle | ₹229 | Adds 50 ATS check credits |
+| Curated Lists Bundle | ₹59 | Adds 5 curated list credits |
+| Cover Letter Bundle | Coming soon | Generates tailored cover letters from a resume, company, and JD |
 
 **Credit System:**
 - All purchased actions are tracked as **credits** in the user's account.
@@ -328,19 +329,19 @@ All ATS operations are **asynchronous** (queued via job queue, results available
 - Consumes 1 curated list credit per generation.
 - User can regenerate (consumes another credit) — useful after updating default resume or preferences.
 
-#### 3.4.5 CV Generation (Future À La Carte Feature)
+#### 3.4.5 Cover Letter Generation
 
-- User selects a resume + provides a job description (paste text).
-- AI generates a tailored CV optimised for the specific JD.
+- User selects a resume + target company + provides a job description (paste text).
+- AI generates a tailored cover letter optimised for the specific JD and company.
 - Output: Downloadable PDF.
-- Consumes 1 CV generation credit.
-- **Pricing TBD** after AI cost estimation in Phase 2.
+- Consumes 1 `cv_generation` credit.
+- À la carte bundle is disabled until the feature ships.
 
 #### 3.4.6 Premium Dashboard
 
 - **Resume health overview:** All uploaded resumes with their general ATS scores at a glance.
 - **AI-curated list summary:** Top matched companies with match scores.
-- **Credit tracker:** Remaining credits by type (uploads, ATS checks, curated lists, CV generations).
+- **Credit tracker:** Remaining credits by type (uploads, ATS checks, curated lists, cover letters).
 - **ATS check history:** Log of all past ATS checks with scores, sortable/filterable.
 - **Recommendations:** "Your resume scores low against Company X — consider updating these keywords."
 
@@ -419,7 +420,7 @@ Confirmation shown to user
 | Company ATS score | User-initiated | Yes (job queue) | 1 ATS credit | Claude (primary), OpenAI (fallback) |
 | Job ATS score | User-initiated | Yes (job queue) | 1 ATS credit | Claude (primary), OpenAI (fallback) |
 | AI-curated company list | User-initiated | Yes (job queue) | 1 curated list credit | Claude (primary), OpenAI (fallback) |
-| CV generation | User-initiated | Yes (job queue) | 1 CV generation credit | Claude (primary), OpenAI (fallback) |
+| Cover letter generation | User-initiated | Yes (job queue) | 1 `cv_generation` credit | Claude (primary), OpenAI (fallback) |
 | Company profile enrichment | Admin-initiated | Yes (job queue) | N/A (platform cost) | Claude API |
 | Company data refresh | Admin-initiated | Yes (job queue) | N/A (platform cost) | Claude API |
 
@@ -496,7 +497,7 @@ Confirmation shown to user
 
 - OAuth (Google) login.
 - Magic link login / MFA.
-- CV generation for specific JDs.
+- Standalone cover-letter bundle pricing after the feature ships.
 - Follow-up reminders / calendar integration.
 - Job description URL auto-fetch (currently paste-only).
 - Bulk import/export of company lists.
@@ -542,8 +543,8 @@ Additional companies beyond Bangalore (Hyderabad, Pune, NCR, Chennai) will be ad
 
 The following items need resolution during the Architecture phase:
 
-1. **AI token budget estimation** — Cost per operation for Claude API (resume parse, ATS score, curated list, CV generation).
-2. **CV generation pricing** — Depends on AI cost estimation.
+1. **AI token budget estimation** — Cost per operation for Claude API (resume parse, ATS score, curated list, cover letter generation).
+2. **Cover letter bundle pricing** — Finalise only after feature shipping costs are measured.
 3. **Search engine decision** — Postgres FTS vs. MeiliSearch/Typesense for company search.
 4. **GST handling** — Whether prices are GST-inclusive or displayed separately.
 5. **Company profile AI enrichment flow** — Exact Claude API integration for admin-triggered research.

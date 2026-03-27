@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { queryKeys, staleTimes } from '@/lib/query-keys';
+import { useAuthStore } from '@/store/auth-store';
 import type {
   Application,
   ApplicationStatus,
@@ -14,39 +15,45 @@ import type {
 // --- Queries ---
 
 export function useApplications(status?: string) {
+  const userId = useAuthStore((s) => s.user?.id);
   const params: Record<string, string> = {};
   if (status) params.status = status;
   return useQuery({
-    queryKey: queryKeys.applications.list(status),
+    queryKey: queryKeys.applications.list(userId!, status),
     queryFn: () => apiClient.get<Application[]>('/api/applications', params),
     staleTime: staleTimes.userLists,
+    enabled: !!userId,
   });
 }
 
 export function useApplicationsByCompany(companyId: string | undefined) {
+  const userId = useAuthStore((s) => s.user?.id);
   return useQuery({
-    queryKey: queryKeys.applications.byCompany(companyId!),
+    queryKey: queryKeys.applications.byCompany(userId!, companyId!),
     queryFn: () =>
       apiClient.get<Application[]>(`/api/applications/by-company/${companyId!}`),
-    enabled: !!companyId,
+    enabled: !!companyId && !!userId,
     staleTime: staleTimes.userLists,
   });
 }
 
 export function useApplicationHistory(applicationId: string) {
+  const userId = useAuthStore((s) => s.user?.id);
   return useQuery({
-    queryKey: queryKeys.applications.detail(applicationId),
+    queryKey: queryKeys.applications.detail(userId!, applicationId),
     queryFn: () =>
       apiClient.get<StatusHistoryItem[]>(`/api/applications/${applicationId}`),
-    enabled: !!applicationId,
+    enabled: !!applicationId && !!userId,
   });
 }
 
 export function useDashboardCounts() {
+  const userId = useAuthStore((s) => s.user?.id);
   return useQuery({
-    queryKey: ['dashboard', 'counts'] as const,
+    queryKey: queryKeys.dashboard.counts(userId!),
     queryFn: () => apiClient.get<DashboardCounts>('/api/dashboard'),
     staleTime: staleTimes.userLists,
+    enabled: !!userId,
   });
 }
 
@@ -54,6 +61,7 @@ export function useDashboardCounts() {
 
 export function useCreateApplication() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: (data: {
       company_id: string;
@@ -63,16 +71,18 @@ export function useCreateApplication() {
       notes?: string;
     }) => apiClient.post<Application>('/api/applications', data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.applications.all });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.applications.all(userId) });
       // Invalidate list queries so application_count in list detail updates immediately
-      qc.invalidateQueries({ queryKey: queryKeys.lists.all });
-      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: queryKeys.lists.all(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.all(userId) });
     },
   });
 }
 
 export function useUpdateApplication() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: ({
       id,
@@ -85,25 +95,28 @@ export function useUpdateApplication() {
       notes?: string;
     }) => apiClient.put<Application>(`/api/applications/${id}`, data),
     onSuccess: (updatedApp) => {
+      if (!userId) return;
       // Immediately patch every cached applications list so the status badge
       // updates without waiting for a background refetch.
       qc.setQueriesData<Application[]>(
-        { queryKey: queryKeys.applications.all },
+        { queryKey: queryKeys.applications.all(userId) },
         (old) => old?.map((a) => (a.id === updatedApp.id ? updatedApp : a)),
       );
-      qc.invalidateQueries({ queryKey: queryKeys.applications.all });
-      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      qc.invalidateQueries({ queryKey: queryKeys.applications.all(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.all(userId) });
     },
   });
 }
 
 export function useDeleteApplication() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: (id: string) => apiClient.delete(`/api/applications/${id}`),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.applications.all });
-      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.applications.all(userId) });
+      qc.invalidateQueries({ queryKey: queryKeys.dashboard.all(userId) });
     },
   });
 }
@@ -112,6 +125,7 @@ export function useDeleteApplication() {
 
 export function useCreateRound() {
   const qc = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   return useMutation({
     mutationFn: ({
       applicationId,
@@ -129,7 +143,8 @@ export function useCreateRound() {
         data,
       ),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.applications.all });
+      if (!userId) return;
+      qc.invalidateQueries({ queryKey: queryKeys.applications.all(userId) });
     },
   });
 }

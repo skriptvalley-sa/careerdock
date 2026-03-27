@@ -11,40 +11,64 @@ export const queryKeys = {
       ['companies', 'list', params] as const,
     detail: (slug: string) => ['companies', 'detail', slug] as const,
   },
+  dashboard: {
+    all: (userId: string) => ['dashboard', userId] as const,
+    counts: (userId: string) => ['dashboard', userId, 'counts'] as const,
+  },
   lists: {
-    all: ['lists'] as const,
-    list: () => ['lists', 'list'] as const,
-    detail: (id: string) => ['lists', 'detail', id] as const,
-    entries: (listId: string) => ['lists', 'entries', listId] as const,
+    all: (userId: string) => ['lists', userId] as const,
+    list: (userId: string) => ['lists', userId, 'list'] as const,
+    detail: (userId: string, id: string) => ['lists', userId, 'detail', id] as const,
+    entries: (userId: string, listId: string) =>
+      ['lists', userId, 'entries', listId] as const,
+    byCompanyAll: (userId: string) => ['lists', userId, 'by-company'] as const,
+    byCompany: (userId: string, companyId: string) =>
+      ['lists', userId, 'by-company', companyId] as const,
+    companyCounts: (userId: string) => ['lists', userId, 'company-counts'] as const,
   },
   resumes: {
-    all: ['resumes'] as const,
-    list: () => ['resumes', 'list'] as const,
-    detail: (id: string) => ['resumes', 'detail', id] as const,
+    all: (userId: string) => ['resumes', userId] as const,
+    list: (userId: string) => ['resumes', userId, 'list'] as const,
+    detail: (userId: string, id: string) => ['resumes', userId, 'detail', id] as const,
   },
   ats: {
-    all: ['ats'] as const,
-    list: () => ['ats', 'list'] as const,
-    detail: (id: string) => ['ats', 'detail', id] as const,
+    all: (userId: string) => ['ats', userId] as const,
+    list: (userId: string) => ['ats', userId, 'list'] as const,
+    detail: (userId: string, id: string) => ['ats', userId, 'detail', id] as const,
   },
   curatedLists: {
-    all: ['curated-lists'] as const,
-    list: () => ['curated-lists', 'list'] as const,
-    detail: (id: string) => ['curated-lists', 'detail', id] as const,
+    all: (userId: string) => ['curated-lists', userId] as const,
+    list: (userId: string) => ['curated-lists', userId, 'list'] as const,
+    detail: (userId: string, id: string) =>
+      ['curated-lists', userId, 'detail', id] as const,
   },
   credits: {
-    balance: ['credits', 'balance'] as const,
+    all: (userId: string) => ['credits', userId] as const,
+    balance: (userId: string) => ['credits', userId, 'balance'] as const,
+    transactions: (userId: string) => ['credits', userId, 'transactions'] as const,
+  },
+  payments: {
+    all: (userId: string) => ['payments', userId] as const,
+    list: (userId: string) => ['payments', userId, 'list'] as const,
   },
   notifications: {
-    all: ['notifications'] as const,
-    list: () => ['notifications', 'list'] as const,
-    unreadCount: () => ['notifications', 'unread-count'] as const,
+    all: (userId: string) => ['notifications', userId] as const,
+    list: (userId: string) => ['notifications', userId, 'list'] as const,
+    unreadCount: (userId: string) => ['notifications', userId, 'unread-count'] as const,
   },
   applications: {
-    all: ['applications'] as const,
-    list: (status?: string) => ['applications', 'list', status] as const,
-    byCompany: (companyId: string) => ['applications', 'by-company', companyId] as const,
-    detail: (id: string) => ['applications', 'detail', id] as const,
+    all: (userId: string) => ['applications', userId] as const,
+    list: (userId: string, status?: string) =>
+      ['applications', userId, 'list', status] as const,
+    byCompany: (userId: string, companyId: string) =>
+      ['applications', userId, 'by-company', companyId] as const,
+    detail: (userId: string, id: string) =>
+      ['applications', userId, 'detail', id] as const,
+  },
+  companyEntries: {
+    all: (userId: string) => ['company-entries', userId] as const,
+    byCompany: (userId: string, companyId: string) =>
+      ['company-entries', userId, 'by-company', companyId] as const,
   },
   moderator: {
     all: ['moderator'] as const,

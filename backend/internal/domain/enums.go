@@ -81,11 +81,13 @@ type ProductType string
 
 // ProductType constants.
 const (
-	ProductStarterPack  ProductType = "starter_pack"
-	ProductResumeUpload ProductType = "resume_upload"
-	ProductATSBundle    ProductType = "ats_bundle"
-	ProductCVGeneration ProductType = "cv_generation"
-	ProductRebuyPack    ProductType = "rebuy_pack"
+	ProductStarterPack       ProductType = "starter_pack"
+	ProductStarterRefill     ProductType = "starter_refill"
+	ProductResumeBundle      ProductType = "resume_bundle"
+	ProductATSBundle         ProductType = "ats_bundle"
+	ProductCuratedListBundle ProductType = "curated_list_bundle"
+	ProductCVBundle          ProductType = "cv_bundle"
+	ProductCartBundle        ProductType = "cart_bundle"
 )
 
 // ATSCheckType represents the type of ATS check.

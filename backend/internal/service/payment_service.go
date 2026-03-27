@@ -12,9 +12,122 @@ import (
 	"github.com/skriptvalley/careerdock/internal/domain"
 )
 
-// Product catalog — prices in paise, credit allocations per product type.
-var productCatalog = map[domain.ProductType]productConfig{
+const maxCartQuantityPerProduct = 5
+
+// activeProductCatalog defines the currently purchasable products.
+var activeProductCatalog = map[domain.ProductType]productConfig{
 	domain.ProductStarterPack: {
+		AmountPaise: 44900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditResumeUpload: 10,
+			domain.CreditATSCheck:     50,
+			domain.CreditCuratedList:  10,
+			domain.CreditCVGeneration: 50,
+		},
+		SetsPremium: true,
+	},
+	domain.ProductStarterRefill: {
+		AmountPaise: 39900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditResumeUpload: 10,
+			domain.CreditATSCheck:     50,
+			domain.CreditCuratedList:  10,
+			domain.CreditCVGeneration: 50,
+		},
+	},
+	domain.ProductResumeBundle: {
+		AmountPaise: 8900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditResumeUpload: 10,
+		},
+	},
+	domain.ProductATSBundle: {
+		AmountPaise: 22900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditATSCheck: 50,
+		},
+	},
+	domain.ProductCuratedListBundle: {
+		AmountPaise: 5900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditCuratedList: 5,
+		},
+	},
+}
+
+type legacyProductKey struct {
+	ProductType domain.ProductType
+	AmountPaise int
+}
+
+// legacyProductCatalog remains available so previously-created orders can still
+// be confirmed after the active catalogue changes.
+var legacyProductCatalog = map[legacyProductKey]productConfig{
+	{
+		ProductType: domain.ProductStarterPack,
+		AmountPaise: 79900,
+	}: {
+		AmountPaise: 79900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditResumeUpload: 10,
+			domain.CreditATSCheck:     50,
+			domain.CreditCuratedList:  10,
+			domain.CreditCVGeneration: 50,
+		},
+		SetsPremium: true,
+	},
+	{
+		ProductType: domain.ProductStarterRefill,
+		AmountPaise: 79900,
+	}: {
+		AmountPaise: 79900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditResumeUpload: 10,
+			domain.CreditATSCheck:     50,
+			domain.CreditCuratedList:  10,
+			domain.CreditCVGeneration: 50,
+		},
+	},
+	{
+		ProductType: domain.ProductResumeBundle,
+		AmountPaise: 19900,
+	}: {
+		AmountPaise: 19900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditResumeUpload: 10,
+		},
+	},
+	{
+		ProductType: domain.ProductATSBundle,
+		AmountPaise: 24900,
+	}: {
+		AmountPaise: 24900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditATSCheck: 50,
+		},
+	},
+	{
+		ProductType: domain.ProductCuratedListBundle,
+		AmountPaise: 14900,
+	}: {
+		AmountPaise: 14900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditCuratedList: 5,
+		},
+	},
+	{
+		ProductType: domain.ProductCVBundle,
+		AmountPaise: 24900,
+	}: {
+		AmountPaise: 24900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditCVGeneration: 50,
+		},
+	},
+	{
+		ProductType: domain.ProductStarterPack,
+		AmountPaise: 39900,
+	}: {
 		AmountPaise: 39900,
 		Credits: map[domain.CreditType]int{
 			domain.CreditResumeUpload: 9,
@@ -23,19 +136,28 @@ var productCatalog = map[domain.ProductType]productConfig{
 		},
 		SetsPremium: true,
 	},
-	domain.ProductResumeUpload: {
-		AmountPaise: 4900,
-		Credits: map[domain.CreditType]int{
-			domain.CreditResumeUpload: 1,
-		},
-	},
-	domain.ProductATSBundle: {
+	{
+		ProductType: domain.ProductATSBundle,
+		AmountPaise: 9900,
+	}: {
 		AmountPaise: 9900,
 		Credits: map[domain.CreditType]int{
 			domain.CreditATSCheck: 10,
 		},
 	},
-	domain.ProductRebuyPack: {
+	{
+		ProductType: domain.ProductType("resume_upload"),
+		AmountPaise: 4900,
+	}: {
+		AmountPaise: 4900,
+		Credits: map[domain.CreditType]int{
+			domain.CreditResumeUpload: 1,
+		},
+	},
+	{
+		ProductType: domain.ProductType("rebuy_pack"),
+		AmountPaise: 39900,
+	}: {
 		AmountPaise: 39900,
 		Credits: map[domain.CreditType]int{
 			domain.CreditResumeUpload: 9,
@@ -49,6 +171,87 @@ type productConfig struct {
 	AmountPaise int
 	Credits     map[domain.CreditType]int
 	SetsPremium bool
+}
+
+type cartSnapshotItem struct {
+	ProductType domain.ProductType        `json:"product_type"`
+	Quantity    int                       `json:"quantity"`
+	AmountPaise int                       `json:"amount_paise"`
+	Credits     map[domain.CreditType]int `json:"credits"`
+	SetsPremium bool                      `json:"sets_premium,omitempty"`
+}
+
+func lookupProductConfigForPayment(payment *domain.Payment) (productConfig, bool) {
+	if legacy, ok := legacyProductCatalog[legacyProductKey{
+		ProductType: payment.ProductType,
+		AmountPaise: payment.AmountPaise,
+	}]; ok {
+		return legacy, true
+	}
+
+	product, ok := activeProductCatalog[payment.ProductType]
+	if !ok {
+		return productConfig{}, false
+	}
+
+	if product.AmountPaise != payment.AmountPaise {
+		return productConfig{}, false
+	}
+
+	return product, true
+}
+
+func lookupCartConfigForPayment(payment *domain.Payment) (productConfig, bool) {
+	if payment.ProductType != domain.ProductCartBundle || len(payment.CartSnapshot) == 0 {
+		return productConfig{}, false
+	}
+
+	var items []cartSnapshotItem
+	if err := json.Unmarshal(payment.CartSnapshot, &items); err != nil || len(items) == 0 {
+		return productConfig{}, false
+	}
+
+	product := productConfig{
+		AmountPaise: payment.AmountPaise,
+		Credits:     make(map[domain.CreditType]int),
+	}
+	totalAmount := 0
+
+	for _, item := range items {
+		if item.Quantity < 1 || item.AmountPaise <= 0 {
+			return productConfig{}, false
+		}
+
+		totalAmount += item.AmountPaise * item.Quantity
+		if item.SetsPremium {
+			product.SetsPremium = true
+		}
+
+		for creditType, amount := range item.Credits {
+			product.Credits[creditType] += amount * item.Quantity
+		}
+	}
+
+	if totalAmount != payment.AmountPaise {
+		return productConfig{}, false
+	}
+
+	return product, true
+}
+
+func allocationForPayment(payment *domain.Payment) (productConfig, bool) {
+	if product, ok := lookupCartConfigForPayment(payment); ok {
+		return product, true
+	}
+	return lookupProductConfigForPayment(payment)
+}
+
+func cloneCredits(credits map[domain.CreditType]int) map[domain.CreditType]int {
+	cloned := make(map[domain.CreditType]int, len(credits))
+	for creditType, amount := range credits {
+		cloned[creditType] = amount
+	}
+	return cloned
 }
 
 // PaymentService handles payment orchestration, Razorpay integration,
@@ -78,10 +281,17 @@ func NewPaymentService(
 	}
 }
 
+// CreateOrderItemInput represents one product line in a checkout request.
+type CreateOrderItemInput struct {
+	ProductType domain.ProductType
+	Quantity    int
+}
+
 // CreateOrderInput holds input for creating a payment order.
 type CreateOrderInput struct {
 	UserID      uuid.UUID
 	ProductType domain.ProductType
+	CartItems   []CreateOrderItemInput
 }
 
 // CreateOrderResult holds the data needed by the frontend to open Razorpay checkout.
@@ -94,42 +304,123 @@ type CreateOrderResult struct {
 	RazorpayKeyID   string             `json:"razorpay_key_id"`
 }
 
-// CreateOrder validates the product, creates a Razorpay order, and records
-// the payment in the database.
-func (s *PaymentService) CreateOrder(ctx context.Context, input CreateOrderInput, razorpayKeyID string) (*CreateOrderResult, error) {
-	// Validate product type
-	product, ok := productCatalog[input.ProductType]
-	if !ok {
-		return nil, domain.ValidationError("invalid product_type", map[string]any{
+func validateProductForPurchase(productType domain.ProductType) (productConfig, error) {
+	if productType == domain.ProductCVBundle {
+		return productConfig{}, domain.ValidationError("cover letter bundle is coming soon", map[string]any{
 			"field":  "product_type",
-			"reason": "unknown product type",
+			"reason": "coming_soon",
 		})
 	}
 
-	// Business rules
-	user, err := s.users.GetByID(ctx, input.UserID)
-	if err != nil {
-		return nil, err
+	product, ok := activeProductCatalog[productType]
+	if !ok {
+		return productConfig{}, domain.ValidationError("invalid product_type", map[string]any{
+			"field":  "product_type",
+			"reason": "unknown_product_type",
+		})
 	}
 
-	if input.ProductType == domain.ProductStarterPack && user.IsPremium() {
-		return nil, domain.ValidationError("starter_pack is only available for non-premium users", map[string]any{
+	return product, nil
+}
+
+func validateUserCanPurchaseProduct(user *domain.User, productType domain.ProductType) error {
+	if productType == domain.ProductStarterPack && user.IsPremium() {
+		return domain.ValidationError("starter_pack is only available for non-premium users", map[string]any{
 			"field":  "product_type",
 			"reason": "already_premium",
 		})
 	}
-	if input.ProductType == domain.ProductRebuyPack && !user.IsPremium() {
-		return nil, domain.ValidationError("rebuy_pack is only available for premium users", map[string]any{
+
+	if productType != domain.ProductStarterPack && !user.IsPremium() {
+		return domain.ValidationError(fmt.Sprintf("%s is only available for premium users", productType), map[string]any{
 			"field":  "product_type",
 			"reason": "not_premium",
 		})
 	}
 
+	return nil
+}
+
+// CreateOrder validates the product, creates a Razorpay order, and records
+// the payment in the database.
+func (s *PaymentService) CreateOrder(ctx context.Context, input CreateOrderInput, razorpayKeyID string) (*CreateOrderResult, error) {
+	user, err := s.users.GetByID(ctx, input.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	orderProductType := input.ProductType
+	orderAmountPaise := 0
+	var cartSnapshot json.RawMessage
+
+	if len(input.CartItems) > 0 {
+		if !user.IsPremium() {
+			return nil, domain.ValidationError("cart checkout is only available for premium users", map[string]any{
+				"field":  "items",
+				"reason": "not_premium",
+			})
+		}
+
+		items := make([]cartSnapshotItem, 0, len(input.CartItems))
+		for _, item := range input.CartItems {
+			if item.ProductType == domain.ProductStarterPack {
+				return nil, domain.ValidationError("starter_pack cannot be purchased through the credit shop cart", map[string]any{
+					"field":  "items",
+					"reason": "starter_pack_not_allowed",
+				})
+			}
+			if item.Quantity < 1 || item.Quantity > maxCartQuantityPerProduct {
+				return nil, domain.ValidationError("invalid cart quantity", map[string]any{
+					"field":    "items.quantity",
+					"min":      1,
+					"max":      maxCartQuantityPerProduct,
+					"quantity": item.Quantity,
+				})
+			}
+
+			product, err := validateProductForPurchase(item.ProductType)
+			if err != nil {
+				return nil, err
+			}
+
+			orderAmountPaise += product.AmountPaise * item.Quantity
+			items = append(items, cartSnapshotItem{
+				ProductType: item.ProductType,
+				Quantity:    item.Quantity,
+				AmountPaise: product.AmountPaise,
+				Credits:     cloneCredits(product.Credits),
+				SetsPremium: product.SetsPremium,
+			})
+		}
+
+		if len(items) == 0 {
+			return nil, domain.ValidationError("items are required", map[string]any{
+				"field": "items",
+			})
+		}
+
+		cartSnapshot, err = json.Marshal(items)
+		if err != nil {
+			return nil, domain.InternalError(fmt.Errorf("marshal cart snapshot: %w", err))
+		}
+		orderProductType = domain.ProductCartBundle
+	} else {
+		if err := validateUserCanPurchaseProduct(user, input.ProductType); err != nil {
+			return nil, err
+		}
+
+		product, err := validateProductForPurchase(input.ProductType)
+		if err != nil {
+			return nil, err
+		}
+		orderAmountPaise = product.AmountPaise
+	}
+
 	// Create Razorpay order
 	order, err := s.gateway.CreateOrder(ctx, &domain.CreateOrderRequest{
 		UserID:      input.UserID,
-		AmountPaise: product.AmountPaise,
-		ProductType: input.ProductType,
+		AmountPaise: orderAmountPaise,
+		ProductType: orderProductType,
 	})
 	if err != nil {
 		return nil, err
@@ -141,9 +432,10 @@ func (s *PaymentService) CreateOrder(ctx context.Context, input CreateOrderInput
 		ID:              uuid.Must(uuid.NewV7()),
 		UserID:          input.UserID,
 		RazorpayOrderID: order.RazorpayOrderID,
-		AmountPaise:     product.AmountPaise,
+		AmountPaise:     orderAmountPaise,
 		Currency:        order.Currency,
-		ProductType:     input.ProductType,
+		ProductType:     orderProductType,
+		CartSnapshot:    cartSnapshot,
 		Status:          domain.PaymentStatusCreated,
 		CreatedAt:       now,
 		UpdatedAt:       now,
@@ -156,9 +448,9 @@ func (s *PaymentService) CreateOrder(ctx context.Context, input CreateOrderInput
 	return &CreateOrderResult{
 		PaymentID:       payment.ID,
 		RazorpayOrderID: order.RazorpayOrderID,
-		AmountPaise:     product.AmountPaise,
+		AmountPaise:     orderAmountPaise,
 		Currency:        order.Currency,
-		ProductType:     input.ProductType,
+		ProductType:     orderProductType,
 		RazorpayKeyID:   razorpayKeyID,
 	}, nil
 }
@@ -215,7 +507,7 @@ func (s *PaymentService) HandleWebhook(ctx context.Context, body []byte) error {
 	}
 
 	// Atomic: capture payment + allocate credits
-	product, ok := productCatalog[payment.ProductType]
+	product, ok := allocationForPayment(payment)
 	if !ok {
 		return domain.InternalError(fmt.Errorf("unknown product type in payment: %s", payment.ProductType))
 	}
@@ -329,7 +621,7 @@ func (s *PaymentService) ConfirmPayment(ctx context.Context, input ConfirmPaymen
 	}
 
 	// Atomic: capture payment + allocate credits (same as webhook path)
-	product, ok := productCatalog[payment.ProductType]
+	product, ok := allocationForPayment(payment)
 	if !ok {
 		return domain.InternalError(fmt.Errorf("unknown product type in payment: %s", payment.ProductType))
 	}
