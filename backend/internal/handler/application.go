@@ -257,30 +257,59 @@ func (h *ApplicationHandler) UpdateApplication(w http.ResponseWriter, r *http.Re
 		return
 	}
 
+	var roleTitle *string
+	roleTitleSet := false
+	if req.RoleTitle != nil {
+		roleTitleSet = true
+		trimmed := strings.TrimSpace(*req.RoleTitle)
+		if trimmed != "" {
+			roleTitle = &trimmed
+		}
+	}
+
 	var status *domain.ApplicationStatus
 	if req.Status != nil {
 		s := domain.ApplicationStatus(*req.Status)
 		status = &s
 	}
 
+	dateAppliedSet := false
 	var dateApplied *time.Time
 	if req.DateApplied != nil {
-		t, err := time.Parse("2006-01-02", *req.DateApplied)
-		if err != nil {
-			respondError(w, r, domain.ValidationError("invalid date_applied format", nil))
-			return
+		dateAppliedSet = true
+		if strings.TrimSpace(*req.DateApplied) == "" {
+			dateApplied = nil
+		} else {
+			t, err := time.Parse("2006-01-02", *req.DateApplied)
+			if err != nil {
+				respondError(w, r, domain.ValidationError("invalid date_applied format", nil))
+				return
+			}
+			dateApplied = &t
 		}
-		dateApplied = &t
+	}
+
+	var notes *string
+	notesSet := false
+	if req.Notes != nil {
+		notesSet = true
+		trimmed := strings.TrimSpace(*req.Notes)
+		if trimmed != "" {
+			notes = &trimmed
+		}
 	}
 
 	userID := middleware.UserIDFromContext(r.Context())
 	app, err := h.apps.UpdateApplication(r.Context(), service.UpdateApplicationInput{
-		ApplicationID: appID,
-		UserID:        userID,
-		RoleTitle:     req.RoleTitle,
-		Status:        status,
-		DateApplied:   dateApplied,
-		Notes:         req.Notes,
+		ApplicationID:  appID,
+		UserID:         userID,
+		RoleTitle:      roleTitle,
+		RoleTitleSet:   roleTitleSet,
+		Status:         status,
+		DateApplied:    dateApplied,
+		DateAppliedSet: dateAppliedSet,
+		Notes:          notes,
+		NotesSet:       notesSet,
 	})
 	if err != nil {
 		respondError(w, r, err)
