@@ -88,12 +88,15 @@ func (s *ApplicationService) ListByCompany(ctx context.Context, userID, companyI
 
 // UpdateApplicationInput holds input for updating an application.
 type UpdateApplicationInput struct {
-	ApplicationID uuid.UUID
-	UserID        uuid.UUID
-	RoleTitle     *string
-	Status        *domain.ApplicationStatus
-	DateApplied   *time.Time
-	Notes         *string
+	ApplicationID  uuid.UUID
+	UserID         uuid.UUID
+	RoleTitle      *string
+	RoleTitleSet   bool
+	Status         *domain.ApplicationStatus
+	DateApplied    *time.Time
+	DateAppliedSet bool
+	Notes          *string
+	NotesSet       bool
 }
 
 // UpdateApplication updates an application, tracking status changes.
@@ -108,16 +111,16 @@ func (s *ApplicationService) UpdateApplication(ctx context.Context, input Update
 
 	oldStatus := app.Status
 
-	if input.RoleTitle != nil {
+	if input.RoleTitleSet {
 		app.RoleTitle = input.RoleTitle
 	}
 	if input.Status != nil {
 		app.Status = *input.Status
 	}
-	if input.DateApplied != nil {
+	if input.DateAppliedSet {
 		app.DateApplied = input.DateApplied
 	}
-	if input.Notes != nil {
+	if input.NotesSet {
 		app.Notes = input.Notes
 	}
 

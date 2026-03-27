@@ -3,13 +3,15 @@
 import { useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink, MapPin, Building2, Calendar, DollarSign, Briefcase, List } from 'lucide-react';
+import { ArrowLeft, ExternalLink, MapPin, Building2, Calendar, DollarSign, Briefcase, FileText, List, PenSquare } from 'lucide-react';
 import { useCompanyDetail } from '@/hooks/use-companies';
 import { useApplicationsByCompany, useUpdateApplication } from '@/hooks/use-applications';
 import { useAuthStore } from '@/store/auth-store';
 import { TechStackTags } from '@/components/companies/tech-stack-tags';
 import { StatusBadge, ALL_STATUSES, getStatusLabel } from '@/components/lists/status-badge';
 import { CompanyStatusBadge } from '@/components/lists/company-status-badge';
+import { ApplicationEditModal } from '@/components/applications/application-edit-modal';
+import { ApplicationNotesModal } from '@/components/applications/application-notes-modal';
 import type { ApplicationStatus, Application, CompanyTrackingStatus } from '@/types/api';
 import { apiClient } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
@@ -73,6 +75,8 @@ export default function CompanyProfile() {
   );
   const updateApp = useUpdateApplication();
   const [editingStatus, setEditingStatus] = useState<string | null>(null);
+  const [editingApplication, setEditingApplication] = useState<Application | null>(null);
+  const [notesApplication, setNotesApplication] = useState<Application | null>(null);
 
   // Derive overall company status (highest priority across all list entries)
   const overallStatus = useMemo<CompanyTrackingStatus | null>(() => {
@@ -369,6 +373,9 @@ export default function CompanyProfile() {
                   <th className="hidden px-4 py-2 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] sm:table-cell">
                     Date Applied
                   </th>
+                  <th className="px-4 py-2 text-right text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-edge">
@@ -403,6 +410,28 @@ export default function CompanyProfile() {
                     <td className="hidden whitespace-nowrap px-4 py-2.5 text-sm text-[var(--color-text-muted)] sm:table-cell">
                       {app.date_applied || '-'}
                     </td>
+                    <td className="px-4 py-2.5">
+                      <div className="flex justify-end gap-2">
+                        {app.notes && (
+                          <button
+                            type="button"
+                            onClick={() => setNotesApplication(app)}
+                            className="inline-flex items-center gap-1 rounded-md border border-edge px-2 py-1 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:bg-overlay hover:text-[var(--color-text)]"
+                          >
+                            <FileText className="h-3.5 w-3.5" />
+                            Notes
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setEditingApplication(app)}
+                          className="inline-flex items-center gap-1 rounded-md border border-edge px-2 py-1 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:bg-overlay hover:text-[var(--color-text)]"
+                        >
+                          <PenSquare className="h-3.5 w-3.5" />
+                          Edit
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -419,6 +448,22 @@ export default function CompanyProfile() {
         {company.last_verified_at && <span className="mx-2">|</span>}
         <span>Updated: {new Date(company.updated_at).toLocaleDateString()}</span>
       </div>
+
+      {editingApplication && (
+        <ApplicationEditModal
+          application={editingApplication}
+          companyName={company.name}
+          onClose={() => setEditingApplication(null)}
+        />
+      )}
+
+      {notesApplication && (
+        <ApplicationNotesModal
+          application={notesApplication}
+          companyName={company.name}
+          onClose={() => setNotesApplication(null)}
+        />
+      )}
     </div>
   );
 }

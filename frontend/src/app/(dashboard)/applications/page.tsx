@@ -2,10 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ChevronDown, Plus } from 'lucide-react';
+import { ChevronDown, FileText, PenSquare, Plus } from 'lucide-react';
 import { useApplications, useUpdateApplication } from '@/hooks/use-applications';
 import { StatusBadge, ALL_STATUSES, getStatusLabel } from '@/components/lists/status-badge';
 import { AddApplicationModal } from '@/components/lists/add-application-modal';
+import { ApplicationEditModal } from '@/components/applications/application-edit-modal';
+import { ApplicationNotesModal } from '@/components/applications/application-notes-modal';
 import type { Application, ApplicationStatus } from '@/types/api';
 
 export default function ApplicationsPage() {
@@ -17,6 +19,8 @@ export default function ApplicationsPage() {
   const [companyFilter, setCompanyFilter] = useState(initialCompany);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState<string | null>(null);
+  const [editingApplication, setEditingApplication] = useState<Application | null>(null);
+  const [notesApplication, setNotesApplication] = useState<Application | null>(null);
 
   const { data: applications, isLoading } = useApplications(statusFilter || undefined);
   const updateApp = useUpdateApplication();
@@ -162,6 +166,9 @@ export default function ApplicationsPage() {
                 <th className="hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] lg:table-cell">
                   Notes
                 </th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-edge">
@@ -201,8 +208,44 @@ export default function ApplicationsPage() {
                   <td className="hidden whitespace-nowrap px-4 py-3 text-sm text-[var(--color-text-muted)] md:table-cell">
                     {app.date_applied || '-'}
                   </td>
-                  <td className="hidden max-w-xs truncate px-4 py-3 text-sm text-[var(--color-text-muted)] lg:table-cell">
-                    {app.notes || '-'}
+                  <td className="hidden px-4 py-3 text-sm text-[var(--color-text-muted)] lg:table-cell">
+                    {app.notes ? (
+                      <button
+                        type="button"
+                        onClick={() => setNotesApplication(app)}
+                        className="max-w-xs text-left transition-colors hover:text-[var(--color-text)]"
+                      >
+                        <p className="truncate">{app.notes}</p>
+                        <span className="mt-1 inline-flex items-center gap-1 text-xs text-[var(--color-primary)]">
+                          <FileText className="h-3.5 w-3.5" />
+                          Read full note
+                        </span>
+                      </button>
+                    ) : (
+                      '-'
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex justify-end gap-2">
+                      {app.notes && (
+                        <button
+                          type="button"
+                          onClick={() => setNotesApplication(app)}
+                          className="inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1.5 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:bg-overlay hover:text-[var(--color-text)] lg:hidden"
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          Notes
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setEditingApplication(app)}
+                        className="inline-flex items-center gap-1 rounded-md border border-edge px-2.5 py-1.5 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:bg-overlay hover:text-[var(--color-text)]"
+                      >
+                        <PenSquare className="h-3.5 w-3.5" />
+                        Edit
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -224,6 +267,22 @@ export default function ApplicationsPage() {
       {/* Add Application Modal */}
       {showAddModal && (
         <AddApplicationModal onClose={() => setShowAddModal(false)} />
+      )}
+
+      {editingApplication && (
+        <ApplicationEditModal
+          application={editingApplication}
+          companyName={editingApplication.company_name}
+          onClose={() => setEditingApplication(null)}
+        />
+      )}
+
+      {notesApplication && (
+        <ApplicationNotesModal
+          application={notesApplication}
+          companyName={notesApplication.company_name}
+          onClose={() => setNotesApplication(null)}
+        />
       )}
     </div>
   );
