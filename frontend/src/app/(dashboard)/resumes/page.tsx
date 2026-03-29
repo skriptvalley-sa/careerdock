@@ -14,7 +14,7 @@ import {
   XCircle,
   RefreshCw,
 } from 'lucide-react';
-import { useResumes, useUploadResume, useSetDefaultResume, useArchiveResume, useResumeDownloadUrl, useRetryResume } from '@/hooks/use-resumes';
+import { useResumes, useUploadResume, useSetDefaultResume, useArchiveResume, useResumeDownload, useRetryResume } from '@/hooks/use-resumes';
 import { useCreditBalance } from '@/hooks/use-payments';
 import { CreditUpsellBanner } from '@/components/credits/credit-upsell-banner';
 import type { ResumeListItem } from '@/types/api';
@@ -310,7 +310,7 @@ export default function ResumesPage() {
   const uploadResume = useUploadResume();
   const setDefault = useSetDefaultResume();
   const archiveResume = useArchiveResume();
-  const downloadUrl = useResumeDownloadUrl();
+  const downloadResume = useResumeDownload();
   const retryResume = useRetryResume();
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
@@ -360,15 +360,18 @@ export default function ResumesPage() {
   const handleDownload = async (id: string) => {
     setActionId(id);
     try {
-      const result = await downloadUrl.mutateAsync(id);
+      const result = await downloadResume.mutateAsync(id);
+      const objectUrl = window.URL.createObjectURL(result.blob);
       const link = document.createElement('a');
-      link.href = result.download_url;
+      link.href = objectUrl;
       link.rel = 'noopener noreferrer';
+      link.download = result.fileName || 'resume.pdf';
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(objectUrl);
     } catch {
-      setError('Failed to get download URL');
+      setError('Failed to download resume');
     } finally {
       setActionId(null);
     }
@@ -444,7 +447,7 @@ export default function ResumesPage() {
                   onRetry={handleRetry}
                   settingDefault={actionId === resume.id && setDefault.isPending}
                   archiving={actionId === resume.id && archiveResume.isPending}
-                  downloading={actionId === resume.id && downloadUrl.isPending}
+                  downloading={actionId === resume.id && downloadResume.isPending}
                   retrying={actionId === resume.id && retryResume.isPending}
                 />
               ))}
