@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"mime"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -85,10 +86,12 @@ func (s *S3Store) Download(ctx context.Context, key string) ([]byte, error) {
 }
 
 // GenerateSignedURL returns a pre-signed GET URL valid for the given duration.
-func (s *S3Store) GenerateSignedURL(ctx context.Context, key string, expiry time.Duration) (string, error) {
+func (s *S3Store) GenerateSignedURL(ctx context.Context, key, fileName string, expiry time.Duration) (string, error) {
 	req, err := s.presign.PresignGetObject(ctx, &s3.GetObjectInput{
-		Bucket: aws.String(s.bucket),
-		Key:    aws.String(key),
+		Bucket:                     aws.String(s.bucket),
+		Key:                        aws.String(key),
+		ResponseContentDisposition: aws.String(mime.FormatMediaType("attachment", map[string]string{"filename": fileName})),
+		ResponseContentType:        aws.String("application/pdf"),
 	}, s3.WithPresignExpires(expiry))
 	if err != nil {
 		return "", fmt.Errorf("s3 presign %s: %w", key, err)
