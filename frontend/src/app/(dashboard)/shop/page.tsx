@@ -16,6 +16,7 @@ import { useProductCheckout } from '@/hooks/use-product-checkout';
 import {
   formatCreditLineItems,
   premiumShopProducts,
+  SUPPORT_EMAIL,
   type PremiumProductType,
 } from '@/lib/payment-products';
 
@@ -202,6 +203,16 @@ function ShopCart({
         >
           {checkoutLabel}
         </button>
+
+        <p className="mt-3 text-xs text-[var(--color-text-muted)]">
+          Need billing help?{' '}
+          <a
+            href={`mailto:${SUPPORT_EMAIL}`}
+            className="text-[var(--color-text)] underline decoration-[var(--color-primary)]/40 underline-offset-4 transition-colors hover:text-[var(--color-primary)]"
+          >
+            {SUPPORT_EMAIL}
+          </a>
+        </p>
       </div>
     </aside>
   );

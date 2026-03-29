@@ -14,11 +14,14 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/hibiken/asynq"
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/skriptvalley/careerdock/internal/domain"
+	"github.com/skriptvalley/careerdock/internal/email"
 	"github.com/skriptvalley/careerdock/internal/repository"
+	"github.com/skriptvalley/careerdock/internal/worker"
 )
 
 const (
@@ -36,11 +39,13 @@ const (
 
 // AuthService handles authentication and authorisation logic.
 type AuthService struct {
-	users     domain.UserRepository
-	tokens    *repository.TokenRepo
-	tx        domain.Transactor
-	redis     *redis.Client
-	jwtSecret []byte
+	users      domain.UserRepository
+	tokens     *repository.TokenRepo
+	tx         domain.Transactor
+	redis      *redis.Client
+	asynq      *asynq.Client
+	jwtSecret  []byte
+	appBaseURL string
 }
 
 // NewAuthService creates a new AuthService.
@@ -49,14 +54,18 @@ func NewAuthService(
 	tokens *repository.TokenRepo,
 	tx domain.Transactor,
 	redisClient *redis.Client,
+	asynqClient *asynq.Client,
 	jwtSecret string,
+	appBaseURL string,
 ) *AuthService {
 	return &AuthService{
-		users:     users,
-		tokens:    tokens,
-		tx:        tx,
-		redis:     redisClient,
-		jwtSecret: []byte(jwtSecret),
+		users:      users,
+		tokens:     tokens,
+		tx:         tx,
+		redis:      redisClient,
+		asynq:      asynqClient,
+		jwtSecret:  []byte(jwtSecret),
+		appBaseURL: appBaseURL,
 	}
 }
 
@@ -139,7 +148,13 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (*domai
 		return nil, nil, err
 	}
 
-	// TODO: Queue email verification email via Asynq
+	if err := s.enqueueVerificationEmail(user.Email, verificationToken); err != nil {
+		slog.Error("failed to enqueue email verification email",
+			"user_id", user.ID,
+			"error", err,
+		)
+	}
+
 	slog.Info("email verification token created",
 		"user_id", user.ID,
 		"token_preview", verificationToken[:8]+"...",
@@ -308,7 +323,13 @@ func (s *AuthService) ForgotPassword(ctx context.Context, email string) error {
 		return nil
 	}
 
-	// TODO: Queue password reset email via Asynq
+	if err := s.enqueuePasswordResetEmail(user.Email, tokenStr); err != nil {
+		slog.Error("failed to enqueue password reset email",
+			"user_id", user.ID,
+			"error", err,
+		)
+	}
+
 	slog.Info("password reset token created",
 		"user_id", user.ID,
 		"token_preview", tokenStr[:8]+"...",
@@ -464,6 +485,24 @@ func (s *AuthService) isTokenBlacklisted(ctx context.Context, jti string) (bool,
 		return false, err
 	}
 	return result > 0, nil
+}
+
+func (s *AuthService) enqueueVerificationEmail(to, token string) error {
+	if s.asynq == nil {
+		return fmt.Errorf("asynq client is not configured")
+	}
+
+	msg := email.VerificationEmail(to, token, s.appBaseURL)
+	return worker.EnqueueEmail(s.asynq, msg.To, msg.Subject, msg.HTML)
+}
+
+func (s *AuthService) enqueuePasswordResetEmail(to, token string) error {
+	if s.asynq == nil {
+		return fmt.Errorf("asynq client is not configured")
+	}
+
+	msg := email.PasswordResetEmail(to, token, s.appBaseURL)
+	return worker.EnqueueEmail(s.asynq, msg.To, msg.Subject, msg.HTML)
 }
 
 // validatePassword enforces the password policy:

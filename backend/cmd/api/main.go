@@ -118,7 +118,7 @@ func main() {
 	defer func() { _ = asynqClient.Close() }()
 
 	// 5. Build service layer
-	authSvc := service.NewAuthService(userRepo, tokenRepo, txr, redisClient, cfg.JWTSecret)
+	authSvc := service.NewAuthService(userRepo, tokenRepo, txr, redisClient, asynqClient, cfg.JWTSecret, cfg.AppBaseURL)
 	companySvc := service.NewCompanyService(companyRepo)
 	listSvc := service.NewListService(listRepo, userRepo, txr)
 	userSvc := service.NewUserService(userRepo, txr)

@@ -1,6 +1,4 @@
-'use client';
-
-export const SUPPORT_EMAIL = 'skriptvalley+careerdock@gmail.com';
+export const SUPPORT_EMAIL = 'support@skirptvalley.com';
 
 export type CreditTypeKey =
   | 'resume_upload'

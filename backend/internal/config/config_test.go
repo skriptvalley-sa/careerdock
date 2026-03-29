@@ -45,6 +45,9 @@ func TestMustLoad_SucceedsWithRequiredValues(t *testing.T) {
 	if cfg.Environment != "development" {
 		t.Errorf("expected ENVIRONMENT development, got %s", cfg.Environment)
 	}
+	if cfg.AppBaseURL != "http://localhost:3000" {
+		t.Errorf("expected default APP_BASE_URL http://localhost:3000, got %s", cfg.AppBaseURL)
+	}
 }
 
 func TestLogLevel(t *testing.T) {
@@ -73,5 +76,19 @@ func TestAllowedOriginsParsing(t *testing.T) {
 	}
 	if cfg.AllowedOrigins[1] != "https://careerdock.skriptvalley.com" {
 		t.Errorf("unexpected second origin: %s", cfg.AllowedOrigins[1])
+	}
+}
+
+func TestAppBaseURLTrimmed(t *testing.T) {
+	t.Setenv("DATABASE_URL", "postgres://test:test@localhost:5432/test?sslmode=disable")
+	t.Setenv("REDIS_URL", "localhost:6379")
+	t.Setenv("JWT_SECRET", "test-secret")
+	t.Setenv("APP_BASE_URL", "https://careerdock.skriptvalley.com/")
+	viper.Reset()
+
+	cfg := MustLoad()
+
+	if cfg.AppBaseURL != "https://careerdock.skriptvalley.com" {
+		t.Errorf("expected trimmed APP_BASE_URL, got %s", cfg.AppBaseURL)
 	}
 }

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SUPPORT_EMAIL } from '@/lib/payment-products';
 
 export function Footer() {
   return (
@@ -40,6 +41,14 @@ export function Footer() {
               <li>
                 <span className="text-sm text-[var(--color-text-muted)]">Blog (coming soon)</span>
               </li>
+              <li>
+                <a
+                  href={`mailto:${SUPPORT_EMAIL}`}
+                  className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                >
+                  Contact Support
+                </a>
+              </li>
             </ul>
           </div>
           <div>
@@ -55,6 +64,9 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t border-edge pt-8 text-center">
+          <p className="text-sm text-[var(--color-text-muted)]">
+            Support: <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-[var(--color-text)]">{SUPPORT_EMAIL}</a>
+          </p>
           <p className="text-sm text-[var(--color-text-muted)]">
             &copy; {new Date().getFullYear()} CareerDock by SkriptValley. All rights reserved.
           </p>

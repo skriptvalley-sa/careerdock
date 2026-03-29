@@ -227,7 +227,12 @@ export default function PricingPage() {
         <h2 className="text-xl font-bold text-[var(--color-text)]">Questions?</h2>
         <p className="mt-2 text-sm text-[var(--color-text-muted)]">
           Reach out at{' '}
-          <span className="font-medium text-[var(--color-text)]">{SUPPORT_EMAIL}</span>{' '}
+          <a
+            href={`mailto:${SUPPORT_EMAIL}`}
+            className="font-medium text-[var(--color-text)] underline decoration-[var(--color-primary)]/40 underline-offset-4 transition-colors hover:text-[var(--color-primary)]"
+          >
+            {SUPPORT_EMAIL}
+          </a>{' '}
           and we&apos;ll get back to you within 24 hours.
         </p>
       </section>
