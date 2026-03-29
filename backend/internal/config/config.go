@@ -37,6 +37,7 @@ type Config struct {
 	// Email
 	ResendAPIKey string
 	FromEmail    string
+	AppBaseURL   string
 
 	// S3 / MinIO
 	S3 S3Config
@@ -76,6 +77,7 @@ func MustLoad() *Config {
 	viper.SetDefault("PORT", "8080")
 	viper.SetDefault("ENVIRONMENT", "development")
 	viper.SetDefault("FROM_EMAIL", "noreply@careerdock.skriptvalley.com")
+	viper.SetDefault("APP_BASE_URL", "http://localhost:3000")
 	viper.SetDefault("S3_USE_PATH_STYLE", true)
 	viper.SetDefault("S3_RESUME_BUCKET", "careerdock-resumes")
 	viper.SetDefault("S3_LOGO_BUCKET", "careerdock-logos")
@@ -106,6 +108,7 @@ func MustLoad() *Config {
 
 		ResendAPIKey: viper.GetString("RESEND_API_KEY"),
 		FromEmail:    viper.GetString("FROM_EMAIL"),
+		AppBaseURL:   strings.TrimRight(viper.GetString("APP_BASE_URL"), "/"),
 
 		S3: S3Config{
 			Endpoint:        viper.GetString("S3_ENDPOINT"),
