@@ -213,11 +213,6 @@ export interface CreditTransaction {
   created_at: string;
 }
 
-export interface ResumeDownloadResponse {
-  download_url: string;
-  expires_in_seconds: number;
-}
-
 // --- ATS Checks (Sprint 4) ---
 
 export interface ATSScoreDetail {

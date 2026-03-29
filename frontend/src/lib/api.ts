@@ -176,6 +176,52 @@ async function apiRaw<T>(
   return json as T;
 }
 
+function parseContentDispositionFilename(header: string | null): string | null {
+  if (!header) return null;
+
+  const utf8Match = header.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    try {
+      return decodeURIComponent(utf8Match[1]);
+    } catch {
+      return utf8Match[1];
+    }
+  }
+
+  const simpleMatch = header.match(/filename="?([^";]+)"?/i);
+  return simpleMatch?.[1] ?? null;
+}
+
+async function apiDownload(
+  path: string,
+  options: RequestInit & { params?: Record<string, string> } = {},
+): Promise<{ blob: Blob; fileName: string | null }> {
+  const { params, ...init } = options;
+
+  let url = `${API_BASE}${path}`;
+  if (params) {
+    const searchParams = new URLSearchParams(params);
+    url += `?${searchParams.toString()}`;
+  }
+
+  const headers: Record<string, string> = {
+    ...(init.headers as Record<string, string>),
+  };
+
+  const resp = await fetchWithAuth(url, { ...init, headers }, path);
+
+  if (!resp.ok) {
+    const json = await resp.json();
+    const errorBody = json.error as ErrorBody;
+    throw new ApiError(resp.status, errorBody);
+  }
+
+  return {
+    blob: await resp.blob(),
+    fileName: parseContentDispositionFilename(resp.headers.get('content-disposition')),
+  };
+}
+
 /**
  * Convenience methods matching REST verbs.
  */
@@ -220,6 +266,10 @@ export const apiClient = {
    */
   getRaw<T>(path: string, params?: Record<string, string>): Promise<T> {
     return apiRaw<T>(path, { method: 'GET', params });
+  },
+
+  download(path: string, params?: Record<string, string>): Promise<{ blob: Blob; fileName: string | null }> {
+    return apiDownload(path, { method: 'GET', params });
   },
 
   upload<T>(path: string, formData: FormData): Promise<T> {
