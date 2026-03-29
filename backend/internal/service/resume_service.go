@@ -247,22 +247,22 @@ func (s *ResumeService) RetryParsing(ctx context.Context, userID, resumeID uuid.
 	return nil
 }
 
-// GetDownloadURL generates a pre-signed S3 URL for downloading a resume.
-func (s *ResumeService) GetDownloadURL(ctx context.Context, userID, resumeID uuid.UUID) (string, error) {
+// DownloadResume loads the original resume PDF after verifying ownership.
+func (s *ResumeService) DownloadResume(ctx context.Context, userID, resumeID uuid.UUID) (*domain.Resume, []byte, error) {
 	resume, err := s.resumeRepo.GetByID(ctx, resumeID)
 	if err != nil {
-		return "", err
+		return nil, nil, err
 	}
 	if resume.UserID != userID {
-		return "", domain.NotFound("resume", resumeID)
+		return nil, nil, domain.NotFound("resume", resumeID)
 	}
 
-	url, err := s.fileStore.GenerateSignedURL(ctx, resume.S3Key, resume.FileName, 15*time.Minute)
+	data, err := s.fileStore.Download(ctx, resume.S3Key)
 	if err != nil {
-		return "", domain.InternalError(fmt.Errorf("generate download URL: %w", err))
+		return nil, nil, domain.InternalError(fmt.Errorf("download resume: %w", err))
 	}
 
-	return url, nil
+	return resume, data, nil
 }
 
 // --- Internal helpers ---

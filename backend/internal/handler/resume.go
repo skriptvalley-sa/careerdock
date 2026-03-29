@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"io"
+	"mime"
 	"net/http"
 	"strconv"
 	"time"
@@ -59,11 +60,6 @@ type resumeDetailResponse struct {
 	ATSGeneral    json.RawMessage     `json:"ats_general,omitempty"`
 	CreatedAt     time.Time           `json:"created_at"`
 	UpdatedAt     time.Time           `json:"updated_at"`
-}
-
-type downloadURLResponse struct {
-	DownloadURL string `json:"download_url"`
-	ExpiresIn   int    `json:"expires_in_seconds"`
 }
 
 // --- Handlers ---
@@ -206,16 +202,18 @@ func (h *ResumeHandler) GetResumeDownloadURL(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	url, err := h.resumeSvc.GetDownloadURL(r.Context(), userID, resumeID)
+	resume, data, err := h.resumeSvc.DownloadResume(r.Context(), userID, resumeID)
 	if err != nil {
 		respondError(w, r, err)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, map[string]any{"data": downloadURLResponse{
-		DownloadURL: url,
-		ExpiresIn:   900, // 15 minutes
-	}})
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": resume.FileName}))
+	w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+	w.Header().Set("Cache-Control", "private, no-store")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(data)
 }
 
 // --- Converters ---

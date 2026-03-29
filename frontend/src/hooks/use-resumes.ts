@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { queryKeys, staleTimes } from '@/lib/query-keys';
 import { useAuthStore } from '@/store/auth-store';
-import type { ResumeListItem, ResumeDetail, ResumeDownloadResponse } from '@/types/api';
+import type { ResumeListItem, ResumeDetail } from '@/types/api';
 
 // --- Queries ---
 
@@ -76,10 +76,10 @@ export function useArchiveResume() {
   });
 }
 
-export function useResumeDownloadUrl() {
+export function useResumeDownload() {
   return useMutation({
     mutationFn: (resumeId: string) =>
-      apiClient.get<ResumeDownloadResponse>(`/api/resumes/${resumeId}/download`),
+      apiClient.download(`/api/resumes/${resumeId}/download`),
   });
 }
 
