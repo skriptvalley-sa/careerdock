@@ -210,7 +210,7 @@ type EmailSender interface {
 type FileStore interface {
 	Upload(ctx context.Context, key string, data []byte, contentType string) error
 	Download(ctx context.Context, key string) ([]byte, error)
-	GenerateSignedURL(ctx context.Context, key string, expiry time.Duration) (string, error)
+	GenerateSignedURL(ctx context.Context, key, fileName string, expiry time.Duration) (string, error)
 	Delete(ctx context.Context, key string) error
 }
 

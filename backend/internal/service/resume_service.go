@@ -257,7 +257,7 @@ func (s *ResumeService) GetDownloadURL(ctx context.Context, userID, resumeID uui
 		return "", domain.NotFound("resume", resumeID)
 	}
 
-	url, err := s.fileStore.GenerateSignedURL(ctx, resume.S3Key, 15*time.Minute)
+	url, err := s.fileStore.GenerateSignedURL(ctx, resume.S3Key, resume.FileName, 15*time.Minute)
 	if err != nil {
 		return "", domain.InternalError(fmt.Errorf("generate download URL: %w", err))
 	}

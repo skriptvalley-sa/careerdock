@@ -361,7 +361,12 @@ export default function ResumesPage() {
     setActionId(id);
     try {
       const result = await downloadUrl.mutateAsync(id);
-      window.open(result.url, '_blank');
+      const link = document.createElement('a');
+      link.href = result.download_url;
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } catch {
       setError('Failed to get download URL');
     } finally {
