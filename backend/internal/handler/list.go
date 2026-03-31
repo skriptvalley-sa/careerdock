@@ -498,8 +498,8 @@ func (h *ListHandler) SyncListEntries(w http.ResponseWriter, r *http.Request) {
 		respondError(w, r, domain.ValidationError("invalid request body", nil))
 		return
 	}
-	if len(req.CompanyIDs) > 50 {
-		respondError(w, r, domain.ValidationError("cannot sync more than 50 companies at once", nil))
+	if len(req.CompanyIDs) > 1000 {
+		respondError(w, r, domain.ValidationError("cannot sync more than 1000 companies at once", nil))
 		return
 	}
 
